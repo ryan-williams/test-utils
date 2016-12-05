@@ -1,4 +1,4 @@
-package org.hammerlab.test
+package org.hammerlab.test.matchers
 
 import org.scalatest.Assertions
 

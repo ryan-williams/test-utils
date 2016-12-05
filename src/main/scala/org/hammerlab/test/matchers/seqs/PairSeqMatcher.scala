@@ -1,4 +1,4 @@
-package org.hammerlab.test
+package org.hammerlab.test.matchers.seqs
 
 import org.scalatest.matchers.{ MatchResult, Matcher }
 
@@ -13,7 +13,9 @@ import scala.collection.mutable.ArrayBuffer
  *   - keys that are present in both but with differing values.
  *   - pairs that are present in both but in different orders.
  */
-case class SeqMatcher[K: Ordering, V: Ordering](expected: Seq[(K, V)]) extends Matcher[Seq[(K, V)]] {
+case class PairSeqMatcher[K: Ordering, V: Ordering](expected: Seq[(K, V)], matchOrder: Boolean = true)
+  extends Matcher[Seq[(K, V)]] {
+
   override def apply(actual: Seq[(K, V)]): MatchResult = {
 
     val expectedMap: Map[K, Set[V]] =
@@ -85,7 +87,7 @@ case class SeqMatcher[K: Ordering, V: Ordering](expected: Seq[(K, V)]) extends M
         errors += s"Differing values:"
         errors += diffLines.mkString("\t", "\n\t", "\n")
       }
-    } else if (actual != expected) {
+    } else if (matchOrder && actual != expected) {
       errors += s"Elements out of order:"
       errors += "Expected:"
       errors += expected.mkString("\t", "\n\t", "\n")
@@ -93,15 +95,22 @@ case class SeqMatcher[K: Ordering, V: Ordering](expected: Seq[(K, V)]) extends M
       errors += actual.mkString("\t", "\n\t", "\n")
     }
 
+    val matched =
+      if (matchOrder)
+        actual == expected
+      else
+        actual.toSet == expected.toSet
+
     MatchResult(
-      actual == expected,
+      matched,
       errors.mkString("\n"),
       s"$actual matched; was supposed to not."
     )
   }
 }
 
-object SeqMatcher {
-  def seqMatch[K: Ordering, V: Ordering](expected: Seq[(K, V)]): Matcher[Seq[(K, V)]] = SeqMatcher[K, V](expected)
-  def seqMatch[K: Ordering, V: Ordering](expected: Array[(K, V)]): Matcher[Seq[(K, V)]] = SeqMatcher[K, V](expected.toList)
+object PairSeqMatcher {
+  def pairsMatch[K: Ordering, V: Ordering](expected: Iterable[(K, V)]): Matcher[Seq[(K, V)]] = PairSeqMatcher[K, V](expected.toSeq)
+  def pairsMatch[K: Ordering, V: Ordering](expected: Array[(K, V)]): Matcher[Seq[(K, V)]] = PairSeqMatcher[K, V](expected.toList)
+  def pairsMatch[K: Ordering, V: Ordering](expected: Iterator[(K, V)]): Matcher[Seq[(K, V)]] = PairSeqMatcher[K, V](expected.toSeq)
 }

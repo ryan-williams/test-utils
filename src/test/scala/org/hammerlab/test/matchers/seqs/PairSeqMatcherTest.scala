@@ -1,19 +1,20 @@
-package org.hammerlab.test
+package org.hammerlab.test.matchers.seqs
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.hammerlab.test.matchers.utils.MatcherResultTest
 
-class SeqMatcherTest extends FunSuite with Matchers {
+class PairSeqMatcherTest extends MatcherResultTest {
 
-  def check[K: Ordering, V: Ordering](expected: (K, V)*)(actual: (K, V)*)(mismatchMessageRaw: String = ""): Unit = {
-    val matchResult = SeqMatcher(expected).apply(actual)
-
-    val mismatchMessage = mismatchMessageRaw.stripMargin
-    val shouldMatch = mismatchMessage.isEmpty
-    matchResult.matches should be(shouldMatch)
-    if (!shouldMatch) {
-      matchResult.failureMessage should be(mismatchMessage)
-    }
-  }
+  def check[K: Ordering, V: Ordering](
+      expected: (K, V)*
+  )(
+      actual: (K, V)*
+  )(
+      mismatchMessageRaw: String = ""
+  ): Unit =
+    checkResult(
+      PairSeqMatcher(expected).apply(actual),
+      mismatchMessageRaw
+    )
 
   test("empty match") {
     check[String, Int]()()()
@@ -119,7 +120,7 @@ class SeqMatcherTest extends FunSuite with Matchers {
     )
   }
 
-  test("out of order elems") {
+  test("two out of order elems") {
     check(
       "a" -> 1,
       "b" -> 2
@@ -203,7 +204,7 @@ class SeqMatcherTest extends FunSuite with Matchers {
     )
   }
 
-  test("out of order") {
+  test("three out of order elems") {
     check(
       "a" -> 1,
       "b" -> 2,
