@@ -19,7 +19,18 @@ class DirMatcherTest extends MatcherResultTest {
       "b",
       """Differing files:
         |
-        |	a/numbers
+        |	a/numbers:
+        |		"1
+        |2
+        |3
+        |[]" was not equal to "1
+        |2
+        |3
+        |[4
+        |5
+        |6
+        |]"
+        |
         |"""
     )
   }
@@ -60,7 +71,14 @@ class DirMatcherTest extends MatcherResultTest {
         |
         |Differing files:
         |
-        |	a/numbers
+        |	a/numbers:
+        |		"1
+        |2
+        |[3
+        |]" was not equal to "1
+        |2
+        |[]"
+        |
         |"""
     )
   }
