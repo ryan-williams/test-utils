@@ -36,7 +36,7 @@ class DirMatcher(expectedDir: String) extends Matcher[String] {
         matchResult = new FileMatcher(expectedFile).apply(actualFile)
         if !matchResult.matches
       } yield {
-        expectedFile
+        expectedFile → matchResult.failureMessage
       }
 
     val errorLines = ArrayBuffer[String]()
@@ -57,7 +57,11 @@ class DirMatcher(expectedDir: String) extends Matcher[String] {
     if (mismatchedFiles.nonEmpty) {
       errorLines += "Differing files:"
       errorLines += ""
-      errorLines ++= mismatchedFiles.map("\t" + _)
+      errorLines ++= (
+        for { (file, msg) <- mismatchedFiles }
+          yield
+            s"\t$file:\n\t\t$msg\n"
+      )
       errorLines += ""
     }
 
