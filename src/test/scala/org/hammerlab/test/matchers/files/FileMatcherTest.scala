@@ -7,6 +7,9 @@ import org.hammerlab.test.resources.File
 class FileMatcherTest extends Suite {
   test("equal files") {
     File("a/numbers").path should fileMatch("c/numbers")
+  }
+
+  test("differing files") {
     val result = fileMatch("c/numbers").apply(File("b/numbers").path)
     result.matches should be(false)
     result.failureMessage should be(""""1
