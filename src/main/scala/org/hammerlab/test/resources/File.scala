@@ -20,4 +20,5 @@ class File private(val path: String) extends AnyVal {
 
 object File {
   def apply(path: String): File = new File(Url(path).getFile)
+  implicit def unmake(file: File): String = file.path
 }

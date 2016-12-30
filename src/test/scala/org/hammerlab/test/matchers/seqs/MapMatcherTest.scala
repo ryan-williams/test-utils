@@ -1,6 +1,7 @@
 package org.hammerlab.test.matchers.seqs
 
 import org.hammerlab.test.matchers.utils.MatcherResultTest
+import MapMatcher.mapMatch
 
 class MapMatcherTest extends MatcherResultTest {
 
@@ -22,33 +23,33 @@ class MapMatcherTest extends MatcherResultTest {
 
   test("single match") {
     check(
-      "a" -> 1
+      "a" → 1
     )(
-      "a" -> 1
+      "a" → 1
     )()
   }
 
   test("multiple match") {
     check(
-      "a" -> 1,
-      "b" -> 2,
-      "c" -> 3
+      "a" → 1,
+      "b" → 2,
+      "c" → 3
     )(
-      "a" -> 1,
-      "b" -> 2,
-      "c" -> 3
+      "a" → 1,
+      "b" → 2,
+      "c" → 3
     )()
   }
 
   test("single differing key") {
     check(
-      "a" -> 1,
-      "b" -> 2,
-      "c" -> 3
+      "a" → 1,
+      "b" → 2,
+      "c" → 3
     )(
-      "a" -> 1,
-      "b" -> 4,
-      "c" -> 3
+      "a" → 1,
+      "b" → 4,
+      "c" → 3
     )(
       """Sequences didn't match!
         |
@@ -60,13 +61,13 @@ class MapMatcherTest extends MatcherResultTest {
 
   test("multiple differing keys") {
     check(
-      "a" -> 1,
-      "b" -> 2,
-      "c" -> 3
+      "a" → 1,
+      "b" → 2,
+      "c" → 3
     )(
-      "a" -> 1,
-      "b" -> 4,
-      "c" -> 5
+      "a" → 1,
+      "b" → 4,
+      "c" → 5
     )(
       """Sequences didn't match!
         |
@@ -78,7 +79,7 @@ class MapMatcherTest extends MatcherResultTest {
   }
 
   test("empty vs single elem") {
-    check()("a" -> 1)(
+    check()("a" → 1)(
       """Sequences didn't match!
         |
         |Extra elems:
@@ -88,7 +89,7 @@ class MapMatcherTest extends MatcherResultTest {
   }
 
   test("single elem vs empty") {
-    check("a" -> 1)()(
+    check("a" → 1)()(
       """Sequences didn't match!
         |
         |Missing elems:
@@ -99,13 +100,13 @@ class MapMatcherTest extends MatcherResultTest {
 
   test("missing and extra elems") {
     check(
-      "a" -> 1,
-      "b" -> 2,
-      "c" -> 3
+      "a" → 1,
+      "b" → 2,
+      "c" → 3
     )(
-      "d" -> 4,
-      "a" -> 1,
-      "e" -> 5
+      "d" → 4,
+      "a" → 1,
+      "e" → 5
     )(
       """Sequences didn't match!
         |
@@ -122,23 +123,33 @@ class MapMatcherTest extends MatcherResultTest {
 
   test("two out of order elems") {
     check(
-      "a" -> 1,
-      "b" -> 2
+      "a" → 1,
+      "b" → 2
     )(
-      "b" -> 2,
-      "a" -> 1
+      "b" → 2,
+      "a" → 1
     )()
   }
 
   test("three out of order elems") {
     check(
-      "a" -> 1,
-      "b" -> 2,
-      "a" -> 3
+      "a" → 1,
+      "b" → 2,
+      "a" → 3
     )(
-      "b" -> 2,
-      "a" -> 1,
-      "a" -> 3
+      "b" → 2,
+      "a" → 1,
+      "a" → 3
     )()
+  }
+
+  test("mapMatch map") {
+    Map(1 → "a", 2 → "b") should mapMatch(Map(2 → "b", 1 → "a"))
+    Map(1 → "a", 2 → "b") should not(mapMatch(Map(2 → "b", 1 → "c")))
+  }
+
+  test("mapMatch varargs") {
+    Map(1 → "a", 2 → "b") should mapMatch(2 → "b", 1 → "a")
+    Map(1 → "a", 2 → "b") should not(mapMatch(2 → "b", 1 → "c"))
   }
 }
