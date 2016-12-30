@@ -1,7 +1,12 @@
 name := "test-utils"
-version := "1.1.1"
-crossScalaVersions += "2.12.1"
+version := "1.1.2-SNAPSHOT"
+
+addScala212
+
 libraryDependencies ++= Seq(
-  libraries.value('scalatest),
-  "commons-io" % "commons-io" % "2.4"
+  libs.value('commons_io),
+  libs.value('scalatest)
 )
+
+// Don't inherit default test-deps from parent plugin.
+testDeps := Seq()
