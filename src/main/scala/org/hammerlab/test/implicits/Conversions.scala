@@ -2,6 +2,13 @@ package org.hammerlab.test.implicits
 
 import scala.reflect.ClassTag
 
+/**
+ * Instantiate this trait to obtain a bunch of handy implicits for using one type ([[T]]) interchangeably with another
+ * ([[U]]; in tests).
+ *
+ * One gotcha is that is more than one [[Conversions]] instance's implicit members are in scope, they will clobber each
+ * other since they'll have the same names; import-renaming can be used per-member to get around this.
+ */
 trait Conversions[T, U] {
   implicit def convertSome(ot: Some[T])(implicit f: T ⇒ U): Option[U] = ot.map(f)
   implicit def convertOpt(ot: Option[T])(implicit f: T ⇒ U): Option[U] = ot.map(f)
