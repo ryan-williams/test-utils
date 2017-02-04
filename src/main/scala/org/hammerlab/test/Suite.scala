@@ -1,10 +1,10 @@
 package org.hammerlab.test
 
-import java.{lang ⇒ jl}
+import java.{ lang ⇒ jl }
 
 import org.hammerlab.test.files.TmpFiles
 import org.scalactic.{ CanEqual, ConversionCheckedTripleEquals }
-import org.scalatest.{ BeforeAndAfter, BeforeAndAfterAll, FunSuite, Matchers }
+import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, Matchers }
 
 // Simple wrapper for common test-suite boilerplate.
 class Suite
@@ -12,7 +12,7 @@ class Suite
     with Matchers
     with ConversionCheckedTripleEquals
     with BeforeAndAfterAll
-    with BeforeAndAfter
+    with BeforeAndAfterEach
     with TmpFiles {
 
   def obviousEquality[L, R]: CanEqual[L, R] =
