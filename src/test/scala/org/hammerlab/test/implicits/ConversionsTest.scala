@@ -3,24 +3,40 @@ package org.hammerlab.test.implicits
 import org.hammerlab.test.Suite
 import org.scalactic.ConversionCheckedTripleEquals
 
-case class A(n: Int)
-case class B(n: Int)
+object Foo {
+  case class A(n: Int)
+  case class B(n: Int)
 
-object B {
-  implicit def fooToBar(foo: A): B = B(10 * foo.n)
+  object B {
+    implicit def fooToBar(foo: A): B = B(10 * foo.n)
+  }
+}
+
+import Foo.{A, B}
+
+@Conversions[Int, String]
+trait IntStringConversions {
+  val nonce1 = 111
+  implicit def intToString(n: Int): String = s"$n$n"
+  def nonce2 = "222"
+}
+
+@Conversions[A, B]
+trait ABConversions {
+  implicit lazy val nonce3 = ("aaa", 333, true)
+}
+
+// Macro-annotations on top-level class-/trait-declarations have some subtleties around companion-object-handling; test
+// those using this object.
+object ABConversions {
+  val nonce4 = 444
 }
 
 class ConversionsTest
   extends Suite
-    with ConversionCheckedTripleEquals {
-
-  implicit def intToString(n: Int): String = s"$n$n"
-
-  val IntToStringConversions = Conversions[Int, String]
-  import IntToStringConversions._
-
-  val AToBConversions = Conversions[A, B]
-  import AToBConversions._
+    with ConversionCheckedTripleEquals
+    with IntStringConversions
+    with ABConversions {
 
   test("int⟶string conversions") {
     Option("22") should ===(Some(2))
@@ -35,5 +51,12 @@ class ConversionsTest
 
   test("A⟶B conversions") {
     Option(B(10)) should ===(Some(A(1)))
+  }
+
+  test("annotated trait bodies are preserved") {
+    nonce1 should be(111)
+    nonce2 should be("222")
+    implicitly[(String, Int, Boolean)] should be("aaa", 333, true)
+    ABConversions.nonce4 should be(444)
   }
 }

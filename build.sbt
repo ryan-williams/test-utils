@@ -1,7 +1,9 @@
 name := "test-utils"
-version := "1.1.6"
+version := "1.2.0-SNAPSHOT"
 
 addScala212
+
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 
 libraryDependencies ++= Seq(
   libs.value('commons_io),

@@ -1,48 +1,103 @@
 package org.hammerlab.test.implicits
 
+import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
 /**
- * Instantiate this trait to obtain a bunch of handy implicits for using one type ([[T]]) interchangeably with another
- * ([[U]]; in tests).
+ * Annotate a trait with [[Conversions[From, To]]] this to generate a bunch of handy implicits for using one type
+ * ([[From]]) interchangeably with another ([[To]]) in tests:
  *
- * One gotcha is that is more than one [[Conversions]] instance's implicit members are in scope, they will clobber each
- * other since they'll have the same names; import-renaming can be used per-member to get around this.
+ * \@Conversions[Int, String]
+ * trait IntToStringConversions {
+ *   // Implicitly convert integers to strings by concatenating their string representations to themselves.
+ *   implicit def intToString(n: Int): String = s"$n$n"
+ * }
+ *
+ * The annotation will unroll a bunch of implicit functions for converting from e.g. [[Option[Int]]] to
+ * [[Option[String]]], [[Seq[Int]]] to [[Seq[String]]], etc. If an implicit [[Int => String]] is not give in the body of
+ * the trait, then one needs to be in scope where it is declared.
+ *
+ * Downstream classes can then mix-in `IntToStringConversions` to have all such implicits in scope.
+ *
+ * A macro is used so that multiple different [[Conversions]] traits can be mixed-in to a given concrete class without
+ * the implicit-names colliding (which would otherwise result in all but the last-to-be-mixed-in being hidden/shadowed);
+ * instead, the macro seeds all implicits' names with the types being converted between, avoiding the issue.
+ *
+ * In order to use the [[Conversions]] annotation, macro paradise must be enabled.
  */
-class Conversions[T, U](implicit val f: T ⇒ U)
+@compileTimeOnly("enable macro paradise to expand macro annotations")
+class Conversions[From, To] extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Any = macro Conversions.impl
+}
 
 object Conversions {
-
-  def apply[T, U](implicit f: T => U): Conversions[T, U] = macro converterImpl[T, U]
-
-  def converterImpl[T: c.WeakTypeTag, U: c.WeakTypeTag](c: whitebox.Context)(f: c.Expr[T ⇒ U]): c.Tree = {
+  def impl(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
+    val inputs = annottees.map(_.tree).toList
 
-    val tType = implicitly[c.WeakTypeTag[T]].tpe
-    val uType = implicitly[c.WeakTypeTag[U]].tpe
+    val Apply(
+      Select(
+        Apply(
+          Select(
+            New(
+              AppliedTypeTree(
+                _,
+                List(
+                  Ident(tt),
+                  Ident(ut)
+                )
+              )
+            ),
+            _
+          ),
+          _
+        ),
+        _
+      ),
+      _
+    ) = c.macroApplication
 
-    val tBasename = tType.toString.split("\\.").last
-    val uBasename = uType.toString.split("\\.").last
+    inputs match {
+      case (param: ClassDef) :: rest ⇒
 
-    val T = tq"$tType"
-    val U = tq"$uType"
+        val q"$_ trait $name { ..$stats }" = param
 
-    def m(name: String) = TermName(s"${name}_${tBasename}_$uBasename")
+        val T = tt.toTypeName
+        val U = ut.toTypeName
 
-    q"""import scala.reflect.ClassTag
-        new Conversions[$T, $U] {
-          implicit def ${m("convertOpt")}(t: Some[$T]): Option[$U] = t.map(f)
-          implicit def ${m("convertTuple2Keys")}[V](t: ($T, V)): ($U, V) = (t._1, t._2)
-          implicit def ${m("convertMapKeys")}[V](m: Map[$T, V]): Map[$U, V] = m.map(t ⇒ (f(t._1), t._2))
-          implicit def ${m("toTupleList")}[V](s: Seq[($T, V)]): List[($U, V)] = s.map(t ⇒ (f(t._1), t._2)).toList
-          implicit def ${m("toTupleArray")}[V: ClassTag](s: Array[($T, V)])(implicit ct: ClassTag[$U]): Array[($U, V)] = s.map(t ⇒ (f(t._1), t._2))
-          implicit def ${m("toSeq")}(s: Seq[$T]): Seq[$U] = s.map(f)
-          implicit def ${m("toVector")}(s: Seq[$T]): Vector[$U] = s.map(f).toVector
-          implicit def ${m("toList")}(s: Seq[$T]): List[$U] = s.map(f).toList
-          implicit def ${m("toArray")}(s: Seq[$T])(implicit ct: ClassTag[$U]): Array[$U] = s.map(f).toArray
-          implicit def ${m("convertArray")}(s: Array[$T])(implicit ct: ClassTag[$U]): Array[$U] = s.map(f)
-        }
-      """
+        def m(name: String) = TermName(s"${name}_${T}_$U")
+
+        val expr =
+          c.Expr[Any](
+            q"""
+              trait $name {
+                ..$stats
+
+                import scala.reflect.ClassTag
+                private val f = implicitly[$T => $U]
+                implicit def ${m("convertOpt")}(t: Some[$T]): Option[$U] = t.map(f)
+                implicit def ${m("convertTuple2Keys")}[V](t: ($T, V)): ($U, V) = (t._1, t._2)
+                implicit def ${m("convertMapKeys")}[V](m: Map[$T, V]): Map[$U, V] = m.map(t ⇒ (f(t._1), t._2))
+                implicit def ${m("toTupleList")}[V](s: Seq[($T, V)]): List[($U, V)] = s.map(t ⇒ (f(t._1), t._2)).toList
+                implicit def ${m("toTupleArray")}[V: ClassTag](s: Array[($T, V)])(implicit ct: ClassTag[$U]): Array[($U, V)] = s.map(t ⇒ (f(t._1), t._2))
+                implicit def ${m("toSeq")}(s: Seq[$T]): Seq[$U] = s.map(f)
+                implicit def ${m("toVector")}(s: Seq[$T]): Vector[$U] = s.map(f).toVector
+                implicit def ${m("toList")}(s: Seq[$T]): List[$U] = s.map(f).toList
+                implicit def ${m("toArray")}(s: Seq[$T])(implicit ct: ClassTag[$U]): Array[$U] = s.map(f).toArray
+                implicit def ${m("convertArray")}(s: Array[$T])(implicit ct: ClassTag[$U]): Array[$U] = s.map(f)
+              }
+             """
+          )
+
+        c.Expr[Any](
+          Block(
+            expr.tree :: rest,
+            Literal(Constant(()))
+          )
+        )
+      case _ ⇒
+        throw new Exception(s"expected ClassDef: $inputs")
+    }
   }
 }
