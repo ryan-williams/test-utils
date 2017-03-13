@@ -76,14 +76,15 @@ object Conversions {
 
                 import scala.reflect.ClassTag
                 private val f = implicitly[$T => $U]
-                implicit def ${m("convertOpt")}(t: Some[$T]): Option[$U] = t.map(f)
+                implicit def ${m("convertOpt")}(t: Option[$T]): Option[$U] = t.map(f)
                 implicit def ${m("convertTuple2Keys")}[V](t: ($T, V)): ($U, V) = (t._1, t._2)
+                implicit def ${m("convertPair")}(t: ($T, $T)): ($U, $U) = (t._1, t._2)
+                implicit def ${m("convertTwoOfThree")}[V](t: ($T, $T, V)): ($U, $U, V) = (t._1, t._2, t._3)
                 implicit def ${m("convertMapKeys")}[V](m: Map[$T, V]): Map[$U, V] = m.map(t ⇒ (f(t._1), t._2))
-                implicit def ${m("toTupleList")}[V](s: Seq[($T, V)]): List[($U, V)] = s.map(t ⇒ (f(t._1), t._2)).toList
+                implicit def ${m("toTupleVector")}[V](s: Seq[($T, V)]): Vector[($U, V)] = s.map(t ⇒ (f(t._1), t._2)).toVector
+                implicit def ${m("toOptionVector")}(s: Seq[Option[$T]]): Vector[Option[$U]] = s.map(t ⇒ (t: Option[$U])).toVector
                 implicit def ${m("toTupleArray")}[V: ClassTag](s: Array[($T, V)])(implicit ct: ClassTag[$U]): Array[($U, V)] = s.map(t ⇒ (f(t._1), t._2))
-                implicit def ${m("toSeq")}(s: Seq[$T]): Seq[$U] = s.map(f)
                 implicit def ${m("toVector")}(s: Seq[$T]): Vector[$U] = s.map(f).toVector
-                implicit def ${m("toList")}(s: Seq[$T]): List[$U] = s.map(f).toList
                 implicit def ${m("toArray")}(s: Seq[$T])(implicit ct: ClassTag[$U]): Array[$U] = s.map(f).toArray
                 implicit def ${m("convertArray")}(s: Array[$T])(implicit ct: ClassTag[$U]): Array[$U] = s.map(f)
               }

@@ -42,11 +42,18 @@ class ConversionsTest
     Option("22") should ===(Some(2))
     ("22", true) should ===((2, true))
     Map("22" → true, "3434" → false) should ===(Map(2 → true, 34 → false))
-    List("11", "2323") should ===(Seq(1, 23))
+    Vector("11", "2323") should ===(Seq(1, 23))
+
+    Vector(Option("11"), None, Option("2323")) should ===(Seq(Some(1), None, Some(23)))
     Array("11", "2323") should ===(Array(1, 23))
     Array("11", "2323") should ===(Seq(1, 23))
-    List("22" → true, "3434" → false) should ===(Seq(2 → true, 34 → false))
+    Vector("22" → true, "3434" → false) should ===(Seq(2 → true, 34 → false))
     Array("22" → true, "3434" → false) should ===(Array(2 → true, 34 → false))
+    ("22", "33") should ===(2, 3)
+    ("22", "33", true) should ===(2, 3, true)
+
+    Seq("22", "33") should ===(Seq(2, 3))
+    Vector("22", "33") should ===(Seq(2, 3))
   }
 
   test("A⟶B conversions") {
