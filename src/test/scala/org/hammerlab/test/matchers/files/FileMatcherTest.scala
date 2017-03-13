@@ -10,7 +10,7 @@ class FileMatcherTest extends Suite {
   }
 
   test("differing files") {
-    val result = fileMatch("c/numbers").apply(File("b/numbers").path)
+    val result = fileMatch("c/numbers")(File("b/numbers"))
     result.matches should be(false)
     result.failureMessage should be(""""1
                                       |2
