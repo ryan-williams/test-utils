@@ -1,24 +1,22 @@
 package org.hammerlab.test.resources
 
-import java.io.{ File ⇒ JFile }
-import java.nio.file.{ Files, Paths }
+import java.net.URI
 
-import scala.io.Source
+import org.hammerlab.paths.Path
 
 /**
  * Wrapper for a test-resource file.
  */
-class File private(val path: String) extends AnyVal {
-  def read: String =
-    Source.fromFile(path).mkString
-
-  def readBytes: Array[Byte] =
-    Files.readAllBytes(Paths.get(path))
-
-  def file: JFile = new JFile(path)
+class File private(val pathStr: String) {
+  def path: Path = Path(pathStr)
 }
 
 object File {
+  def apply(path: Path): File = apply(path.toString)
   def apply(path: String): File = new File(Url(path).getFile)
-  implicit def unmake(file: File): String = file.path
+  implicit def fromString(path: String): File = apply(path)
+  implicit def unmake(file: File): String = file.pathStr
+  implicit def toPath(file: File): Path = Path(file)
+  implicit def fromPath(path: Path): File = apply(path)
+  implicit def fromURI(uri: URI): File = apply(Path(uri))
 }

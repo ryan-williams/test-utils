@@ -1,78 +1,97 @@
 package org.hammerlab.test.matchers.files
 
-import java.io.File
+import java.io.{ ByteArrayOutputStream, PrintWriter }
 
-import org.apache.commons.io.FileUtils
-import org.hammerlab.test.resources.{File ⇒ Resource}
+import org.hammerlab.paths.Path
+import org.hammerlab.test.resources.File
 import org.scalatest.matchers.{ MatchResult, Matcher }
 
-import scala.collection.JavaConversions._
-import scala.collection.mutable.ArrayBuffer
+class DirMatcher(expected: Path)
+  extends Matcher[Path] {
 
-class DirMatcher(expectedDir: String) extends Matcher[String] {
+  def dirMap(dir: Path): Map[Path, Path] =
+    dir
+      .walk
+      .map(
+        path ⇒
+          Path(dir.relativize(path)) →
+            path
+      )
+      .toMap
 
-  val expectedDirFile = Resource(expectedDir).file
-  val expectedDirURI = expectedDirFile.toURI
+  def err(line: String = "")(implicit pw: PrintWriter): Unit = {
+    pw println line
+  }
 
-  def recursiveListFiles(f: File): Set[File] =
-    FileUtils.listFiles(f, null, true).toSet
+  def err(lines: Seq[String])(implicit pw: PrintWriter): Unit = {
+    lines foreach (pw println)
+  }
 
-  override def apply(actualDir: String): MatchResult = {
+  override def apply(actual: Path): MatchResult = {
 
-    val actualDirFile = new File(actualDir)
-    val actualDirURI = actualDirFile.toURI
+    val expectedPathsMap = dirMap(expected)
+    val actualPathsMap = dirMap(actual)
 
-    val expectedFiles = recursiveListFiles(expectedDirFile).map(_.toURI).map(expectedDirURI.relativize).map(_.getPath)
-    val actualFiles = recursiveListFiles(actualDirFile).map(_.toURI).map(actualDirURI.relativize).map(_.getPath)
+    val expectedPaths = expectedPathsMap.keySet
+    val actualPaths = actualPathsMap.keySet
 
-    val extraFiles = actualFiles.diff(expectedFiles)
-    val missingFiles = expectedFiles.diff(actualFiles)
+    val extraPaths = actualPaths.diff(expectedPaths)
+    val missingPaths = expectedPaths.diff(actualPaths)
 
-    lazy val mismatchedFiles =
+    lazy val mismatchedPaths =
       for {
-        file ← expectedFiles.intersect(actualFiles)
-        expectedFile = new File(expectedDir, file).getPath
-        actualFile = new File(actualDirFile, file).getPath
-        matchResult = new FileMatcher(expectedFile).apply(actualFile)
+        path ← expectedPaths.intersect(actualPaths)
+        expectedPath = expectedPathsMap(path)
+        actualPath = actualPathsMap(path)
+        if !expectedPath.isDirectory && !actualPath.isDirectory
+        matchResult = new FileMatcher(expectedPath).apply(actualPath)
         if !matchResult.matches
       } yield {
-        expectedFile → matchResult.failureMessage
+        path → matchResult.failureMessage
       }
 
-    val errorLines = ArrayBuffer[String]()
-    if (extraFiles.nonEmpty) {
-      errorLines += "Extra files:"
-      errorLines += ""
-      errorLines ++= extraFiles.map("\t" + _)
-      errorLines += ""
+    val baos = new ByteArrayOutputStream
+    implicit val pw = new PrintWriter(baos)
+
+    implicit val pathOrd = Ordering.by[Path, String](_.toString)
+
+    if (extraPaths.nonEmpty) {
+      err("Extra files:")
+      err()
+      err(extraPaths.toArray.sorted.map("\t" + _))
+      err()
     }
 
-    if (missingFiles.nonEmpty) {
-      errorLines += "Missing files:"
-      errorLines += ""
-      errorLines ++= missingFiles.map("\t" + _)
-      errorLines += ""
+    if (missingPaths.nonEmpty) {
+      err("Missing files:")
+      err()
+      err(missingPaths.toArray.sorted.map("\t" + _))
+      err()
     }
 
-    if (mismatchedFiles.nonEmpty) {
-      errorLines += "Differing files:"
-      errorLines += ""
-      errorLines ++= (
-        for { (file, msg) <- mismatchedFiles }
-          yield
-            s"\t$file:\n\t\t$msg\n"
+    if (mismatchedPaths.nonEmpty) {
+      err("Differing files:")
+      err()
+      err(
+        for {
+          (path, msg) <- mismatchedPaths.toArray.sorted
+        } yield
+          s"\t$path:\n\t\t$msg\n"
       )
-      errorLines += ""
     }
+
+    pw.close()
+
+    lazy val errors = new String(baos.toByteArray)
 
     MatchResult(
-      extraFiles.isEmpty && missingFiles.isEmpty && mismatchedFiles.isEmpty,
-      errorLines.mkString("\n"),
-      s"$actualDirFile matched $expectedDir, but was supposed to not"
+      extraPaths.isEmpty && missingPaths.isEmpty && mismatchedPaths.isEmpty,
+      errors,
+      s"$actual matched $expected, but was supposed to not"
     )
   }
 }
 
 object DirMatcher {
-  def dirMatch(actualDir: String): DirMatcher = new DirMatcher(actualDir)
+  def dirMatch(expectedDir: File): DirMatcher = new DirMatcher(expectedDir)
 }

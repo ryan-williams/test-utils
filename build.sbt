@@ -1,12 +1,13 @@
 name := "test-utils"
-version := "1.2.0"
+version := "1.2.1-SNAPSHOT"
 
 addScala212
 
 enableMacroParadise
 
-libraryDependencies ++= Seq(
+deps ++= Seq(
   libs.value('commons_io),
+  libs.value('paths),
   libs.value('scalatest),
   libs.value('scala_reflect)
 )
