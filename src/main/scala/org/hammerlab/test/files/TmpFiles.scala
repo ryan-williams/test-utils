@@ -16,6 +16,9 @@ trait TmpFiles extends BeforeAndAfterAll {
   val files = ArrayBuffer[Path]()
   val dirs = ArrayBuffer[Path]()
 
+  /**
+   * Create a temporary file and return a [[Path]] to it.
+   */
   def tmpFile(prefix: String = this.getClass.getSimpleName, suffix: String = ""): Path = {
     val f = Path(createTempFile(prefix, suffix))
     files += f
@@ -28,6 +31,9 @@ trait TmpFiles extends BeforeAndAfterAll {
     f
   }
 
+  /**
+   * Return a [[Path]] to a temporary file that has not yet been created.
+   */
   def tmpPath(prefix: String = this.getClass.getSimpleName,
               suffix: String = ""): Path =
     tmpDir() / (prefix + suffix)

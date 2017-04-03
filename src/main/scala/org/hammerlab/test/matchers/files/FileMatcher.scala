@@ -18,9 +18,17 @@ class FileMatcher(expected: Path)
    */
   override def apply(actual: Path): MatchResult =
     if (expected.isDirectory)
-      be(false).apply(expected.isDirectory)
+      MatchResult(
+        false,
+        s"'Expected' file $expected should not be a directory",
+        s"<unused>"
+      )
     else if (actual.isDirectory)
-      be(false).apply(actual.isDirectory)
+      MatchResult(
+        false,
+        s"'Actual' file $actual should not be a directory",
+        s"<unused>"
+      )
     else {
       try {
         val expectedStr = expected.read
