@@ -1,35 +1,52 @@
 package org.hammerlab.test.matchers.files
 
+import java.io.UncheckedIOException
 import java.nio.charset.MalformedInputException
-import java.nio.file.{ Files, Paths }
 
+import org.hammerlab.paths.Path
 import org.hammerlab.test.resources.File
 import org.scalatest.Matchers
 import org.scalatest.matchers.{ MatchResult, Matcher }
 
-import scala.io.Source.fromFile
+class FileMatcher(expected: Path)
+  extends Matcher[Path]
+    with Matchers {
 
-class FileMatcher(expectedFile: String) extends Matcher[String] with Matchers {
   /**
-   * @param actualFile Fully-qualified path to the "actual" file whose contents should be compared to the "expected"
+   * @param actual Fully-qualified path to the "actual" file whose contents should be compared to the "expected"
    *                   test-resource file.
    */
-  override def apply(actualFile: String): MatchResult = {
-    val expectedPath = File(expectedFile)
-    try {
-      val expectedStr = expectedPath.read
-      val actualStr = fromFile(actualFile).mkString
+  override def apply(actual: Path): MatchResult =
+    if (expected.isDirectory)
+      MatchResult(
+        false,
+        s"'Expected' file $expected should not be a directory",
+        s"<unused>"
+      )
+    else if (actual.isDirectory)
+      MatchResult(
+        false,
+        s"'Actual' file $actual should not be a directory",
+        s"<unused>"
+      )
+    else {
+      try {
+        val expectedStr = expected.read
+        val actualStr = actual.read
 
-      // Hook into scalatest's usual String-comparison logic, which includes a nice diff summary when the strings
-      // differ.
-      be(actualStr).apply(expectedStr)
-    } catch {
-      case e: MalformedInputException ⇒
-        be(Files.readAllBytes(Paths.get(actualFile))).apply(expectedPath.readBytes)
+        // Hook into scalatest's usual String-comparison logic, which includes a nice diff summary when the strings
+        // differ.
+        be(actualStr).apply(expectedStr)
+      }
+      catch {
+        // Catch and re-compare binary files
+        case _: MalformedInputException | _: UncheckedIOException ⇒
+          be(actual.readBytes).apply(expected.readBytes)
+      }
     }
-  }
 }
 
 object FileMatcher {
-  def fileMatch(actualFile: String): FileMatcher = new FileMatcher(actualFile)
+  def fileMatch(expectedFile: String): FileMatcher = new FileMatcher(File(expectedFile))
+  def fileMatch(expectedFile: File): FileMatcher = new FileMatcher(expectedFile)
 }

@@ -6,8 +6,8 @@ import org.hammerlab.test.resources.File
 
 class DirMatcherTest extends MatcherResultTest {
 
-  def check(expectedDir: String, actualDir: String, failureMessage: String = ""): Unit =
-    checkResult(dirMatch(expectedDir)(File(actualDir)), failureMessage)
+  def check(expectedDir: File, actualDir: File, failureMessage: String = ""): Unit =
+    checkResult(dirMatch(expectedDir)(actualDir), failureMessage)
 
   test("matching dirs") {
     check("a", "c")
@@ -19,17 +19,15 @@ class DirMatcherTest extends MatcherResultTest {
       "b",
       """Differing files:
         |
-        |	a/numbers:
+        |	numbers:
         |		"1
         |2
-        |3
-        |[]" was not equal to "1
+        |3[]" was not equal to "1
         |2
-        |3
-        |[4
+        |3[
+        |4
         |5
-        |6
-        |]"
+        |6]"
         |
         |"""
     )
@@ -42,6 +40,7 @@ class DirMatcherTest extends MatcherResultTest {
       """Missing files:
         |
         |	words
+        |
         |"""
     )
   }
@@ -53,6 +52,7 @@ class DirMatcherTest extends MatcherResultTest {
       """Extra files:
         |
         |	more-words
+        |
         |"""
     )
   }
@@ -71,13 +71,11 @@ class DirMatcherTest extends MatcherResultTest {
         |
         |Differing files:
         |
-        |	a/numbers:
+        |	numbers:
         |		"1
-        |2
-        |[3
-        |]" was not equal to "1
-        |2
-        |[]"
+        |2[
+        |3]" was not equal to "1
+        |2[]"
         |
         |"""
     )
