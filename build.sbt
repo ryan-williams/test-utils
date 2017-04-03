@@ -1,5 +1,5 @@
 name := "test-utils"
-version := "1.2.1-SNAPSHOT"
+version := "1.2.1"
 
 addScala212
 
