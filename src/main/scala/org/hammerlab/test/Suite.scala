@@ -8,7 +8,9 @@ import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, Matchers
 
 import scala.collection.mutable.ArrayBuffer
 
-// Simple wrapper for common test-suite boilerplate.
+/**
+ * Simple wrapper for common test-suite boilerplate.
+ */
 class Suite
   extends FunSuite
     with Matchers
