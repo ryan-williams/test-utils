@@ -10,7 +10,9 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Mix-in for tests that allows for creating temporary files and directories, and cleans them up before exiting.
  */
-trait TmpFiles extends BeforeAndAfterAll {
+trait TmpFiles
+  extends BeforeAndAfterAll {
+
   self: Suite ⇒
 
   val files = ArrayBuffer[Path]()
