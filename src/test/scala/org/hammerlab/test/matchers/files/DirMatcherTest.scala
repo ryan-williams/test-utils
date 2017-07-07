@@ -22,12 +22,14 @@ class DirMatcherTest extends MatcherResultTest {
         |	numbers:
         |		"1
         |2
-        |3[]" was not equal to "1
+        |3
+        |[]" was not equal to "1
         |2
-        |3[
-        |4
+        |3
+        |[4
         |5
-        |6]"
+        |6
+        |]"
         |
         |"""
     )
@@ -73,9 +75,11 @@ class DirMatcherTest extends MatcherResultTest {
         |
         |	numbers:
         |		"1
-        |2[
-        |3]" was not equal to "1
-        |2[]"
+        |2
+        |[3
+        |]" was not equal to "1
+        |2
+        |[]"
         |
         |"""
     )

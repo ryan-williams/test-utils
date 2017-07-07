@@ -46,6 +46,16 @@ class Suite
     for { afterFn ← afters } { afterFn() }
   }
 
+  /**
+   * Hacky helper for setting env variables
+   */
+  def setEnv(key: String, value: String) = {
+    val field = System.getenv().getClass.getDeclaredField("m")
+    field.setAccessible(true)
+    val map = field.get(System.getenv()).asInstanceOf[java.util.Map[java.lang.String, java.lang.String]]
+    map.put(key, value)
+  }
+
   // Some implicits to allow trivial conversions for type-safe equality checking with ===.
   implicit val intLongEqual = obviousEquality[Int, Long]
   implicit val longIntEqual = obviousEquality[Long, Int]
