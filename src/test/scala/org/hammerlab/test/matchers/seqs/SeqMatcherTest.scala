@@ -86,6 +86,7 @@ class SeqMatcherTest extends MatcherResultTest {
       """Sequences didn't match!
         |
         |Elements out of order:
+        |
         |Expected:
         |	a
         |	b
