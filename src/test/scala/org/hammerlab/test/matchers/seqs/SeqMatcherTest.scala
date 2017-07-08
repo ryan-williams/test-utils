@@ -2,10 +2,18 @@ package org.hammerlab.test.matchers.seqs
 
 import org.hammerlab.test.matchers.utils.MatcherResultTest
 
+import scala.collection.immutable.SortedSet
 import scala.reflect.ClassTag
 
 class SeqMatcherTest
   extends MatcherResultTest {
+
+  def check[T: ClassTag](expected: Iterable[T],
+                         actual: Iterable[T]): Unit =
+    checkResult(
+      SeqMatcher(expected).apply(actual),
+      ""
+    )
 
   def check[T: ClassTag](
       expected: T*
@@ -101,6 +109,17 @@ class SeqMatcherTest
         |	c
         |	b
         |"""
+    )
+  }
+
+  test("sorted-set vs vector") {
+    check[String](
+      SortedSet(
+        "a", "b", "c"
+      ),
+      Vector(
+        "a", "b", "c"
+      )
     )
   }
 }

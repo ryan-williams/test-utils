@@ -4,9 +4,9 @@ import org.scalatest.matchers.{ MatchResult, Matcher }
 
 import scala.collection.mutable.ArrayBuffer
 
-case class SeqMatcher[T](expected: Seq[T],
+case class SeqMatcher[T](expected: Iterable[T],
                          matchOrder: Boolean = true)
-  extends Matcher[Seq[T]] {
+  extends Matcher[Iterable[T]] {
 
   sealed trait Error
 
@@ -29,7 +29,7 @@ case class SeqMatcher[T](expected: Seq[T],
         errors += ""
     }
 
-  override def apply(actual: Seq[T]): MatchResult = {
+  override def apply(actual: Iterable[T]): MatchResult = {
     val expectedSet: Set[T] = expected.toSet
 
     val actualSet: Set[T] = actual.toSet
@@ -58,7 +58,7 @@ case class SeqMatcher[T](expected: Seq[T],
           missingElems
         )
 
-    } else if (matchOrder && actual != expected)
+    } else if (matchOrder && !actual.sameElements(expected))
       err(
         "Elements out of order:",
         "",
@@ -71,7 +71,7 @@ case class SeqMatcher[T](expected: Seq[T],
 
     val matched =
       if (matchOrder)
-        actual == expected
+        actual.sameElements(expected)
       else
         actualSet == expectedSet
 
@@ -84,6 +84,6 @@ case class SeqMatcher[T](expected: Seq[T],
 }
 
 object SeqMatcher {
-  def seqMatch[T](expected: Iterable[T]): Matcher[Seq[T]] = SeqMatcher[T](expected.toSeq)
-  def seqMatch[T](expected: Iterator[T]): Matcher[Seq[T]] = SeqMatcher[T](expected.toSeq)
+  def seqMatch[T](expected: Iterable[T]): Matcher[Iterable[T]] = SeqMatcher[T](expected.toSeq)
+  def seqMatch[T](expected: Iterator[T]): Matcher[Iterable[T]] = SeqMatcher[T](expected.toSeq)
 }

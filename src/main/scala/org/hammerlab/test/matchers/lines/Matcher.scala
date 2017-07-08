@@ -1,11 +1,12 @@
 package org.hammerlab.test.matchers.lines
 
 import org.hammerlab.test.matchers.lines.Chars.escape
-import org.scalatest.matchers.{ MatchResult, Matcher }
+import org.scalatest.matchers
+import org.scalatest.matchers.MatchResult
 
 object Matcher {
-  def apply(lines: Line*): Matcher[String] =
-    new Matcher[String] {
+  def apply(lines: Line*): matchers.Matcher[String] =
+    new matchers.Matcher[String] {
       override def apply(str: String): MatchResult = {
 
         val chars = LinesIterator(str)

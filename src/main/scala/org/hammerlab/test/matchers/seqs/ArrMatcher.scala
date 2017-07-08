@@ -2,7 +2,7 @@ package org.hammerlab.test.matchers.seqs
 
 import org.scalatest.matchers.{ MatchResult, Matcher }
 
-case class ArrMatcher[T](expected: Seq[T],
+case class ArrMatcher[T](expected: Iterable[T],
                          matchOrder: Boolean = true)
   extends Matcher[Array[T]] {
   override def apply(actual: Array[T]): MatchResult =
