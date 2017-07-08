@@ -85,6 +85,5 @@ case class SeqMatcher[T](expected: Seq[T],
 
 object SeqMatcher {
   def seqMatch[T](expected: Iterable[T]): Matcher[Seq[T]] = SeqMatcher[T](expected.toSeq)
-  def seqMatch[T](expected:    Array[T]): Matcher[Seq[T]] = SeqMatcher[T](expected.toList)
   def seqMatch[T](expected: Iterator[T]): Matcher[Seq[T]] = SeqMatcher[T](expected.toSeq)
 }
