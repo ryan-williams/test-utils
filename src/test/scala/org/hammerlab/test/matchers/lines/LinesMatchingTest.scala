@@ -1,6 +1,6 @@
 package org.hammerlab.test.matchers.lines
 
-import org.hammerlab.test.{ Suite, linesMatch }
+import org.hammerlab.test.{ Suite, linesMatch, firstLinesMatch }
 
 class LinesMatchingTest
   extends Suite {
@@ -74,6 +74,28 @@ class LinesMatchingTest
         LineNumber ++ Chars(",123 ") ++ LineNumber,
         ""
       )
+    )
+  }
+
+  test("not-chars") {
+    "abc" should linesMatch(NotChars("def"))
+    "abc" should not(linesMatch(NotChars("cde")))
+    "" should not(linesMatch(NotChars("def")))
+
+    "abc" should linesMatch(NotChar('d'))
+    "abdc" should not(linesMatch(NotChar('d')))
+  }
+
+  test("prefix") {
+    """abc 1
+      |123 def
+      |ggg45hhh
+      |77 ,,123  88
+      |"""
+    .stripMargin should firstLinesMatch(
+      "abc " ++ LineNumber,
+      LineNumber ++ " def",
+      "ggg" ++ LineNumber ++ "hhh"
     )
   }
 }

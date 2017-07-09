@@ -17,7 +17,7 @@ case class LinesIterator(str: String)
     val n = it.next
 
     if (n == '\n')
-      pos = pos.copy(line = pos.line + 1)
+      pos = pos.copy(line = pos.line + 1, idx = 0)
     else
       pos = pos.copy(idx = pos.idx + 1)
 
