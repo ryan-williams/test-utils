@@ -6,10 +6,10 @@ addScala212
 enableMacroParadise
 
 deps ++= Seq(
-  libs.value('commons_io),
-  libs.value('paths).copy(revision = "1.1.1-SNAPSHOT"),
-  scalatest.value,
-  libs.value('scala_reflect)
+  commons_io,
+  paths % "1.1.1-SNAPSHOT",
+  scalatest,
+  scala_reflect
 )
 
 // Don't inherit default test-deps from parent plugin.
