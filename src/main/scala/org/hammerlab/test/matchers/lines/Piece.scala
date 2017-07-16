@@ -109,5 +109,8 @@ object LineNumber
     max = 8  // 1e9-1 lines should be enough for any source file 😎
   )
 
+object Digits
+  extends Chars("0123456789")
+
 object NewLine extends Chars("\n", max = 1)
 
