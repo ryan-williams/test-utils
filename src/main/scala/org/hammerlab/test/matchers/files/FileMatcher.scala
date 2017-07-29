@@ -32,7 +32,7 @@ class FileMatcher(expected: Path, binaryMatch: Boolean = false)
 
       // Hook into scalatest's usual String-comparison logic, which includes a nice diff summary when the strings
       // differ.
-      be(actualStr).apply(expectedStr)
+      be(expectedStr).apply(actualStr)
     }
 }
 
