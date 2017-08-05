@@ -20,7 +20,9 @@ class ResourcesTest extends Suite {
     File("a/numbers").read should be(
       """1
         |2
-        |3""".stripMargin
+        |3
+        |"""
+      .stripMargin
     )
   }
 
@@ -29,7 +31,9 @@ class ResourcesTest extends Suite {
       """1
         |2
         |3
-        |""".stripMargin.getBytes
+        |"""
+      .stripMargin
+      .getBytes
     )
   }
 }

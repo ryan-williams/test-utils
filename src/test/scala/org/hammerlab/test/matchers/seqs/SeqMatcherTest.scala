@@ -2,8 +2,20 @@ package org.hammerlab.test.matchers.seqs
 
 import org.hammerlab.test.matchers.utils.MatcherResultTest
 
-class SeqMatcherTest extends MatcherResultTest {
-  def check[T](
+import scala.collection.immutable.SortedSet
+import scala.reflect.ClassTag
+
+class SeqMatcherTest
+  extends MatcherResultTest {
+
+  def check[T: ClassTag](expected: Iterable[T],
+                         actual: Iterable[T]): Unit =
+    checkResult(
+      SeqMatcher(expected).apply(actual),
+      ""
+    )
+
+  def check[T: ClassTag](
       expected: T*
   )(
       actual: T*
@@ -86,6 +98,7 @@ class SeqMatcherTest extends MatcherResultTest {
       """Sequences didn't match!
         |
         |Elements out of order:
+        |
         |Expected:
         |	a
         |	b
@@ -98,4 +111,30 @@ class SeqMatcherTest extends MatcherResultTest {
         |"""
     )
   }
+
+  test("sorted-set vs vector") {
+    check[String](
+      SortedSet(
+        "a", "b", "c"
+      ),
+      Vector(
+        "a", "b", "c"
+      )
+    )
+  }
+}
+
+class ArrMatcherTest
+  extends SeqMatcherTest {
+  override def check[T: ClassTag](
+      expected: T*
+  )(
+      actual: T*
+  )(
+      mismatchMessageRaw: String = ""
+  ): Unit =
+    checkResult(
+      ArrMatcher(expected).apply(actual.toArray),
+      mismatchMessageRaw
+    )
 }
