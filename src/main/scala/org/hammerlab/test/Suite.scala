@@ -1,8 +1,11 @@
 package org.hammerlab.test
 
+import java.nio.file.Files
 import java.{ lang ⇒ jl }
 
+import org.hammerlab.paths.Path
 import org.hammerlab.test.files.TmpFiles
+import org.hammerlab.test.resources.Url
 import org.scalactic.{ CanEqual, ConversionCheckedTripleEquals }
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, Matchers }
 
@@ -54,6 +57,15 @@ class Suite
     field.setAccessible(true)
     val map = field.get(System.getenv()).asInstanceOf[java.util.Map[java.lang.String, java.lang.String]]
     map.put(key, value)
+  }
+
+  def path(name: String): Path = Path(Url(name).toURI)
+
+  def fileCopy(path: Path, out: Path): Path = {
+    val in = path.inputStream
+    Files.copy(in, out)
+    in.close()
+    out
   }
 
   // Some implicits to allow trivial conversions for type-safe equality checking with ===.

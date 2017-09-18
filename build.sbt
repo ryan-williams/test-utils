@@ -1,5 +1,5 @@
 name := "test-utils"
-version := "1.3.1"
+version := "1.4.0-SNAPSHOT"
 
 addScala212
 
@@ -7,7 +7,7 @@ enableMacroParadise
 
 deps ++= Seq(
   commons_io,
-  paths % "1.2.0",
+  paths % "1.3.0",
   scalatest,
   scala_reflect
 )
