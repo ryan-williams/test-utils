@@ -11,6 +11,7 @@ object JavaSerialization {
   def javaRead[T](bytes: Array[Byte]): T = {
     javaRead(new ByteArrayInputStream(bytes))
   }
+
   def javaRead[T](is: InputStream): T = {
     val ois = new ObjectInputStream(is)
     try {

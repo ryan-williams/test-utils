@@ -29,4 +29,18 @@ class SuiteTest
     b should be("")
     numAftersRun should be(2)
   }
+
+  test("fileCopy") {
+    fileCopy(
+      path("a/numbers"),
+      tmpPath()
+    )
+    .read should be(
+      """1
+        |2
+        |3
+        |"""
+      .stripMargin
+    )
+  }
 }

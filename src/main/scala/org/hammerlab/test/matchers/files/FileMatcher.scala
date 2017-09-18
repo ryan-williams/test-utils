@@ -1,7 +1,7 @@
 package org.hammerlab.test.matchers.files
 
 import org.hammerlab.paths.Path
-import org.hammerlab.test.resources.File
+import org.hammerlab.test.resources.{ File, Url }
 import org.scalatest.Matchers
 import org.scalatest.matchers.{ MatchResult, Matcher }
 
@@ -37,6 +37,6 @@ class FileMatcher(expected: Path, binaryMatch: Boolean = false)
 }
 
 object FileMatcher {
-  def fileMatch(expectedFile: String): FileMatcher = new FileMatcher(File(expectedFile))
+  def fileMatch(expectedFile: String): FileMatcher = new FileMatcher(Path(Url(expectedFile).toURI))
   def fileMatch(expectedFile: File): FileMatcher = new FileMatcher(expectedFile)
 }
