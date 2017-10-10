@@ -5,9 +5,9 @@ jdk:
 
 scala:
   - 2.11.8
-  - 2.12.1
+  - 2.12.3
 
-script: sbt ++$TRAVIS_SCALA_VERSION clean test
+script: sbt ++$TRAVIS_SCALA_VERSION clean coverageTest
 
 cache:
   directories:
