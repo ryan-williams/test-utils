@@ -14,7 +14,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Simple wrapper for common test-suite boilerplate.
  */
-class Suite
+abstract class Suite
   extends FunSuite
     with Matchers
     with ConversionCheckedTripleEquals

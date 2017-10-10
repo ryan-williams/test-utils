@@ -1,6 +1,7 @@
 package org.hammerlab.test.matchers.lines
 
 import org.hammerlab.test.{ Suite, linesMatch, firstLinesMatch }
+import Line._
 
 class LinesMatchingTest
   extends Suite {
@@ -54,10 +55,10 @@ class LinesMatchingTest
       |77 ,,123  88
       |"""
     .stripMargin should linesMatch(
-      "abc " ++ LineNumber,
-      LineNumber ++ " def",
-      "ggg" ++ LineNumber ++ "hhh",
-      LineNumber ++ Chars(",123 ") ++ LineNumber,
+      l"abc $ln",
+      l"$ln def",
+      l"ggg${ln}hhh",
+      l"$ln${Chars(",123 ")}$ln",
       ""
     )
 
@@ -68,10 +69,10 @@ class LinesMatchingTest
       |"""
     .stripMargin should not(
       linesMatch(
-        "abc " ++ LineNumber,
-        LineNumber ++ " def",
-        "ggg" ++ LineNumber ++ "hhh",
-        LineNumber ++ Chars(",123 ") ++ LineNumber,
+        l"abc $ln",
+        l"$ln def",
+        l"ggg${ln}hhh",
+        l"$ln${Chars(",123 ")}$ln",
         ""
       )
     )
@@ -93,9 +94,9 @@ class LinesMatchingTest
       |77 ,,123  88
       |"""
     .stripMargin should firstLinesMatch(
-      "abc " ++ LineNumber,
-      LineNumber ++ " def",
-      "ggg" ++ LineNumber ++ "hhh"
+      l"abc $ln",
+      l"$ln def",
+      l"ggg${ln}hhh"
     )
   }
 }
