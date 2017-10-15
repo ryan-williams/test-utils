@@ -40,6 +40,8 @@ trait TmpFiles
               suffix: String = ""): Path =
     tmpDir() / (prefix + suffix)
 
+  def tmpPath(basename: String): Path = tmpDir() / basename
+
   override def afterAll(): Unit = {
     super.afterAll()
     files.foreach(f ⇒ if (f.exists) f.delete())
