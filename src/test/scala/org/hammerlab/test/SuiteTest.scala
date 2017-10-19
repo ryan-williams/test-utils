@@ -33,7 +33,7 @@ class SuiteTest
   test("fileCopy") {
     fileCopy(
       path("a/numbers"),
-      tmpPath()
+      tmpPath("numbers")
     )
     .read should be(
       """1
