@@ -1,11 +1,11 @@
 name := "test-utils"
-version := "1.5.1"
+r"1.5.1"
 
 addScala212
 
 enableMacroParadise
 
-deps ++= Seq(
+dep(
   commons_io,
   paths % "1.3.1",
   scalatest,
