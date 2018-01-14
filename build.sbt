@@ -1,8 +1,6 @@
 name := "test-utils"
 r"1.5.1"
 
-addScala212
-
 enableMacroParadise
 
 dep(
