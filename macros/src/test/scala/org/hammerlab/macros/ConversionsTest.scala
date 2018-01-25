@@ -1,7 +1,4 @@
-package org.hammerlab.test.implicits
-
-import org.hammerlab.test.Suite
-import org.scalactic.ConversionCheckedTripleEquals
+package org.hammerlab.macros
 
 object Foo {
   case class A(n: Int)
@@ -12,7 +9,9 @@ object Foo {
   }
 }
 
-import Foo.{A, B}
+import org.hammerlab.macros.Foo.{ A, B }
+import org.hammerlab.test.Suite
+import org.scalactic.ConversionCheckedTripleEquals
 
 @Conversions[Int, String]
 trait IntStringConversions {

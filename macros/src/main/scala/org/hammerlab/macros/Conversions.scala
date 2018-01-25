@@ -1,4 +1,4 @@
-package org.hammerlab.test.implicits
+package org.hammerlab.macros
 
 import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 import scala.language.experimental.macros
