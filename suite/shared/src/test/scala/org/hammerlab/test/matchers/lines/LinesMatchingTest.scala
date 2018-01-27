@@ -1,6 +1,7 @@
 package org.hammerlab.test.matchers.lines
 
-import org.hammerlab.test.{ Suite, linesMatch, firstLinesMatch }
+import org.hammerlab.Suite
+import org.hammerlab.test.{ linesMatch, firstLinesMatch }
 import Line._
 
 class LinesMatchingTest

@@ -7,47 +7,19 @@ import org.hammerlab.paths.Path
 import org.hammerlab.test.files.TmpFiles
 import org.hammerlab.test.resources.Url
 import org.scalactic.{ CanEqual, ConversionCheckedTripleEquals }
-import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, Matchers }
-
-import scala.collection.mutable.ArrayBuffer
 
 /**
  * Simple wrapper for common test-suite boilerplate.
  */
 abstract class Suite
-  extends FunSuite
-    with Matchers
+  extends org.hammerlab.Suite
     with ConversionCheckedTripleEquals
-    with BeforeAndAfterAll
-    with BeforeAndAfterEach
     with TmpFiles {
 
   def obviousEquality[L, R]: CanEqual[L, R] =
     new CanEqual[L, R] {
       override def areEqual(a: L, b: R): Boolean = a == b
     }
-
-  private val befores = ArrayBuffer[() ⇒ Unit]()
-
-  def before(fn: ⇒ Unit): Unit = {
-    befores += (() ⇒ fn)
-  }
-
-  final override def beforeEach(): Unit = {
-    super.beforeEach()
-    for { beforeFn ← befores } { beforeFn() }
-  }
-
-  private val afters = ArrayBuffer[() ⇒ Unit]()
-
-  def after(fn: ⇒ Unit): Unit = {
-    afters += (() ⇒ fn)
-  }
-
-  final override def afterEach(): Unit = {
-    super.afterEach()
-    for { afterFn ← afters } { afterFn() }
-  }
 
   /**
    * Hacky helper for setting env variables

@@ -48,7 +48,7 @@ class ConversionsTest
     Array("11", "2323") should ===(Seq(1, 23))
     Vector("22" → true, "3434" → false) should ===(Seq(2 → true, 34 → false))
     Array("22" → true, "3434" → false) should ===(Array(2 → true, 34 → false))
-    ("22", "33") should ===(2, 3)
+    ("22", "33") should ===((2, 3))
     ("22", "33", true) should ===(2, 3, true)
 
     Seq("22", "33") should ===(Seq(2, 3))

@@ -2,7 +2,7 @@
 default(
   group("org.hammerlab.test"),
   // Don't inherit default test-deps from parent plugin.
-  testDeps := Seq(),
+  testDeps := Nil,
   v"1.0.0"
 )
 
@@ -11,10 +11,17 @@ lazy val base = project.settings(
     paths % "1.4.0"
   )
 ).dependsOn(
-  suiteJVM
+  suiteJVM % "test->test"
 )
 
-lazy val suite    = crossProject.settings(dep(scalatest))
+lazy val suite = crossProject.settings(
+  dep(
+    cats,
+    scalatest,
+    shapeless,
+    "org.hammerlab" ^^ "syntax" ^ "1.0.0-SNAPSHOT"
+  )
+)
 lazy val suiteJS  = suite.js
 lazy val suiteJVM = suite.jvm
 
