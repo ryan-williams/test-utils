@@ -8,10 +8,12 @@ default(
 
 lazy val base = project.settings(
   dep(
-    paths % "1.4.0"
+    paths % "1.4.0",
+    // this should come from the suiteJVM classpath-dep below, but test-scoped dependencies don't transit as you'd think/like
+    "org.hammerlab.math" ^^ "syntax" ^ "1.0.0-SNAPSHOT" tests
   )
 ).dependsOn(
-  suiteJVM % "test->test"
+  suiteJVM andTest
 )
 
 lazy val suite = crossProject.settings(
@@ -19,7 +21,7 @@ lazy val suite = crossProject.settings(
     cats,
     scalatest,
     shapeless,
-    "org.hammerlab" ^^ "syntax" ^ "1.0.0-SNAPSHOT"
+    "org.hammerlab.math" ^^ "syntax" ^ "1.0.0-SNAPSHOT"
   )
 )
 lazy val suiteJS  = suite.js

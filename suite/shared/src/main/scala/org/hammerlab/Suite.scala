@@ -1,10 +1,9 @@
 package org.hammerlab
 
 import cats.Eq
-import cats.instances.{ LongInstances, StringInstances }
 import cats.kernel.instances.ListInstances2
-import hammerlab.math.syntax.Tolerance
-import org.hammerlab.test.CanEq.fromExisting
+import org.hammerlab.math.syntax.Tolerance
+import org.hammerlab.test.CanEq.withConversion
 import org.hammerlab.test.{ CanEq, MkEqDerivation }
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, Matchers }
 
@@ -16,9 +15,10 @@ abstract class Suite
     with BeforeAndAfterAll
     with BeforeAndAfterEach
     with MkEqDerivation
-    with StringInstances
-    with ListInstances2
-    with LongInstances {
+    with ListInstances2 {
+
+  implicit val  intOrder = cats.instances. int.catsKernelStdOrderForInt
+  implicit val longOrder = cats.instances.long.catsKernelStdOrderForLong
 
   implicit var ε = Tolerance(1e-6)
 
@@ -26,8 +26,8 @@ abstract class Suite
     ε = d
   }
 
-  implicit val int2double : CanEq[Double, Int] = fromExisting[Double, Int]
-  implicit val int2long   : CanEq[  Long, Int] = fromExisting[  Long, Int]
+  implicit val int2double : CanEq[Double, Int] = withConversion[Double, Int]
+  implicit val int2long   : CanEq[  Long, Int] = withConversion[  Long, Int]
 
   implicit def doubleEq(implicit tolerance: Tolerance): Eq[Double] =
     new Eq[Double] {

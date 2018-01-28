@@ -40,6 +40,6 @@ object CanEq extends LowPri {
 
   implicit def fromEq[T](implicit e: Eq[T]): CanEq[T, T] = instance(e.eqv)
 
-  def fromExisting[T, U](implicit ce: CanEq[T, T], conv: U ⇒ T): CanEq[T, U] =
+  def withConversion[T, U](implicit ce: CanEq[T, T], conv: U ⇒ T): CanEq[T, U] =
     instance((t, u) ⇒ ce.eqv(t, u))
 }
