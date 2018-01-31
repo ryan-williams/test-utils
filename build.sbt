@@ -9,7 +9,8 @@ default(
 lazy val base = project.settings(
   dep(
     paths % "1.4.0",
-    // this should come from the suiteJVM classpath-dep below, but test-scoped dependencies don't transit as you'd think/like
+    // this should come from the suiteJVM classpath-dep below, but test-scoped dependencies don't transit as you'd
+    // think/like
     "org.hammerlab.math" ^^ "syntax" ^ "1.0.0-SNAPSHOT" tests
   )
 ).dependsOn(
@@ -35,4 +36,8 @@ lazy val macros = project.settings(
   base test
 )
 
-lazy val test_utils = rootProject(base, macros, suiteJS, suiteJVM)
+lazy val test_utils = rootProject(
+  base,
+  macros,
+  suiteJS, suiteJVM
+)

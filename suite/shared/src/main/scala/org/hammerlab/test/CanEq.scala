@@ -2,7 +2,7 @@ package org.hammerlab.test
 
 import cats.Eq
 
-trait CanEq[T, U] {
+trait CanEq[-T, -U] {
   def eqv(t: T, u: U): Boolean
 }
 
