@@ -1,10 +1,9 @@
 package org.hammerlab
 
-import cats.Eq
 import org.hammerlab.math.syntax.FuzzyCmp.FuzzyCmpOps
 import org.hammerlab.math.syntax.Tolerance
 import org.hammerlab.test.CanEq.withConversion
-import org.hammerlab.test.{ Afters, Befores, CanEq, MkEqDerivation }
+import org.hammerlab.test.{ Afters, Befores, CanEq, Cmp, MkEqDerivation }
 import org.scalatest.{ FunSuite, Matchers }
 
 import scala.math.abs
@@ -16,16 +15,16 @@ abstract class Suite
     with Afters
     with MkEqDerivation {
 
-  implicit val  intOrder = cats.instances. int.catsKernelStdOrderForInt
-  implicit val longOrder = cats.instances.long.catsKernelStdOrderForLong
-
-  /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[doubleEq]] */
+  /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[doubleCmp]] */
   implicit var ε: Tolerance = 1e-6
 
   /** Convenience-setter for [[ε]] */
   def tolerance(d: Double): Unit = {
     ε = d
   }
+
+  implicit val  intOrder = cats.instances. int.catsKernelStdOrderForInt
+  implicit val longOrder = cats.instances.long.catsKernelStdOrderForLong
 
   /** Default [[CanEq]] instances for [[Double]]s vs. [[Int]]s */
   implicit val int2double : CanEq[Double, Int] = withConversion[Double, Int]
@@ -35,17 +34,28 @@ abstract class Suite
    * Consider [[Double]]s to be equal if their ratio if their ratio differs from [[1]] by less than or equal to [[ε]],
    * or if one of them equals zero and the other's absolute value is less than or equal to [[ε]]
    */
-  implicit def doubleEq: Eq[Double] =
-    new Eq[Double] {
-      override def eqv(x: Double, y: Double) =
+  implicit def doubleCmp(implicit ε: Tolerance): Cmp[Double] =
+    Cmp[Double, String](
+      (x, y) ⇒
         if (x == 0 || y == 0)
-          abs(x + y) + 1 <= ε
+          if (abs(x + y) + 1 <= ε)
+            None
+          else
+            Some(s"(x, y): ($x, $y), ε: $ε")
+        else if (new FuzzyCmpOps(x).===(y))
+          None
         else
-          new FuzzyCmpOps(x).===(y)
-    }
+          Some(
+            s"(x, y): ($x, $y), ε: $ε; x/y: ${x/y}, y/x: ${y/x}"
+          )
+    )
 
-  def ===[T, U](t1: T, t2: U)(implicit canEqual: CanEq[T, U]): Unit = {
-    if (!canEqual.eqv(t1, t2))
-      fail(s"$t1 didn't match $t2")
-  }
+  def ===[T, U](t1: T, t2: U)(implicit canEqual: CanEq[T, U]): Unit =
+    canEqual
+    .cmp(t1, t2)
+    .foreach(e ⇒ fail(e.toString))
+
+  def !==[T, U](t1: T, t2: U)(implicit canEqual: CanEq[T, U]): Unit =
+    if (canEqual.cmp(t1, t2).isEmpty)
+      fail(s"Expected $t1 !== $t2")
 }
