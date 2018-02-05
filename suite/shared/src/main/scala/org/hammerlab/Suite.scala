@@ -1,7 +1,7 @@
 package org.hammerlab
 
 import org.hammerlab.math.syntax.FuzzyCmp.FuzzyCmpOps
-import org.hammerlab.math.syntax.Tolerance
+import org.hammerlab.math.syntax.E
 import org.hammerlab.test.CanEq.withConversion
 import org.hammerlab.test.{ Afters, Befores, CanEq, Cmp, MkEqDerivation }
 import org.scalatest.{ FunSuite, Matchers }
@@ -16,7 +16,7 @@ abstract class Suite
     with MkEqDerivation {
 
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[doubleCmp]] */
-  implicit var ε: Tolerance = 1e-6
+  implicit var ε: E = 1e-6
 
   /** Convenience-setter for [[ε]] */
   def tolerance(d: Double): Unit = {
@@ -34,7 +34,7 @@ abstract class Suite
    * Consider [[Double]]s to be equal if their ratio if their ratio differs from [[1]] by less than or equal to [[ε]],
    * or if one of them equals zero and the other's absolute value is less than or equal to [[ε]]
    */
-  implicit def doubleCmp(implicit ε: Tolerance): Cmp[Double] =
+  implicit def doubleCmp(implicit ε: E): Cmp.Aux[Double, String] =
     Cmp[Double, String](
       (x, y) ⇒
         if (x == 0 || y == 0)
