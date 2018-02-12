@@ -1,5 +1,9 @@
 package org.hammerlab.macros
 
+import org.hammerlab.macros.Foo.{ A, B }
+import org.hammerlab.test.Suite
+import org.scalactic.ConversionCheckedTripleEquals
+
 object Foo {
   case class A(n: Int)
   case class B(n: Int)
@@ -8,10 +12,6 @@ object Foo {
     implicit def fooToBar(foo: A): B = B(10 * foo.n)
   }
 }
-
-import org.hammerlab.macros.Foo.{ A, B }
-import org.hammerlab.test.Suite
-import org.scalactic.ConversionCheckedTripleEquals
 
 @Conversions[Int, String]
 trait IntStringConversions {

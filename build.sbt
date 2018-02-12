@@ -1,9 +1,9 @@
 
 default(
   group("org.hammerlab.test"),
+  v"1.0.0",
   // Don't inherit default test-deps from parent plugin.
-  testDeps := Nil,
-  v"1.0.0"
+  clearTestDeps
 )
 
 lazy val base = project.settings(
@@ -12,7 +12,8 @@ lazy val base = project.settings(
     // this should come from the suiteJVM classpath-dep below, but test-scoped dependencies don't transit as you'd
     // think/like
     "org.hammerlab.math" ^^ "syntax" ^ "1.0.0-SNAPSHOT" tests
-  )
+  ),
+  testDeps += scalatest
 ).dependsOn(
   suiteJVM andTest
 )
@@ -33,7 +34,7 @@ lazy val macros = project.settings(
   name := "conversions",
   enableMacroParadise
 ).dependsOn(
-  base test
+  base.test
 )
 
 lazy val test_utils = rootProject(
