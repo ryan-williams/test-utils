@@ -1,11 +1,8 @@
 package org.hammerlab.test.matchers.lines
 
-import org.hammerlab.Suite
-import org.hammerlab.test.{ linesMatch, firstLinesMatch }
-import Line._
-
 class LinesMatchingTest
-  extends Suite {
+  extends hammerlab.Suite {
+
   test("plain strings") {
     "abc def\tghi" should linesMatch("abc def\tghi")
     "" should linesMatch("")
@@ -46,8 +43,6 @@ class LinesMatchingTest
       ""
     )
   }
-
-  import Line._
 
   test("wildcards") {
     """abc 1

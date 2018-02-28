@@ -36,7 +36,12 @@ class FileMatcher(expected: Path, binaryMatch: Boolean = false)
     }
 }
 
-object FileMatcher {
-  def fileMatch(expectedFile: String): FileMatcher = new FileMatcher(Path(Url(expectedFile).toURI))
-  def fileMatch(expectedFile: File): FileMatcher = new FileMatcher(expectedFile)
+trait HasFileMatchers {
+  def fileMatch(expected: String): FileMatcher = new FileMatcher(Path(Url(expected).toURI))
+  def fileMatch(expected: File): FileMatcher = new FileMatcher(expected)
+  def fileMatch(expected: Path): FileMatcher = new FileMatcher(expected)
 }
+
+object FileMatcher
+  extends HasFileMatchers
+    with Serializable

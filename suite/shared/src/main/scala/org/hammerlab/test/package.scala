@@ -1,22 +1,10 @@
 package org.hammerlab
 
-import org.hammerlab.test.matchers.lines.Line
-import org.scalatest.matchers.Matcher
+import org.hammerlab.cmp.CanEq
+import org.hammerlab.test.matchers.lines.HasMatcher
 
-package object test {
-
+package object test
+  extends HasMatcher {
   type Cmp[T] = CanEq.Cmp[T]
   val Cmp = CanEq.Cmp
-
-  def firstLinesMatch(lines: Line*): Matcher[String] =
-    org.hammerlab.test.matchers.lines.Matcher(
-      prefix = true,
-      lines: _*
-    )
-
-  def linesMatch(lines: Line*): Matcher[String] =
-    org.hammerlab.test.matchers.lines.Matcher(
-      prefix = false,
-      lines: _*
-    )
 }

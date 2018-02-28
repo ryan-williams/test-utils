@@ -92,6 +92,9 @@ class DirMatcher(expected: Path)
   }
 }
 
-object DirMatcher {
+trait HasDirMatchers {
+  def dirMatch(expectedDir: Path): DirMatcher = new DirMatcher(expectedDir)
   def dirMatch(expectedDir: File): DirMatcher = new DirMatcher(expectedDir)
 }
+
+object DirMatcher extends HasDirMatchers

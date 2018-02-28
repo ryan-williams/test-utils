@@ -3,6 +3,20 @@ package org.hammerlab.test.matchers.lines
 import org.scalatest.matchers
 import org.scalatest.matchers.MatchResult
 
+trait HasMatcher {
+  def firstLinesMatch(lines: Line*): matchers.Matcher[String] =
+    org.hammerlab.test.matchers.lines.Matcher(
+      prefix = true,
+      lines: _*
+    )
+
+  def linesMatch(lines: Line*): matchers.Matcher[String] =
+    org.hammerlab.test.matchers.lines.Matcher(
+      prefix = false,
+      lines: _*
+    )
+}
+
 object Matcher {
   def apply(lines: Line*): matchers.Matcher[String] =
     apply(

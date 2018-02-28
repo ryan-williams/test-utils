@@ -4,6 +4,7 @@ import java.nio.file.Files
 
 import org.hammerlab.paths.Path
 import org.hammerlab.test.files.TmpFiles
+import org.hammerlab.test.matchers.files.{ HasDirMatchers, HasFileMatchers }
 import org.hammerlab.test.resources.Url
 import org.scalactic.ConversionCheckedTripleEquals
 
@@ -11,9 +12,11 @@ import org.scalactic.ConversionCheckedTripleEquals
  * Simple wrapper for common test-suite boilerplate.
  */
 abstract class Suite
-  extends org.hammerlab.Suite
+  extends hammerlab.Suite
     with ConversionCheckedTripleEquals
-    with TmpFiles {
+    with TmpFiles
+    with HasFileMatchers
+    with HasDirMatchers {
 
   /**
    * Hacky helper for setting env variables

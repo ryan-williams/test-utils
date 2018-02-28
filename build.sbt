@@ -3,15 +3,18 @@ default(
   group("org.hammerlab.test"),
   v"1.0.0",
   // Don't inherit default test-deps from parent plugin.
-  clearTestDeps
+  clearTestDeps,
+  versions(
+    hammerlab("math", "syntax") → "1.0.0"
+  )
 )
 
 lazy val base = project.settings(
   dep(
-    paths % "1.4.0",
+    paths % "1.5.0",
     // this should come from the suiteJVM classpath-dep below, but test-scoped dependencies don't transit as you'd
     // think/like
-    "org.hammerlab.math" ^^ "syntax" ^ "1.0.0-SNAPSHOT" tests
+    hammerlab("math", "syntax") tests
   ),
   testDeps += scalatest
 ).dependsOn(
@@ -23,7 +26,7 @@ lazy val suite = crossProject.settings(
     cats,
     scalatest,
     shapeless,
-    "org.hammerlab.math" ^^ "syntax" ^ "1.0.0-SNAPSHOT"
+    hammerlab("math", "syntax")
   )
 )
 lazy val suiteJS  = suite.js

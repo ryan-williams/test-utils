@@ -15,10 +15,17 @@ case class Line(pieces: Seq[Piece]) {
     )
 }
 
-object Line {
+trait HasLine {
   implicit def lineFromPiece(piece: Piece): Line = Line(Vector(piece))
   implicit def lineFromString(str: String): Line = Line(Vector[Piece](str))
 
+  implicit val LineContextHelper = LineContext.LineContextHelper _
+
+  val d = Digits
+  val ln = LineNumber
+}
+
+object LineContext {
   implicit class LineContextHelper(val sc: StringContext) extends AnyVal {
     def l(args: Piece*): Line = {
 
@@ -34,29 +41,28 @@ object Line {
       val first = parts.next
       val rest =
         parts
-          .zip(pieces)
-          .flatMap {
-            case (part, arg) ⇒
-              Seq(
-                Some(arg),
-                part
-              )
-          }
-          .flatten
-          .toList
+        .zip(pieces)
+        .flatMap {
+          case (part, arg) ⇒
+            Seq(
+              Some(arg),
+              part
+            )
+        }
+        .flatten
+        .toList
 
       Line(
         first
-          .map {
-            _ :: rest
-          }
-          .getOrElse(
-            rest
-          )
+        .map {
+          _ :: rest
+        }
+        .getOrElse(
+          rest
+        )
       )
     }
   }
-
-  val d = Digits
-  val ln = LineNumber
 }
+
+object Line extends HasLine
