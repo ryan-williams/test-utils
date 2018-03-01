@@ -1,7 +1,8 @@
 package org.hammerlab.test.matchers.lines
 
 class LinesMatchingTest
-  extends hammerlab.Suite {
+  extends hammerlab.Suite
+    with HasLines {
 
   test("plain strings") {
     "abc def\tghi" should linesMatch("abc def\tghi")

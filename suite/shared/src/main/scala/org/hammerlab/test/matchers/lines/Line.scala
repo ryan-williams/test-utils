@@ -15,7 +15,7 @@ case class Line(pieces: Seq[Piece]) {
     )
 }
 
-trait HasLine {
+trait HasLines {
   implicit def lineFromPiece(piece: Piece): Line = Line(Vector(piece))
   implicit def lineFromString(str: String): Line = Line(Vector[Piece](str))
 
@@ -65,4 +65,4 @@ object LineContext {
   }
 }
 
-object Line extends HasLine
+object Line extends HasLines

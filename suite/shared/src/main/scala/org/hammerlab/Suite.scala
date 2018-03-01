@@ -1,11 +1,10 @@
 package org.hammerlab
 
-import org.hammerlab.cmp.CanEq
 import org.hammerlab.cmp.CanEq.withConversion
-import org.hammerlab.cmp.double
+import org.hammerlab.cmp.{ CanEq, double }
 import org.hammerlab.math.syntax.E
-import org.hammerlab.test.matchers.lines.{ HasLine, HasMatcher }
-import org.hammerlab.test.{ Afters, Befores, Cmp }
+import org.hammerlab.test.matchers.lines.HasMatcher
+import org.hammerlab.test.{ Afters, Befores }
 import org.scalatest.{ FunSuite, Matchers }
 
 abstract class Suite
@@ -13,7 +12,6 @@ abstract class Suite
     with Matchers
     with Befores
     with Afters
-    with HasLine
     with HasMatcher
     with double.HasNeq {
 
