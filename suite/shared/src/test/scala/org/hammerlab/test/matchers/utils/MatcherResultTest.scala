@@ -1,6 +1,6 @@
 package org.hammerlab.test.matchers.utils
 
-import org.hammerlab.Suite
+import hammerlab.Suite
 import org.scalatest.matchers.MatchResult
 
 trait MatcherResultTest

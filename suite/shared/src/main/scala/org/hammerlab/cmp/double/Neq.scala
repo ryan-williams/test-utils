@@ -3,8 +3,7 @@ package org.hammerlab.cmp.double
 import cats.Show
 import cats.Show.show
 import cats.syntax.show._
-import org.hammerlab.math.syntax.E
-import org.hammerlab.math.syntax.FuzzyCmp._
+import hammerlab.math.tolerance._
 import org.hammerlab.test.Cmp
 
 case class Neq(l: Double, r: Double, ε: E)

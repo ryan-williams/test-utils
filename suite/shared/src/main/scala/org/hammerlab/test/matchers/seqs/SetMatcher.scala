@@ -14,7 +14,7 @@ case class SetMatcher[T](expected: Set[T])
     seqMatcher(actual.toSeq)
 }
 
-object SetMatcher {
+trait HasSetMatcher {
   def setMatch[T](expected: Iterable[(T)]): Matcher[Set[T]] =
     SetMatcher[T](expected.toSet)
 }

@@ -13,7 +13,7 @@ case class MapMatcher[K: Ordering, V: Ordering](expected: Map[K, V]) extends Mat
   }
 }
 
-object MapMatcher {
+trait HasMapMatcher {
   def mapMatch[K: Ordering, V: Ordering](expected: Map[K, V]): Matcher[Map[K, V]] = MapMatcher(expected)
   def mapMatch[K: Ordering, V: Ordering](expected: (K, V)*): Matcher[Map[K, V]] = MapMatcher(expected.toMap)
 }

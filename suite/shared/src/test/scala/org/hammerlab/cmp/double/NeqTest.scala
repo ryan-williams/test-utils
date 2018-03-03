@@ -1,6 +1,6 @@
 package org.hammerlab.cmp.double
 
-import org.hammerlab.math.syntax.E
+import hammerlab.math.tolerance._
 import org.hammerlab.test.Cmp
 
 class NeqTest

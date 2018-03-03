@@ -1,10 +1,9 @@
 package org.hammerlab
 
+import hammerlab.math.tolerance._
 import org.hammerlab.cmp.CanEq.withConversion
 import org.hammerlab.cmp.{ CanEq, double }
-import org.hammerlab.math.syntax.E
-import org.hammerlab.test.matchers.lines.HasMatcher
-import org.hammerlab.test.{ Afters, Befores }
+import org.hammerlab.test.{ Afters, Befores, matchers }
 import org.scalatest.{ FunSuite, Matchers }
 
 abstract class Suite
@@ -12,7 +11,8 @@ abstract class Suite
     with Matchers
     with Befores
     with Afters
-    with HasMatcher
+    with matchers.lines.HasMatcher
+    with matchers.seqs.all
     with double.HasNeq {
 
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[doubleCmp]] */

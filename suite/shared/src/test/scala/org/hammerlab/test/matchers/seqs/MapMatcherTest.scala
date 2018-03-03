@@ -1,9 +1,9 @@
 package org.hammerlab.test.matchers.seqs
 
 import org.hammerlab.test.matchers.utils.MatcherResultTest
-import MapMatcher.mapMatch
 
-class MapMatcherTest extends MatcherResultTest {
+class MapMatcherTest
+  extends MatcherResultTest {
 
   def check[K: Ordering, V: Ordering](
       expected: (K, V)*

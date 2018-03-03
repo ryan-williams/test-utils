@@ -83,7 +83,7 @@ case class SeqMatcher[T](expected: Iterable[T],
   }
 }
 
-object SeqMatcher {
+trait HasSeqMatcher {
   def seqMatch[T](expected: Iterable[T]): Matcher[Iterable[T]] = SeqMatcher[T](expected.toSeq)
   def seqMatch[T](expected: Iterator[T]): Matcher[Iterable[T]] = SeqMatcher[T](expected.toSeq)
 }

@@ -10,7 +10,7 @@ case class ArrMatcher[T](expected: Iterable[T],
       .apply(actual)
 }
 
-object ArrMatcher {
+trait HasArrMatcher {
   def arrMatch[T](expected: Iterable[T]): Matcher[Array[T]] = ArrMatcher[T](expected.toSeq)
   def arrMatch[T](expected: Iterator[T]): Matcher[Array[T]] = ArrMatcher[T](expected.toSeq)
 }

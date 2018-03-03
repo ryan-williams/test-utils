@@ -109,7 +109,7 @@ case class PairSeqMatcher[K: Ordering, V: Ordering](expected: Seq[(K, V)], match
   }
 }
 
-object PairSeqMatcher {
+trait HasPairSeqMatcher {
   def pairsMatch[K: Ordering, V: Ordering](expected: Iterable[(K, V)]): Matcher[Seq[(K, V)]] = PairSeqMatcher[K, V](expected.toSeq)
   def pairsMatch[K: Ordering, V: Ordering](expected: Array[(K, V)]): Matcher[Seq[(K, V)]] = PairSeqMatcher[K, V](expected.toList)
   def pairsMatch[K: Ordering, V: Ordering](expected: Iterator[(K, V)]): Matcher[Seq[(K, V)]] = PairSeqMatcher[K, V](expected.toSeq)
