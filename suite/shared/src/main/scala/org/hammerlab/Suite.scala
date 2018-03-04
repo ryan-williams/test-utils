@@ -23,8 +23,9 @@ abstract class Suite
     ε = d
   }
 
-  implicit val  intOrder = cats.instances. int.catsKernelStdOrderForInt
-  implicit val longOrder = cats.instances.long.catsKernelStdOrderForLong
+  implicit val    intOrder = cats.instances.   int.catsKernelStdOrderForInt
+  implicit val   longOrder = cats.instances.  long.catsKernelStdOrderForLong
+  implicit val stringOrder = cats.instances.string.catsKernelStdOrderForString
 
   /** Default [[CanEq]] instances for [[Double]]s vs. [[Int]]s */
   implicit val int2double : CanEq[Double, Int] = withConversion[Double, Int]
