@@ -6,8 +6,7 @@ default(
   clearTestDeps,
   versions(
     math.tolerance → "1.0.0"
-  ),
-  resolvers += Resolver.sonatypeRepo("orghammerlab-1405")
+  )
 )
 
 lazy val base = project.settings(
