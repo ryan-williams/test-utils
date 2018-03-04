@@ -1,12 +1,15 @@
 package org.hammerlab.test.matchers.files
 
 import org.hammerlab.test.Suite
-import org.hammerlab.test.matchers.files.FileMatcher._
 import org.hammerlab.test.resources.{File, stringToTestPath}
 
-class FileMatcherTest extends Suite {
+class FileMatcherTest
+  extends Suite {
+
   test("equal files") {
     File("a/numbers").path should fileMatch("c/numbers")
+    File("a/numbers").path should fileMatch(File("c/numbers"))
+    File("a/numbers").path should fileMatch(File("c/numbers").path)
   }
 
   test("differing files") {

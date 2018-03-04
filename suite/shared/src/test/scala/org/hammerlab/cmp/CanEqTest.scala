@@ -2,10 +2,12 @@ package org.hammerlab.cmp
 
 import org.hammerlab.cmp.double.Neq
 import org.hammerlab.test.Cmp
-import shapeless.{ :+:, CNil, Inl, Inr }
+import org.scalatest.exceptions.TestFailedException
+import shapeless.{ Inl, Inr }
 
-sealed trait T[R]
+sealed trait T[R] extends Product with Serializable
 case class D(d: Double) extends T[Double]
+case class E(d: Double) extends T[Double]
 
 case class Complex(r: Double, i: Double)
 
@@ -17,6 +19,12 @@ class CanEqTest
       Seq(2.0, 3.0),
       Seq(2.0000000001, 3.0)
     )
+    intercept[TestFailedException] {
+      !==(
+        Seq(2.0, 3.0),
+        Seq(2.0000000001, 3.0)
+      )
+    }
 
     ===(
       Seq(2.0, 3.0),
@@ -27,6 +35,12 @@ class CanEqTest
       Seq(2.0, 3.0),
       Seq(2.000002001, 3.0)
     )
+    intercept[TestFailedException] {
+      ===(
+        Seq(2.0, 3.0),
+        Seq(2.000002001, 3.0)
+      )
+    }
 
     ===(
       Seq(2.0, 3.0),
@@ -58,6 +72,16 @@ class CanEqTest
       Seq(2.0, -3.000003001)
     )
 
+    !==(
+      Seq(2, 3, 4),
+      Seq(2, 3)
+    )
+
+    !==(
+      Seq(2, 3),
+      Seq(2, 3, 4)
+    )
+
     val lt: Seq[T[Double]] = Seq(D(2.0), D(3.0))
     val rt: Seq[T[Double]] = Seq(D(2.0), D(3.0))
 
@@ -67,6 +91,44 @@ class CanEqTest
     )
 
     ===(lt, rt)
+
+    !==(
+      Seq(D(2.0), E(3.0)),
+      Seq(D(2.0), D(3.0))
+    )
+
+    !==(
+      Seq(D(2.0), D(3.0)),
+      Seq(D(2.0), E(3.0))
+    )
+
+    !==(
+      Seq(E(2.0), D(3.0)),
+      Seq(D(2.0), D(3.0))
+    )
+
+    !==(
+      Seq(D(2.0), D(3.0)),
+      Seq(E(2.0), D(3.0))
+    )
+  }
+
+  test("strings") {
+    ===("abc", "abc")
+    !==("abc", "abcd")
+    !==("abcd", "abc")
+    ===("", "")
+    !==("abc", "")
+    !==("", "abc")
+  }
+
+  test("custom cmp") {
+    implicit val cmp = Cmp.by[Int, String](_.toInt)
+    ===("2", "2")
+    ===("02", "2")
+    !==("-02", "2")
+    !==("03", "2")
+    !==("3", "2")
   }
 
   test("case class") {

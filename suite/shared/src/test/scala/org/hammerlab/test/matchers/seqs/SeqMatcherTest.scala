@@ -9,11 +9,17 @@ class SeqMatcherTest
   extends MatcherResultTest {
 
   def check[T: ClassTag](expected: Iterable[T],
-                         actual: Iterable[T]): Unit =
+                         actual: Iterable[T]): Unit = {
     checkResult(
       SeqMatcher(expected).apply(actual),
       ""
     )
+    actual should seqMatch(expected)
+    actual should seqMatch(expected.iterator)
+    actual.toArray should arrMatch(expected)
+    actual.toArray should arrMatch(expected.iterator)
+    actual.toSet should setMatch(expected)
+  }
 
   def check[T: ClassTag](
       expected: T*

@@ -1,13 +1,17 @@
 package org.hammerlab.test.matchers.files
 
-import org.hammerlab.test.matchers.files.DirMatcher.dirMatch
+import hammerlab.test.Suite
 import org.hammerlab.test.matchers.utils.MatcherResultTest
 import org.hammerlab.test.resources.File
 
-class DirMatcherTest extends MatcherResultTest {
+class DirMatcherTest
+  extends Suite
+    with MatcherResultTest {
 
-  def check(expectedDir: File, actualDir: File, failureMessage: String = ""): Unit =
+  def check(expectedDir: File, actualDir: File, failureMessage: String = ""): Unit = {
     checkResult(dirMatch(expectedDir)(actualDir), failureMessage)
+    checkResult(dirMatch(expectedDir.path)(actualDir), failureMessage)
+  }
 
   test("matching dirs") {
     check("a", "c")
