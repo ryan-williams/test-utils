@@ -1,7 +1,6 @@
 
 default(
   group("org.hammerlab.test"),
-  v"1.0.0",
   // Don't inherit default test-deps from parent plugin.
   clearTestDeps,
   versions(
@@ -10,6 +9,7 @@ default(
 )
 
 lazy val base = project.settings(
+  v"1.0.1",
   dep(
     // this should come from the suiteJVM classpath-dep below, but test-scoped dependencies don't transit as you'd
     // think/like
@@ -22,6 +22,7 @@ lazy val base = project.settings(
 )
 
 lazy val suite = crossProject.settings(
+  r"1.0.0",
   dep(
     cats,
     math.tolerance,
@@ -35,6 +36,7 @@ lazy val suiteJVM = suite.jvm
 lazy val macros = project.settings(
   group("org.hammerlab.macros"),
   name := "conversions",
+  r"1.0.0",
   enableMacroParadise
 ).dependsOn(
   base.test
