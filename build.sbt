@@ -1,6 +1,6 @@
 
 default(
-  group("org.hammerlab.test"),
+  subgroup("test"),
   // Don't inherit default test-deps from parent plugin.
   clearTestDeps,
   versions(
@@ -34,7 +34,7 @@ lazy val suiteJS  = suite.js
 lazy val suiteJVM = suite.jvm
 
 lazy val macros = project.settings(
-  group("org.hammerlab.macros"),
+  subgroup("macros"),
   name := "conversions",
   r"1.0.0",
   enableMacroParadise

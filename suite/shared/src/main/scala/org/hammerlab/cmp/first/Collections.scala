@@ -5,6 +5,18 @@ import org.hammerlab.cmp.CanEq.instance
 
 trait Collections {
 
+  implicit def arrs[T, U](implicit
+                          ce: CanEq[T, U]): CanEq.Aux[Array[T], Array[U], (Int, Option[ce.Error])] = {
+    val iters: CanEq.Aux[Iterator[T], Iterator[U], (Int, Option[ce.Error])] = iterators[T, U](ce)
+    instance[Array[T], Array[U], (Int, Option[ce.Error])](
+      (s1, s2) ⇒
+        iters(
+          s1.iterator,
+          s2.iterator
+        )
+    )
+  }
+
   implicit def seqs[T, U](implicit
                           ce: CanEq[T, U]): CanEq.Aux[Seq[T], Seq[U], (Int, Option[ce.Error])] = {
     val iters: CanEq.Aux[Iterator[T], Iterator[U], (Int, Option[ce.Error])] = iterators[T, U](ce)
