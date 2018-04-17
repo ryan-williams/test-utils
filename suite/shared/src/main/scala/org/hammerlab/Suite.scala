@@ -8,12 +8,12 @@ import org.scalatest.{ FunSuite, Matchers }
 
 abstract class Suite
   extends FunSuite
-    with Matchers
-    with Befores
-    with Afters
-    with matchers.lines.HasMatcher
-    with matchers.seqs.all
-    with double.HasNeq {
+     with Matchers
+     with Befores
+     with Afters
+     with matchers.lines.HasMatcher
+     with matchers.seqs.all
+     with double.HasNeq {
 
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[doubleCmp]] */
   implicit var ε: E = 1e-6
@@ -31,9 +31,8 @@ abstract class Suite
   implicit val int2double : CanEq[Double, Int] = withConversion[Double, Int]
   implicit val int2long   : CanEq[  Long, Int] = withConversion[  Long, Int]
 
-  def ===[T, U](t1: T, t2: U)(implicit canEqual: CanEq[T, U]): Unit =
-    canEqual
-      .cmp(t1, t2)
+  def ===[T, U](t1: T, t2: U)(implicit cmp: CanEq[T, U]): Unit =
+    cmp(t1, t2)
       .foreach {
         e ⇒
           fail(
@@ -41,7 +40,7 @@ abstract class Suite
           )
       }
 
-  def !==[T, U](t1: T, t2: U)(implicit canEqual: CanEq[T, U]): Unit =
-    if (canEqual.cmp(t1, t2).isEmpty)
+  def !==[T, U](t1: T, t2: U)(implicit cmp: CanEq[T, U]): Unit =
+    if (cmp(t1, t2).isEmpty)
       fail(s"Expected $t1 !== $t2")
 }

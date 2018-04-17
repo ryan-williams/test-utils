@@ -13,10 +13,9 @@ import org.scalactic.ConversionCheckedTripleEquals
  */
 abstract class Suite
   extends hammerlab.Suite
-    with ConversionCheckedTripleEquals
-    with TmpFiles
-    with HasFileMatchers
-    with HasDirMatchers {
+     with TmpFiles
+     with HasFileMatchers
+     with HasDirMatchers {
 
   /**
    * Hacky helper for setting env variables

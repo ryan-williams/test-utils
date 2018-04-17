@@ -22,7 +22,7 @@ lazy val base = project.settings(
 )
 
 lazy val suite = crossProject.settings(
-  r"1.0.0",
+  v"1.0.0",
   dep(
     cats,
     math.tolerance,
@@ -33,17 +33,26 @@ lazy val suite = crossProject.settings(
 lazy val suiteJS  = suite.js
 lazy val suiteJVM = suite.jvm
 
-lazy val macros = project.settings(
-  subgroup("macros"),
-  name := "conversions",
-  r"1.0.0",
-  enableMacroParadise
-).dependsOn(
-  base.test
-)
+lazy val snippets =
+  project
+    .settings(
+      group("org.hammerlab.docs", "snippets"),
+      v"1.0.0",
+      enableMacroParadise,
+      dep(
+        hammerlab.io % "5.0.0",
+        scalatags
+      )
+    )
+    .enablePlugins(
+      ScalaJSPlugin
+    )
+    .dependsOn(
+      suiteJS andTest
+    )
 
 lazy val test_utils = rootProject(
   base,
-  macros,
+  snippets,
   suiteJS, suiteJVM
 )
