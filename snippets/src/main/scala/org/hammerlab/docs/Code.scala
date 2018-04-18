@@ -33,7 +33,12 @@ object Code {
               unrollIndents(example.output)
                 .map(
                   l ⇒
-                    l.copy(str = "// " + l.str): Lines
+                    (
+                      if (l.str.startsWith("// "))
+                        l
+                      else
+                        l.copy(str = "// " + l.str)
+                    ): Lines
                 )
                 .toSeq
             )

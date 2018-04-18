@@ -62,28 +62,27 @@ object Macros {
         )
         .toString
 
-    def code(start: Int, end: Int) =
-      Literal(
-        Constant(
-          stripMargin(
-            content
-              .subSequence(start, end)
-              .toString
-              .split("\n") match {
-                case lines
-                  if lines.head.matches("\\s*\\{\\s*") &&
-                     lines.last.matches("\\s*\\}\\s*") ⇒
-                  lines
-                    .slice(
-                      1,
-                      lines.size - 1
-                    )
-                case lines ⇒ lines
-              }
-          )
-          .mkString("\n")
+    def code(start: Int, end: Int) = {
+      val lines =
+        stripMargin(
+          content
+            .subSequence(start, end)
+            .toString
+            .split("\n") match {
+              case lines
+                if lines.head.matches("\\s*\\{\\s*") &&
+                   lines.last.matches("\\s*\\}\\s*") ⇒
+                lines
+                  .slice(
+                    1,
+                    lines.size - 1
+                  )
+              case lines ⇒ lines
+            }
         )
-      )
+
+      q"_root_.org.hammerlab.lines.Lines(..$lines)"
+    }
 
     val prevNewline = content.lastIndexOfSlice("\n", lpos.start - 1)
 
