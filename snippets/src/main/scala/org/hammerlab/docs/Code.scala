@@ -28,11 +28,6 @@ object Code {
         import c.universe._
 
         import hammerlab.show._
-        implicit val showPos: Show[Position] = {
-          (p: Position) ⇒
-            show"${p.start}-${p.end} ${p.line}:${p.column}:\n${p.source.content.subSequence(p.start, p.end).toString}"
-        }
-
         implicit val showTree: Show[Tree] = {
           (t: Tree) ⇒
             val pos = t.pos
@@ -50,16 +45,14 @@ object Code {
               case (c: ClassDef) ⇒
                 val pos = c.pos
                 val src = pos.source.content
-                println(show"class def: $pos\n")
-                val body = c.impl.body
-
-                body.foreach { p ⇒ println(show"${p.pos}\n") }
+                val impl = c.impl
+                val body = impl.body
 
                 val strings =
                   body
-                    .map { _.show }
+                    .map    { _.show     }
                     .filter { _.nonEmpty }
-                    .map { s ⇒ Literal(Constant(s)) }
+                    .map    { s ⇒ Literal(Constant(s)) }
 
                 val lines = q"_root_.org.hammerlab.lines.Lines(..$strings)"
 
@@ -73,8 +66,6 @@ object Code {
                     setup
                   )
 
-                val impl = c.impl
-
                 ClassDef(
                   c.mods,
                   c.name,
@@ -82,12 +73,11 @@ object Code {
                   Template(
                     impl.parents,
                     impl.self,
-                    valdef :: impl.body
+                    valdef :: body
                   )
                 )
               case l ⇒ l
-            } ++
-          List(Literal(Constant(())))
+            }
 
         q"{..$outputs}"
       }
