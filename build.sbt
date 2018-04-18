@@ -39,6 +39,7 @@ lazy val snippets =
       group("org.hammerlab.docs", "snippets"),
       v"1.0.0",
       enableMacroParadise,
+      scalameta,
       dep(
         hammerlab.io % "5.0.0",
         scalatags

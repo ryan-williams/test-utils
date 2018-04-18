@@ -12,6 +12,7 @@ sealed trait Code
 object Code {
 
   def lines(elems: Code*)(implicit render: Render) = {
+    // TODO: make this one wildcard ("coproduct"?) import
     import hammerlab.lines.generic.{traitToLines, ccons, cnil}
     elems.map(_.lines)
   }
@@ -19,6 +20,27 @@ object Code {
   case class Setup(lines: Lines) extends Code
   object Setup {
     implicit val lines: ToLines[Setup] = _.lines
+
+    import scala.annotation.StaticAnnotation
+    import scala.meta._
+
+    class setup
+      extends StaticAnnotation {
+      inline def apply(defn: Any): Any = meta {
+        println(s"defn: ${defn.getClass} $defn")
+        defn match {
+          case q"trait $name { ..$body }" ⇒
+            println(body.head.getClass)
+            println(body)
+            val args = body.map(s ⇒ Lit.String(s.toString))
+            println(args.mkString("\n"))
+            val block = q"_root_.org.hammerlab.docs.Code.Setup(_root_.hammerlab.lines.Lines(..$args))"
+            q"trait $name { implicit val setup = $block; ..$body }"
+          case _ ⇒
+            abort("Didn't recognize constructor form of annotated object")
+        }
+      }
+    }
   }
 
   case class Example(input: Lines, output: Lines) extends Code
