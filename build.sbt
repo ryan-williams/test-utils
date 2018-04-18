@@ -40,6 +40,7 @@ lazy val snippets =
       v"1.0.0",
       enableMacroParadise,
       scalameta,
+      skipDoc,
       dep(
         hammerlab.io % "5.0.0",
         scalatags

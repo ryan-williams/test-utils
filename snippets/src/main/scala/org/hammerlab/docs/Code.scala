@@ -3,8 +3,10 @@ package org.hammerlab.docs
 import hammerlab.lines._
 import org.hammerlab.cmp.CanEq
 import org.hammerlab.docs.Code.Example.Render
+import org.hammerlab.docs.Code.Setup.MacroImpl
 import org.hammerlab.lines.Lines.unrollIndents
 
+import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
@@ -21,24 +23,73 @@ object Code {
   object Setup {
     implicit val lines: ToLines[Setup] = _.lines
 
-    import scala.annotation.StaticAnnotation
-    import scala.meta._
+    object MacroImpl {
+      def impl(c: Context)(annottees: c.Expr[Any]*): c.Tree = {
+        import c.universe._
 
-    class setup
-      extends StaticAnnotation {
-      inline def apply(defn: Any): Any = meta {
-        println(s"defn: ${defn.getClass} $defn")
-        defn match {
-          case q"trait $name { ..$body }" ⇒
-            println(body.head.getClass)
-            println(body)
-            val args = body.map(s ⇒ Lit.String(s.toString))
-            println(args.mkString("\n"))
-            val block = q"_root_.org.hammerlab.docs.Code.Setup(_root_.hammerlab.lines.Lines(..$args))"
-            q"trait $name { implicit val setup = $block; ..$body }"
-          case _ ⇒
-            abort("Didn't recognize constructor form of annotated object")
+        import hammerlab.show._
+        implicit val showPos: Show[Position] = {
+          (p: Position) ⇒
+            show"${p.start}-${p.end} ${p.line}:${p.column}:\n${p.source.content.subSequence(p.start, p.end).toString}"
         }
+
+        implicit val showTree: Show[Tree] = {
+          (t: Tree) ⇒
+            val pos = t.pos
+            pos.source.content.subSequence(pos.start, pos.end).toString
+        }
+
+        val inputs =
+          annottees
+            .map(_.tree)
+            .toList
+
+        val outputs =
+          inputs
+            .map {
+              case (c: ClassDef) ⇒
+                val pos = c.pos
+                val src = pos.source.content
+                println(show"class def: $pos\n")
+                val body = c.impl.body
+
+                body.foreach { p ⇒ println(show"${p.pos}\n") }
+
+                val strings =
+                  body
+                    .map { _.show }
+                    .filter { _.nonEmpty }
+                    .map { s ⇒ Literal(Constant(s)) }
+
+                val lines = q"_root_.org.hammerlab.lines.Lines(..$strings)"
+
+                val setup = q"_root_.org.hammerlab.docs.Code.Setup($lines)"
+
+                val valdef =
+                  ValDef(
+                    Modifiers(),
+                    TermName("setup"),
+                    TypeTree(),
+                    setup
+                  )
+
+                val impl = c.impl
+
+                ClassDef(
+                  c.mods,
+                  c.name,
+                  c.tparams,
+                  Template(
+                    impl.parents,
+                    impl.self,
+                    valdef :: impl.body
+                  )
+                )
+              case l ⇒ l
+            } ++
+          List(Literal(Constant(())))
+
+        q"{..$outputs}"
       }
     }
   }
@@ -208,4 +259,10 @@ object Code {
       }
     }
   }
+}
+
+@compileTimeOnly("enable macro paradise to expand macro annotations")
+class setup
+  extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Unit = macro MacroImpl.impl
 }
