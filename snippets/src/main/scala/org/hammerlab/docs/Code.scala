@@ -15,7 +15,7 @@ object Code {
 
   def lines(elems: Code*)(implicit render: Render) = {
     // TODO: make this one wildcard ("coproduct"?) import
-    import hammerlab.lines.generic.{traitToLines, ccons, cnil}
+    import hammerlab.lines.generic.{ traitToLines, ccons, cnil }
     elems.map(_.lines)
   }
 
@@ -58,13 +58,7 @@ object Code {
 
                 val setup = q"_root_.org.hammerlab.docs.Code.Setup($lines)"
 
-                val valdef =
-                  ValDef(
-                    Modifiers(),
-                    TermName("setup"),
-                    TypeTree(),
-                    setup
-                  )
+                val valdef = q"implicit val ${TermName(c.name.toString)} = $setup"
 
                 ClassDef(
                   c.mods,
@@ -99,15 +93,15 @@ object Code {
             Lines(
               example.input,
               unrollIndents(example.output)
-                .map(
-                  l ⇒
+                .map {
+                  case l @ Line(s, _) ⇒
                     (
-                      if (l.str.startsWith("// "))
+                      if (s.isEmpty || s.startsWith("// "))
                         l
                       else
-                        l.copy(str = "// " + l.str)
+                        l.copy(str = "// " + s)
                     ): Lines
-                )
+                }
                 .toSeq
             )
         }
@@ -125,9 +119,9 @@ object Code {
       val brace = """\s*\{\s*""".r
 
       def stripMargin(lines: Seq[String]): Seq[String] = {
-        val spaces =
+        val margins =
           lines
-            .dropWhile(
+            .filterNot(
               _.forall(
                 _.isWhitespace
               )
@@ -137,7 +131,12 @@ object Code {
                 .takeWhile(_.isWhitespace)
                 .length
             }
-            .min
+
+        val spaces =
+          if (margins.isEmpty)
+            0
+          else
+            margins.min
 
         lines
           .map {
@@ -181,12 +180,12 @@ object Code {
                 .split("\n") match {
                   case lines
                     if lines.head.matches("\\s*\\{\\s*") &&
-                      lines.last.matches("\\s*\\}\\s*") ⇒
+                       lines.last.matches("\\s*\\}\\s*") ⇒
                     lines
-                    .slice(
-                      1,
-                      lines.size - 1
-                    )
+                      .slice(
+                        1,
+                        lines.size - 1
+                      )
                   case lines ⇒ lines
                 }
             )
@@ -196,16 +195,18 @@ object Code {
 
         val prevNewline = content.lastIndexOfSlice("\n", lpos.start - 1)
 
+        // capture any indentation preceding the start of the LHS expression, to correctly infer relative indentation of
+        // its lines
         val lstart =
           if (
             prevNewline >= 0 &&
-              content
-                .subSequence(
-                  prevNewline + 1,
-                  lpos.start
-                )
-                .toString
-                .forall(_.isWhitespace)
+            content
+              .subSequence(
+                prevNewline + 1,
+                lpos.start
+              )
+              .toString
+              .forall(_.isWhitespace)
           )
             prevNewline + 1
           else
@@ -217,6 +218,8 @@ object Code {
             lpos.end
           )
 
+        // drop whitespace between [the comma separating the LHS- and RHS-expressions] and [the start of the RHS, or the
+        // line on which it starts]
         val rstart =
           between match {
             case comma(extra) ⇒
@@ -233,15 +236,17 @@ object Code {
               )
           }
 
+        // call `cmp` to compare the two expressions
         val check = q"$cmp.cmp($l, $r)"
+
+        // verify that no error was returned
+        val verify = q"{($check).foreach(e => throw new _root_.java.lang.AssertionError(e.toString))}"
 
         val rhs =
           code(
             rstart,
             rpos.end
           )
-
-        val verify = q"{($check).foreach(e => throw new _root_.java.lang.AssertionError(e.toString))}"
 
         val example = q"_root_.org.hammerlab.docs.Code.Example($lhs, $rhs)"
 
