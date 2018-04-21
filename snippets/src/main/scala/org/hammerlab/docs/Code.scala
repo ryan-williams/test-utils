@@ -13,10 +13,23 @@ import scala.reflect.macros.whitebox.Context
 sealed trait Code
 object Code {
 
-  def lines(elems: Code*)(implicit render: Render) = {
-    // TODO: make this one wildcard ("coproduct"?) import
+  def lines(implicit render: Render): ToLines[Code] = {
     import hammerlab.lines.generic.{ traitToLines, ccons, cnil }
-    elems.map(_.lines)
+    traitToLines
+  }
+
+  case class Comment(lines: String*) extends Code
+  object Comment {
+    implicit def lines: ToLines[Comment] = {
+      case Comment(lines @ _*) ⇒
+        Lines(
+          lines
+            .map {
+              case   "" ⇒ ""           : Lines
+              case line ⇒ "// " + line : Lines
+            }
+        )
+    }
   }
 
   case class Setup(lines: Lines) extends Code
@@ -60,16 +73,26 @@ object Code {
 
                 val valdef = q"implicit val ${TermName(c.name.toString)} = $setup"
 
-                ClassDef(
-                  c.mods,
-                  c.name,
-                  c.tparams,
-                  Template(
-                    impl.parents,
-                    impl.self,
-                    valdef :: body
+                val name = c.name
+
+                val cls =
+                  ClassDef(
+                    c.mods,
+                    name,
+                    c.tparams,
+                    Template(
+                      impl.parents,
+                      impl.self,
+                      valdef :: body
+                    )
                   )
-                )
+
+                val term = TermName(name.toString)
+
+                val obj = q"object $term extends $name"
+
+                val stmts = Seq(cls, obj, q"import $term._")
+                q"..$stmts"
               case l ⇒ l
             }
 
@@ -99,7 +122,7 @@ object Code {
                       if (s.isEmpty || s.startsWith("// "))
                         l
                       else
-                        l.copy(str = "// " + s)
+                        l.prepend("// ")
                     ): Lines
                 }
                 .toSeq
@@ -161,22 +184,43 @@ object Code {
         val lpos = l.tree.pos
         val rpos = r.tree.pos
 
-        val content = lpos.source.content
+        val content = new String(lpos.source.content)
+
+        val lstart =
+          content(lpos.start - 1) match {
+            case '('
+              if lpos.start >= "example(".length &&
+                 content.substring(
+                   lpos.start - "example(".length,
+                   lpos.start
+                 ) != "example(" ⇒
+              lpos.start - 1
+            case _ ⇒
+              lpos.start
+          }
+
+        val lend =
+          lpos.end match {
+            case end
+              if end < content.length &&
+                 content(end) == ')' ⇒
+              end + 1
+            case end ⇒
+              end
+          }
 
         val between =
           content
-            .subSequence(
-              lpos.end,
+            .slice(
+              lend,
               rpos.start
             )
-            .toString
 
         def code(start: Int, end: Int) = {
           val lines =
             stripMargin(
               content
-                .subSequence(start, end)
-                .toString
+                .slice(start, end)
                 .split("\n") match {
                   case lines
                     if lines.head.matches("\\s*\\{\\s*") &&
@@ -193,29 +237,28 @@ object Code {
           q"_root_.org.hammerlab.lines.Lines(..$lines)"
         }
 
-        val prevNewline = content.lastIndexOfSlice("\n", lpos.start - 1)
+        val prevNewline = content.lastIndexOfSlice("\n", lstart - 1)
 
         // capture any indentation preceding the start of the LHS expression, to correctly infer relative indentation of
         // its lines
-        val lstart =
+        val llinestart =
           if (
             prevNewline >= 0 &&
             content
-              .subSequence(
+              .slice(
                 prevNewline + 1,
-                lpos.start
+                lstart
               )
-              .toString
               .forall(_.isWhitespace)
           )
             prevNewline + 1
           else
-            lpos.start
+            lstart
 
         val lhs =
           code(
-            lstart,
-            lpos.end
+            llinestart,
+            lend
           )
 
         // drop whitespace between [the comma separating the LHS- and RHS-expressions] and [the start of the RHS, or the

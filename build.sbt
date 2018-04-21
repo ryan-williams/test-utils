@@ -42,7 +42,7 @@ lazy val snippets =
       scalameta,
       skipDoc,
       dep(
-        hammerlab.io % "5.0.0",
+        hammerlab.io % "5.0.0".snapshot,
         scalatags
       )
     )
