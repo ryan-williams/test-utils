@@ -3,6 +3,7 @@ package org.hammerlab.docs
 import hammerlab.lines._
 import org.hammerlab.cmp.CanEq
 import org.hammerlab.docs.Code.Example.Render
+import org.hammerlab.docs.Code.Setup
 import org.hammerlab.docs.Code.Setup.MacroImpl
 import org.hammerlab.lines.Lines.unrollIndents
 
@@ -10,13 +11,27 @@ import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
+/**
+ * Interface for Scala code-samples that can be inserted into docs as strings but also statically-checked for
+ * correctness.
+ *
+ * This can mean verifying simply that they compile (given the library-code that they exercise), or that sample input-
+ * and output-expressions' values match at run-time.
+ */
 sealed trait Code
 object Code {
 
   def lines(implicit render: Render): ToLines[Code] = {
+    /**
+     *  Don't import product auto-derivations that would supersede implementations' companions' [[ToLines]] instances
+     *
+     *  TODO: export these via {{{import hammerlab.lines.generic.coproduct._}}}
+     */
     import hammerlab.lines.generic.{ traitToLines, ccons, cnil }
     traitToLines
   }
+
+  implicit def liftComment(comment: String): Code = Comment(comment)
 
   case class Comment(lines: String*) extends Code
   object Comment {
@@ -36,16 +51,60 @@ object Code {
   object Setup {
     implicit val lines: ToLines[Setup] = _.lines
 
+    def block[T](expr: T): Setup = macro blockImpl
+
+    def blockImpl(c: Context)(expr: c.Tree): c.Tree = {
+      import c.universe._
+      val setup =
+        expr match {
+          case Block(stats, expr) ⇒
+            make(c)(stats)
+          case t ⇒
+            make(c)(List(t))
+        }
+
+      q"{..${Seq(expr, setup)}}"
+    }
+
+    def make(c: Context)(body: List[c.Tree]): c.Tree = {
+      import c.universe._
+      import hammerlab.show._
+      implicit val showTree: Show[Tree] = {
+        (t: Tree) ⇒
+          val pos = t.pos
+          val content = new String(pos.source.content)
+          val start = rewindToLineStart(content, pos.start)
+          val lines =
+            stripMargin(
+              content
+                .slice(
+                  start,
+                  pos.end
+                )
+                .split("\n")
+            )
+
+          lines.mkString("\n")
+      }
+
+      val strings =
+        body
+          .filter {
+            s ⇒
+              val pos = s.pos
+              pos.end > pos.start
+          }
+          .map { _.show }
+          .map { s ⇒ Literal(Constant(s)) }
+
+      val lines = q"_root_.org.hammerlab.lines.Lines(..$strings)"
+
+      q"_root_.org.hammerlab.docs.Code.Setup($lines)"
+    }
+
     object MacroImpl {
       def impl(c: Context)(annottees: c.Expr[Any]*): c.Tree = {
         import c.universe._
-
-        import hammerlab.show._
-        implicit val showTree: Show[Tree] = {
-          (t: Tree) ⇒
-            val pos = t.pos
-            pos.source.content.subSequence(pos.start, pos.end).toString
-        }
 
         val inputs =
           annottees
@@ -55,43 +114,42 @@ object Code {
         val outputs =
           inputs
             .map {
-              case (c: ClassDef) ⇒
-                val pos = c.pos
-                val src = pos.source.content
-                val impl = c.impl
-                val body = impl.body
-
-                val strings =
+              case ClassDef(
+                mods,
+                name,
+                tparams,
+                Template(
+                  parents,
+                  self,
                   body
-                    .map    { _.show     }
-                    .filter { _.nonEmpty }
-                    .map    { s ⇒ Literal(Constant(s)) }
+                )
+              ) ⇒
 
-                val lines = q"_root_.org.hammerlab.lines.Lines(..$strings)"
+                val setup = make(c)(body)
 
-                val setup = q"_root_.org.hammerlab.docs.Code.Setup($lines)"
+                val term = TermName(name.toString)
 
-                val valdef = q"implicit val ${TermName(c.name.toString)} = $setup"
-
-                val name = c.name
+                val valdef = q"implicit val $term = $setup"
 
                 val cls =
                   ClassDef(
-                    c.mods,
+                    mods,
                     name,
-                    c.tparams,
+                    tparams,
                     Template(
-                      impl.parents,
-                      impl.self,
+                      parents,
+                      self,
                       valdef :: body
                     )
                   )
 
-                val term = TermName(name.toString)
+                val stmts =
+                  Seq(
+                    cls,
+                    q"object $term extends $name",
+                    q"import $term._"
+                  )
 
-                val obj = q"object $term extends $name"
-
-                val stmts = Seq(cls, obj, q"import $term._")
                 q"..$stmts"
               case l ⇒ l
             }
@@ -99,6 +157,51 @@ object Code {
         q"{..$outputs}"
       }
     }
+  }
+
+  def stripMargin(lines: Seq[String]): Seq[String] = {
+    val margins =
+      lines
+        .filterNot(
+          _.forall(
+            _.isWhitespace
+          )
+        )
+        .map {
+          _
+            .takeWhile(_.isWhitespace)
+            .length
+        }
+
+    val spaces =
+      if (margins.isEmpty)
+        0
+      else
+        margins.min
+
+    lines
+      .map {
+        _.drop(spaces)
+      }
+  }
+
+  // Capture any indentation preceding the start of an expression, to correctly infer relative indentation of its
+  // lines (in the case that there's more than one)
+  def rewindToLineStart(content: String, start: Int, requireWhitespace: Boolean = false) = {
+    val prevNewline = content.lastIndexOfSlice("\n", start - 1)
+
+    if (
+      prevNewline >= 0 &&
+        content
+          .slice(
+            prevNewline + 1,
+            start
+          )
+          .forall(_.isWhitespace || !requireWhitespace)
+    )
+      prevNewline + 1
+    else
+      start
   }
 
   case class Example(input: Lines, output: Lines) extends Code
@@ -140,32 +243,6 @@ object Code {
 
       val comma = """(?s)\s*,(\s*.*)""".r
       val brace = """\s*\{\s*""".r
-
-      def stripMargin(lines: Seq[String]): Seq[String] = {
-        val margins =
-          lines
-            .filterNot(
-              _.forall(
-                _.isWhitespace
-              )
-            )
-            .map {
-              _
-                .takeWhile(_.isWhitespace)
-                .length
-            }
-
-        val spaces =
-          if (margins.isEmpty)
-            0
-          else
-            margins.min
-
-        lines
-          .map {
-            _.drop(spaces)
-          }
-      }
 
       def example[
           L: c.WeakTypeTag,
@@ -237,27 +314,12 @@ object Code {
           q"_root_.org.hammerlab.lines.Lines(..$lines)"
         }
 
-        val prevNewline = content.lastIndexOfSlice("\n", lstart - 1)
-
-        // capture any indentation preceding the start of the LHS expression, to correctly infer relative indentation of
-        // its lines
-        val llinestart =
-          if (
-            prevNewline >= 0 &&
-            content
-              .slice(
-                prevNewline + 1,
-                lstart
-              )
-              .forall(_.isWhitespace)
-          )
-            prevNewline + 1
-          else
-            lstart
-
         val lhs =
           code(
-            llinestart,
+            rewindToLineStart(
+              content,
+              lstart
+            ),
             lend
           )
 
@@ -303,4 +365,14 @@ object Code {
 class setup
   extends StaticAnnotation {
   def macroTransform(annottees: Any*): Unit = macro MacroImpl.impl
+}
+
+@compileTimeOnly("enable macro paradise to expand macro annotations")
+class block
+  extends StaticAnnotation {
+  def macroTransform(annottees: Any*): Unit = macro MacroImpl.impl
+}
+
+object block {
+  def apply[T](expr: T): Setup = macro Setup.blockImpl
 }
