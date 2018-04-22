@@ -1,8 +1,8 @@
 package org.hammerlab.docs
 
+import hammerlab.indent.implicits.spaces2
 import hammerlab.lines._
 import org.hammerlab.cmp.CanEq
-import org.hammerlab.docs.Code.Example.Render
 import org.hammerlab.docs.Code.Setup
 import org.hammerlab.docs.Code.Setup.MacroImpl
 import org.hammerlab.lines.Lines.unrollIndents
@@ -21,13 +21,13 @@ import scala.reflect.macros.whitebox.Context
 sealed trait Code
 object Code {
 
-  def lines(implicit render: Render): ToLines[Code] = {
+  def lines: ToLines[Code] = {
     /**
      *  Don't import product auto-derivations that would supersede implementations' companions' [[ToLines]] instances
      *
      *  TODO: export these via {{{import hammerlab.lines.generic.coproduct._}}}
      */
-    import hammerlab.lines.generic.{ traitToLines, ccons, cnil }
+    import hammerlab.lines.generic.{ ccons, cnil, traitToLines }
     traitToLines
   }
 
@@ -204,34 +204,9 @@ object Code {
       start
   }
 
-  case class Example(input: Lines, output: Lines) extends Code
+  case class Example(lines: Lines) extends Code
   object Example {
-    implicit def lines(implicit render: Render): ToLines[Example] =
-      ToLines { render(_) }
-
-    sealed trait Render {
-      def apply(example: Example): Lines
-    }
-    object Render {
-      implicit val nextLineComments: Render =
-        new Render {
-          def apply(example: Example): Lines =
-            Lines(
-              example.input,
-              unrollIndents(example.output)
-                .map {
-                  case l @ Line(s, _) ⇒
-                    (
-                      if (s.isEmpty || s.startsWith("// "))
-                        l
-                      else
-                        l.prepend("// ")
-                    ): Lines
-                }
-                .toSeq
-            )
-        }
-    }
+    implicit val lines: ToLines[Example] = _.lines
 
     trait make {
       def example[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Example = macro Macro.example[L, R]
@@ -241,8 +216,75 @@ object Code {
 
     object Macro {
 
-      val comma = """(?s)\s*,(\s*.*)""".r
+      val betweenRegex = """(?s)([\s)]*),(.*)""".r
       val brace = """\s*\{\s*""".r
+      val whitespace = """\s*""".r
+
+      case class Content(value: String) {
+        def apply(start: Int, end: Int) = value.slice(start, end)
+      }
+      object Content {
+        def apply(chars: Array[Char]): Content = Content(new String(chars))
+      }
+
+      case class Segment(start: Int, end: Int, value: String)
+      object Segment {
+        def apply(start: Int, end: Int)(
+            implicit content: Content
+        ): Segment =
+          Segment(
+            start,
+            end,
+            content(start, end)
+          )
+
+        implicit def toInt(s: Segment) = s.start
+        implicit def toStr(s: Segment) = s.value
+      }
+      case class Exp(prefix: Segment,
+                     expr: Segment,
+                     suffix: Segment,
+                     value: String,
+                     lines: List[String]) {
+        val start = prefix.start
+        val   end = suffix.  end
+      }
+      object Exp {
+        def apply(prefixStart: Int,
+                  exprStart: Int,
+                  exprEnd: Int,
+                  suffixEnd: Int)(
+            implicit content: Content
+        ): Exp = {
+          val value = content(prefixStart, suffixEnd)
+          Exp(
+            Segment(prefixStart, exprStart),
+            Segment(exprStart, exprEnd),
+            Segment(exprEnd, suffixEnd),
+            value,
+            value.split("\n").toList
+          )
+        }
+
+        implicit val lines = ToLines[Exp] {
+          case Exp(prefix, expr, suffix, _, _) ⇒
+            Lines(
+              s"prefix: '${prefix.value}'",
+              s"  expr: '${  expr.value}'",
+              s"suffix: '${suffix.value}'"
+            )
+        }
+      }
+
+      case class Exception(msg: String) extends java.lang.Exception(msg)
+      def exception(msg: String) = {
+        println(s"ERROR: $msg")
+        throw Exception(msg)
+      }
+
+      def p(s: Lines*) =
+        ()
+//        s.foreach(lines ⇒ println(lines.showLines))
 
       def example[
           L: c.WeakTypeTag,
@@ -261,99 +303,254 @@ object Code {
         val lpos = l.tree.pos
         val rpos = r.tree.pos
 
-        val content = new String(lpos.source.content)
+        import hammerlab.show._
+        implicit val showPos: Show[Position] =
+          (p: Position) ⇒
+            s"${p.start}-${p.end} (${p.line}:${p.column})"
 
-        val lstart =
-          content(lpos.start - 1) match {
-            case '('
-              if lpos.start >= "example(".length &&
-                 content.substring(
-                   lpos.start - "example(".length,
-                   lpos.start
-                 ) != "example(" ⇒
-              lpos.start - 1
-            case _ ⇒
-              lpos.start
-          }
-
-        val lend =
-          lpos.end match {
-            case end
-              if end < content.length &&
-                 content(end) == ')' ⇒
-              end + 1
-            case end ⇒
-              end
-          }
-
-        val between =
-          content
-            .slice(
-              lend,
-              rpos.start
-            )
-
-        def code(start: Int, end: Int) = {
-          val lines =
-            stripMargin(
-              content
-                .slice(start, end)
-                .split("\n") match {
-                  case lines
-                    if lines.head.matches("\\s*\\{\\s*") &&
-                       lines.last.matches("\\s*\\}\\s*") ⇒
-                    lines
-                      .slice(
-                        1,
-                        lines.size - 1
-                      )
-                  case lines ⇒ lines
-                }
-            )
-
-          q"_root_.org.hammerlab.lines.Lines(..$lines)"
-        }
-
-        val lhs =
-          code(
-            rewindToLineStart(
-              content,
-              lstart
-            ),
-            lend
+        if (lpos.start == lpos.end)
+          exception(
+            show"Empty lpos: $lpos; this probably means that this macro failed expanding for some other reason, and was re-run with empty expressions for some reason"
           )
 
-        // drop whitespace between [the comma separating the LHS- and RHS-expressions] and [the start of the RHS, or the
-        // line on which it starts]
-        val rstart =
-          between match {
-            case comma(extra) ⇒
-              extra.indexOf('\n') match {
-                case n if n == extra.length ⇒
-                  rpos.start - extra.length
-                case n ⇒
-                  rpos.start - extra.length + n + 1
-              }
+        val content = new String(lpos.source.content)
+        implicit val _content = Content(content)
 
-            case l ⇒
-              throw new IllegalStateException(
-                s"Unrecognized inter-argument span: '$l'"
+        implicit val showTree: Show[Tree] =
+          (t: Tree) ⇒
+            show"${t.pos}:\n${_content(t.pos.start, t.pos.end)}"
+
+
+        p(show"l tree: ${l.tree}")
+        p(show"r tree: ${r.tree}")
+
+        val exampleStart =
+          content.lastIndexOf("example(", lpos.start) +
+          "example(".length
+
+        p(s"exampleStart: '$exampleStart'")
+
+        val leftStart =
+          exampleStart +
+            content
+              .drop(exampleStart)
+              .takeWhile(_.isWhitespace)
+              .length
+
+        p(s"leftStart: '$leftStart'")
+
+        val (leftExtra, rightPrefix) =
+          content.slice(lpos.end, rpos.start) match {
+            case betweenRegex(leftExtra, rightPrefix) ⇒
+                             (leftExtra, rightPrefix)
+            case s ⇒
+              exception(
+                s"Invalid section between example arguments: $s"
               )
           }
+
+        p(s"leftExtra: '$leftExtra'")
+        p(s"rightPrefix: '$rightPrefix'")
+
+        val comma = lpos.end + leftExtra.length
+        p(s"comma: '$comma'")
+
+        val leftEnd = lpos.end + leftExtra.lastIndexOf(')') + 1
+        p(s"leftEnd: '$leftEnd'")
+
+        val left =
+          Exp(
+            exampleStart,
+            leftStart,
+            leftEnd,
+            comma
+          )
+
+        p(
+          "left:",
+          indent(left)
+        )
+
+        val rightStart =
+          comma + 1 +
+            rightPrefix
+              .takeWhile(_.isWhitespace)
+              .length
+
+        p(s"rightStart: '$rightStart'")
+
+        import hammerlab.iterator._
+
+        val prefix = rightPrefix.iterator
+        def count: Int = {
+          if (!prefix.hasNext)
+            0
+          else
+            prefix.next match {
+              case '(' ⇒ 1 + count
+              case '/' ⇒
+                prefix
+                  .nextOption
+                  .flatMap {
+                    case '/' ⇒
+                      prefix
+                        .find(_ == '\n')
+                        .map(_ ⇒ count)
+                    case '*' ⇒
+                      prefix
+                        .sliding2
+                        .find(_ == ('*', '/'))
+                        .map(_ ⇒ count)
+                    case _ ⇒
+                      Some(count)
+                  }
+                  .getOrElse(0)
+              case _ ⇒
+                count
+            }
+        }
+
+        val rightParends = count
+        p(s"rightParends: $rightParends")
+
+        val (rightEnd, exampleEnd) =
+          content
+            .drop(rpos.end)
+            .iterator
+            .zipWithIndex
+            .collect {
+              case (')', idx) ⇒ idx
+            }
+            .take(rightParends + 1)
+            .map(rpos.end + _)
+            .toVector
+            .takeRight(2) match {
+              case Vector(exampleEnd) ⇒
+                (
+                  exampleEnd,
+                  exampleEnd
+                )
+              case Vector(rightEnd, exampleEnd) ⇒
+                (
+                  rightEnd + 1,
+                  exampleEnd
+                )
+              case parends ⇒
+                exception(
+                  s"Unexpected rhs close-parends situation: ${parends.mkString(",")}"
+                )
+            }
+
+        val right =
+          Exp(
+            comma + 1,
+            rightStart,
+            rightEnd,
+            exampleEnd
+          )
+
+        p(
+          "right:",
+          indent(right)
+        )
+
+        val whole = Segment(exampleStart, exampleEnd)
+
+        val lines =
+          whole
+            .split("\n")
+            .toList match {
+              case line :: Nil ⇒
+                List(
+                  s"${left.value}  //${right.value}"
+                )
+              case lines ⇒
+                val marginSize =
+                  lines
+                    .drop(1)
+                    .filterNot(
+                      _.forall(
+                        ' ' == _
+                      )
+                    )
+                    .map(
+                      _
+                        .takeWhile(
+                          ' ' == _
+                        )
+                        .length
+                    )
+                    .min
+
+                p(s"marginSize: $marginSize")
+
+                val marginStr = " " * marginSize
+                p(s"marginStr: '$marginStr'")
+
+                def strip(line: String) =
+                  if (line.forall(_.isWhitespace))
+                    ""
+                  else if (!line.startsWith(marginStr)) {
+                    exception(
+                      s"Line doesn't start with $marginSize-space margin: $line"
+                    )
+                  } else {
+                    p(s"dropping margin: $line")
+                    line.drop(marginSize)
+                  }
+
+                p(s"left lines:\n${left.lines.mkString("\n")}")
+
+                def stripLines(exp: Exp) = {
+                  val lines = exp.lines
+                  p("stripping lines…")
+                  lines match {
+                    case whitespace() :: lines ⇒
+                      p("stripping…")
+                      lines.map {
+                        line ⇒
+                          p(s"strip line: $line")
+                          strip(line)
+                      }
+                    case lines ⇒
+                      exception(
+                        s"Expected initial whitespace-only line:\n\t${lines.mkString("\n\t")}"
+                      )
+                  }
+                }
+
+                val leftLines = stripLines(left)
+
+                p(s"right lines:\n${right.lines.mkString("\n")}")
+
+                val rightLines =
+                  stripLines(right)
+                    .map {
+                      line ⇒
+                        val trim = line.dropWhile(_.isWhitespace)
+                        if (
+                          trim.isEmpty ||
+                          trim.startsWith("// ")
+                        )
+                          line
+                        else
+                          "// " + line
+                    }
+
+                p(s"got right lines:\n${rightLines.mkString("\n")}")
+
+                leftLines ++
+                rightLines
+            }
+
+        //val example = q"_root_.org.hammerlab.docs.Code.Example($lhs, $rhs)"
+        val example = q"_root_.org.hammerlab.docs.Code.Example(_root_.org.hammerlab.lines.Lines(..$lines))"
 
         // call `cmp` to compare the two expressions
         val check = q"$cmp.cmp($l, $r)"
 
         // verify that no error was returned
         val verify = q"{($check).foreach(e => throw new _root_.java.lang.AssertionError(e.toString))}"
-
-        val rhs =
-          code(
-            rstart,
-            rpos.end
-          )
-
-        val example = q"_root_.org.hammerlab.docs.Code.Example($lhs, $rhs)"
 
         q"{..${Seq(verify, example)}}"
       }
