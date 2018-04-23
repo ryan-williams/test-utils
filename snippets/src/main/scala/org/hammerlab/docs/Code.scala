@@ -5,7 +5,6 @@ import hammerlab.lines._
 import org.hammerlab.cmp.CanEq
 import org.hammerlab.docs.Code.Setup
 import org.hammerlab.docs.Code.Setup.MacroImpl
-import org.hammerlab.lines.Lines.unrollIndents
 
 import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 import scala.language.experimental.macros
@@ -57,7 +56,7 @@ object Code {
       import c.universe._
       val setup =
         expr match {
-          case Block(stats, expr) ⇒
+          case Block(stats, _) ⇒
             make(c)(stats)
           case t ⇒
             make(c)(List(t))
@@ -282,10 +281,6 @@ object Code {
         throw Exception(msg)
       }
 
-      def p(s: Lines*) =
-        ()
-//        s.foreach(lines ⇒ println(lines.showLines))
-
       def example[
           L: c.WeakTypeTag,
           R: c.WeakTypeTag
@@ -321,14 +316,9 @@ object Code {
             show"${t.pos}:\n${_content(t.pos.start, t.pos.end)}"
 
 
-        p(show"l tree: ${l.tree}")
-        p(show"r tree: ${r.tree}")
-
         val exampleStart =
           content.lastIndexOf("example(", lpos.start) +
           "example(".length
-
-        p(s"exampleStart: '$exampleStart'")
 
         val leftStart =
           exampleStart +
@@ -336,8 +326,6 @@ object Code {
               .drop(exampleStart)
               .takeWhile(_.isWhitespace)
               .length
-
-        p(s"leftStart: '$leftStart'")
 
         val (leftExtra, rightPrefix) =
           content.slice(lpos.end, rpos.start) match {
@@ -349,14 +337,9 @@ object Code {
               )
           }
 
-        p(s"leftExtra: '$leftExtra'")
-        p(s"rightPrefix: '$rightPrefix'")
-
         val comma = lpos.end + leftExtra.length
-        p(s"comma: '$comma'")
 
         val leftEnd = lpos.end + leftExtra.lastIndexOf(')') + 1
-        p(s"leftEnd: '$leftEnd'")
 
         val left =
           Exp(
@@ -366,18 +349,11 @@ object Code {
             comma
           )
 
-        p(
-          "left:",
-          indent(left)
-        )
-
         val rightStart =
           comma + 1 +
             rightPrefix
               .takeWhile(_.isWhitespace)
               .length
-
-        p(s"rightStart: '$rightStart'")
 
         import hammerlab.iterator._
 
@@ -411,7 +387,6 @@ object Code {
         }
 
         val rightParends = count
-        p(s"rightParends: $rightParends")
 
         val (rightEnd, exampleEnd) =
           content
@@ -449,18 +424,13 @@ object Code {
             exampleEnd
           )
 
-        p(
-          "right:",
-          indent(right)
-        )
-
         val whole = Segment(exampleStart, exampleEnd)
 
         val lines =
           whole
             .split("\n")
             .toList match {
-              case line :: Nil ⇒
+              case _ :: Nil ⇒
                 List(
                   s"${left.value}  //${right.value}"
                 )
@@ -482,46 +452,29 @@ object Code {
                     )
                     .min
 
-                p(s"marginSize: $marginSize")
-
                 val marginStr = " " * marginSize
-                p(s"marginStr: '$marginStr'")
 
                 def strip(line: String) =
                   if (line.forall(_.isWhitespace))
                     ""
-                  else if (!line.startsWith(marginStr)) {
+                  else if (!line.startsWith(marginStr))
                     exception(
                       s"Line doesn't start with $marginSize-space margin: $line"
                     )
-                  } else {
-                    p(s"dropping margin: $line")
+                  else
                     line.drop(marginSize)
-                  }
 
-                p(s"left lines:\n${left.lines.mkString("\n")}")
-
-                def stripLines(exp: Exp) = {
-                  val lines = exp.lines
-                  p("stripping lines…")
-                  lines match {
+                def stripLines(exp: Exp) =
+                  exp.lines match {
                     case whitespace() :: lines ⇒
-                      p("stripping…")
-                      lines.map {
-                        line ⇒
-                          p(s"strip line: $line")
-                          strip(line)
-                      }
+                      lines.map { strip }
                     case lines ⇒
                       exception(
                         s"Expected initial whitespace-only line:\n\t${lines.mkString("\n\t")}"
                       )
                   }
-                }
 
                 val leftLines = stripLines(left)
-
-                p(s"right lines:\n${right.lines.mkString("\n")}")
 
                 val rightLines =
                   stripLines(right)
@@ -536,8 +489,6 @@ object Code {
                         else
                           "// " + line
                     }
-
-                p(s"got right lines:\n${rightLines.mkString("\n")}")
 
                 leftLines ++
                 rightLines
