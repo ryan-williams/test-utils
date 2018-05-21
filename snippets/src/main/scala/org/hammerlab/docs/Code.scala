@@ -142,14 +142,7 @@ object Code {
                     )
                   )
 
-                val stmts =
-                  Seq(
-                    cls,
-                    q"object $term extends $name",
-                    q"import $term._"
-                  )
-
-                q"..$stmts"
+                cls
               case l ⇒ l
             }
 
