@@ -1,6 +1,5 @@
 package org.hammerlab.cmp.first
 
-import cats.data.Ior
 import cats.data.Ior._
 import org.hammerlab.cmp.CanEq
 import org.hammerlab.cmp.CanEq.instance
@@ -48,6 +47,11 @@ trait Collections {
         )
     }
 
+  sealed trait MapElemDiff[+L, +R, +B] extends Product with Serializable
+  case class  LeftOnly[L, R, B](l: L) extends MapElemDiff[L, R, B]
+  case class RightOnly[L, R, B](r: R) extends MapElemDiff[L, R, B]
+  case class      Diff[L, R, B](b: B) extends MapElemDiff[L, R, B]
+
   implicit def maps[K, V1, V2](
     implicit
     cmp: CanEq[V1, V2]
@@ -57,7 +61,7 @@ trait Collections {
       Map[K, V2],
       (
         K,
-        V1 :+: V2 :+: cmp.Error :+: CNil
+        MapElemDiff[V1, V2, cmp.Error]
       )
     ] =
     instance {
@@ -68,21 +72,22 @@ trait Collections {
             v1 = m1.get(k)
             v2 = m2.get(k)
             vs ← fromOptions(v1, v2)
-             e ← (
-                   vs match {
-                     case  Left(v) ⇒ Some(    Inl(v) )
-                     case Right(v) ⇒ Some(Inr(Inl(v)))
-                     case Both(v1, v2) ⇒
-                       cmp(v1, v2)
-                         .map {
-                           e ⇒
-                             Inr(Inr(Inl(e)))
-                         }
-                   }
-                 )
-                 .map {
-                   (k, _)
+             e ←
+               (
+                 vs match {
+                   case  Left(v) ⇒ Some( LeftOnly(v))
+                   case Right(v) ⇒ Some(RightOnly(v))
+                   case Both(v1, v2) ⇒
+                     cmp(v1, v2)
+                       .map {
+                         e ⇒
+                           Diff(e)
+                       }
                  }
+               )
+               .map {
+                 (k, _)
+               }
           } yield
             e
 

@@ -44,7 +44,7 @@ trait LowPriCanEq
           None
         else
           Some(
-            s"$t1 didn't match $t2"
+            (t1, t2)
           )
     )
 }
@@ -58,4 +58,6 @@ trait MkCanEq
 
 object CanEq
   extends MkCanEq
-  with first.all
+  with first.all {
+  def cmp[L, R, E](l: L, r: R)(implicit cmp: CanEq.Aux[L, R, E]): Option[E] = cmp(l, r)
+}
