@@ -37,7 +37,7 @@ lazy val snippets =
   project
     .settings(
       group("org.hammerlab.docs", "snippets"),
-      v"1.0.0",
+      r"1.0.0",
       enableMacroParadise,
       scalameta,
       skipDoc,
@@ -53,7 +53,7 @@ lazy val snippets =
       suiteJS andTest
     )
 
-lazy val test_utils = rootProject(
+lazy val `test-utils` = rootProject(
   base,
   snippets,
   suiteJS, suiteJVM
