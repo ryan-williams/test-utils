@@ -3,66 +3,56 @@ package org.hammerlab.cmp.first
 import cats.data.Ior._
 import org.hammerlab.cmp.CanEq
 import org.hammerlab.cmp.CanEq.instance
-import shapeless._
 
 trait Collections {
 
-  implicit def arrs[T, U](
+  implicit def arraysCanEq[T, U](
     implicit
     ce: CanEq[T, U]
   ):
     CanEq.Aux[
       Array[T],
       Array[U],
-      (
-        Int,
-        Option[ce.Error]
-      )
+      IdxError[T, U, ce.Error]
     ] =
     instance {
       (s1, s2) ⇒
-        iterators(ce)(
+        iteratorsCanEq(ce)(
           s1.iterator,
           s2.iterator
         )
     }
 
-  implicit def seqs[T, U](
+  implicit def seqsCanEq[T, U](
     implicit
     ce: CanEq[T, U]
   ):
     CanEq.Aux[
       Seq[T],
       Seq[U],
-      (
-        Int,
-        Option[ce.Error]
-      )
+      IdxError[T, U, ce.Error]
     ] =
     instance {
       (s1, s2) ⇒
-        iterators(ce)(
+        iteratorsCanEq(ce)(
           s1.iterator,
           s2.iterator
         )
     }
 
-  sealed trait MapElemDiff[+L, +R, +B] extends Product with Serializable
-  case class  LeftOnly[L, R, B](l: L) extends MapElemDiff[L, R, B]
-  case class RightOnly[L, R, B](r: R) extends MapElemDiff[L, R, B]
-  case class      Diff[L, R, B](b: B) extends MapElemDiff[L, R, B]
+  sealed trait ElemDiff[+L, +R, +B] extends Product with Serializable
+  case class  LeftOnly[L, R, B](l: L) extends ElemDiff[L, R, B]
+  case class RightOnly[L, R, B](r: R) extends ElemDiff[L, R, B]
+  case class      Diff[L, R, B](b: B) extends ElemDiff[L, R, B]
 
-  implicit def maps[K, V1, V2](
+  implicit def mapsCanEq[K, V1, V2](
     implicit
     cmp: CanEq[V1, V2]
   ):
     CanEq.Aux[
       Map[K, V1],
       Map[K, V2],
-      (
-        K,
-        MapElemDiff[V1, V2, cmp.Error]
-      )
+      ErrT[K, V1, V2, cmp.Error]
     ] =
     instance {
       (m1, m2) ⇒
@@ -97,21 +87,20 @@ trait Collections {
           None
     }
 
-  implicit def iterators[T, U](
+  type ErrT[K, L, R, E] = (K, ElemDiff[L, R, E])
+  type IdxError[L, R, E] = ErrT[Int, L, R, E]
+  implicit def iteratorsCanEq[T, U](
     implicit
     ce: CanEq[T, U]
   ):
     CanEq.Aux[
       Iterator[T],
       Iterator[U],
-      (
-        Int,
-        Option[ce.Error]
-      )
+      IdxError[T, U, ce.Error]
     ] =
     new CanEq[Iterator[T], Iterator[U]] {
-      type Error = (Int, Option[ce.Error])
-      override def cmp(t: Iterator[T], u: Iterator[U]): Option[Error] = cmp(0, t, u)
+      type Error = IdxError[T, U, ce.Error]
+      def cmp(          t: Iterator[T], u: Iterator[U]): Option[Error] = cmp(0, t, u)
       def cmp(idx: Int, t: Iterator[T], u: Iterator[U]): Option[Error] =
         (t.hasNext, u.hasNext) match {
           case (true, true) ⇒
@@ -119,7 +108,7 @@ trait Collections {
               t.next,
               u.next
             )
-            .map(e ⇒ idx → Some(e))
+            .map(e ⇒ idx → Diff(e))
             .orElse(
               cmp(
                 idx + 1,
@@ -127,8 +116,9 @@ trait Collections {
                 u
               )
             )
-          case (false, false) ⇒ None
-          case _ ⇒ Some((idx, None))
+          case ( true, false) ⇒ Some(idx →  LeftOnly(t.next))
+          case (false,  true) ⇒ Some(idx → RightOnly(u.next))
+          case _ ⇒ None
         }
     }
 }

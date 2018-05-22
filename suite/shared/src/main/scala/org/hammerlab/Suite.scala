@@ -1,5 +1,6 @@
 package org.hammerlab
 
+import cats.Eq
 import hammerlab.math.tolerance._
 import org.hammerlab.cmp.CanEq.withConversion
 import org.hammerlab.cmp.{ CanEq, double }
@@ -23,9 +24,9 @@ abstract class Suite
     ε = d
   }
 
-  implicit val    intOrder = cats.instances.   int.catsKernelStdOrderForInt
-  implicit val   longOrder = cats.instances.  long.catsKernelStdOrderForLong
-  implicit val stringOrder = cats.instances.string.catsKernelStdOrderForString
+  implicit val    intOrder: Eq[   Int] = cats.instances.   int.catsKernelStdOrderForInt
+  implicit val   longOrder: Eq[  Long] = cats.instances.  long.catsKernelStdOrderForLong
+  implicit val stringOrder: Eq[String] = cats.instances.string.catsKernelStdOrderForString
 
   /** Default [[CanEq]] instances for [[Double]]s vs. [[Int]]s */
   implicit val int2double : CanEq[Double, Int] = withConversion[Double, Int]

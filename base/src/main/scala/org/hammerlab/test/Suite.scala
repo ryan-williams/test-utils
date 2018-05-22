@@ -6,7 +6,6 @@ import org.hammerlab.paths.Path
 import org.hammerlab.test.files.TmpFiles
 import org.hammerlab.test.matchers.files.{ HasDirMatchers, HasFileMatchers }
 import org.hammerlab.test.resources.Url
-import org.scalactic.ConversionCheckedTripleEquals
 
 /**
  * Simple wrapper for common test-suite boilerplate.

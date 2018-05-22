@@ -1,15 +1,26 @@
 package org.hammerlab.cmp
 
 import hammerlab.cmp.first._
-import org.hammerlab.test.Cmp
 import CanEq.cmp
 
 class CollectionsTest
   extends hammerlab.Suite {
+
+  override implicit val intOrder: cats.Eq[Int] =
+    new cats.Eq[Int] {
+      def eqv(x: Int, y: Int): Boolean =
+        x % 10 == y % 10
+    }
+
   test("maps") {
     ===(
       Map("a" → 2),
       Map("a" → 2)
+    )
+
+    ===(
+      Map("a" →  2),
+      Map("a" → 12)
     )
 
     cmp(
@@ -63,27 +74,21 @@ class CollectionsTest
     )
   }
 
-  test("custom value cmp") {
-    val intCmp = implicitly[Cmp[Int]]
 
-    {
-      implicit val lastDigitCmp = Cmp.by[Int, Int](_ % 10)(intCmp)
-      ===(
-        Map("a" →  2),
-        Map("a" → 12)
-      )
+  test("arrays") {
+    ===(
+      Array( 1,  6, 22, 17),
+      Array(11, 66,  2, 77)
+    )
 
-      cmp(
-        Map("a" →  2),
-        Map("a" →  3)
-      ) should be(
-        Some(
-          (
-            "a",
-            Diff((2, 3))
-          )
-        )
+    cmp(
+      Array( 1,  6, 22, 17),
+      Array(11, 66,  2, 78)
+    ) should be(
+      Some(
+        3 →
+          Diff((17, 78))
       )
-    }
+    )
   }
 }
