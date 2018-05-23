@@ -2,9 +2,24 @@
 
 [![Build Status](https://travis-ci.org/hammerlab/test-utils.svg?branch=master)](https://travis-ci.org/hammerlab/test-utils)
 [![codecov](https://codecov.io/gh/hammerlab/test-utils/branch/master/graph/badge.svg)](https://codecov.io/gh/hammerlab/test-utils)
-[![Maven Central](https://img.shields.io/maven-central/v/org.hammerlab/test-utils_2.11.svg?maxAge=600)](http://search.maven.org/#search%7Cga%7C1%7Ctest-utils)
+[![Maven Central](https://img.shields.io/maven-central/v/org.hammerlab.test/base_2.12.svg?maxAge=600)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aorg.hammerlab.test)
 
-Unit-testing utilities:
+- [`suite`](suite): test suites, custom matchers, and more for the JVM and JS
+- [`base`](base): JVM-specific extensions to [`suite`](suite) that adds filesystem-utilities (e.g. creating temporary files/directories)
+
+## Get
+
+```scala
+libraryDependencies += "org.hammerlab.test" %%% "suite" % "1.0.1"
+```
+
+or
+
+```scala
+libraryDependencies += "org.hammerlab.test" %% "base" % "1.0.1"
+```
+
+## Use
 
 - [`Suite`](https://github.com/hammerlab/test-utils/blob/master/src/main/scala/org/hammerlab/test/Suite.scala): wrapper for ScalaTest `FunSuite with Matchers`.
 - [`TmpFiles`](https://github.com/hammerlab/test-utils/blob/master/src/main/scala/org/hammerlab/test/files/TmpFiles.scala): create (and automatically garbage-collect) temporary files and directories.

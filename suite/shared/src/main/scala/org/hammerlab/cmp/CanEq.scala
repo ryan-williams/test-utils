@@ -3,7 +3,8 @@ package org.hammerlab.cmp
 import cats.Eq
 
 /**
- * Type-class representing a comparison between two types, with customizable [[Error]] output-type
+ * Type-class for comparing two types, with customizable `Error` output-type containing a possibly-structured
+ * representation of the "diff", if any
  */
 trait CanEq[-L, -R] {
   type Error
@@ -15,11 +16,16 @@ trait CanEq[-L, -R] {
 trait LowPriCanEq
   extends Serializable {
 
+  /** Short-hand for a [[CanEq]] whose comparee-types are equal */
   type Cmp[T] = CanEq[T, T]
   object Cmp {
     type Aux[T, E] = CanEq.Aux[T, T, E]
+
+    /** Create a [[Cmp]] from its single method */
     def apply[T, E](fn: (T, T) ⇒ Option[E]): Cmp.Aux[T, E] = CanEq.instance[T, T, E](fn)
-    def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Cmp[U] =
+
+    /** Create a [[Cmp]] interms of another */
+    def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Cmp.Aux[U, cmp.Error] =
       Cmp {
         (l, r) ⇒
           cmp(
@@ -31,31 +37,49 @@ trait LowPriCanEq
 
   type Aux[T, U, E] = CanEq[T, U] { type Error = E }
 
+  /**
+   * Short-hand for creating [[CanEq]] instances from a single method.
+   *
+   * TODO: can probably go away in favor of SAM-syntax once Scala 2.11 support is dropped.
+   */
   def instance[T, U, E](fn: (T, U) ⇒ Option[E]): CanEq.Aux[T, U, E] =
     new CanEq[T, U] {
       type Error = E
       override def cmp(t: T, u: U): Option[Error] = fn(t, u)
     }
 
-  implicit def fromEq[T](implicit e: Eq[T]): Cmp[T] =
+  /**
+   * Derive a [[Cmp]] from an [[Eq]], where the returned "diff"-representation is just a [[Tuple2]] with the two
+   * comparees
+   */
+  implicit def fromEq[T](implicit e: Eq[T]): Cmp.Aux[T, (T, T)] =
     instance(
       (t1, t2) ⇒
         if (e.eqv(t1, t2))
           None
         else
           Some(
-            s"$t1 didn't match $t2"
+            (t1, t2)
           )
     )
 }
 
-trait MkCanEq
-  extends LowPriCanEq {
-
-  def withConversion[T, U](implicit ce: CanEq[T, T], conv: U ⇒ T): CanEq[T, U] =
-    instance((t, u) ⇒ ce.cmp(t, u))
-}
-
 object CanEq
-  extends MkCanEq
-  with first.all
+  extends LowPriCanEq
+     with first.all {
+
+  /**
+   * Create a [[CanEq]] for two different types given a [[Cmp]] for one and a conversion function for the other into the
+   * [[Cmp]]'s type
+   */
+  def withConversion[T, U](
+    implicit
+    cmp: Cmp[T],
+    conv: U ⇒ T
+  ):
+    CanEq.Aux[T, U, cmp.Error] =
+    instance(cmp(_, _))
+
+  /** Short-hand for applying a [[CanEq]] to two objects and returning the "error", if any */
+  def cmp[L, R, E](l: L, r: R)(implicit cmp: CanEq.Aux[L, R, E]): Option[E] = cmp(l, r)
+}
