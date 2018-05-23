@@ -7,7 +7,10 @@ scala:
   - 2.11.12
   - 2.12.6
 
-script: sbt ++$TRAVIS_SCALA_VERSION clean coverageTest
+script:
+  - echo "Travis build $TRAVIS_BUILD_ID $TRAVIS_BUILD_NUMBER"
+  - echo "Travis   job $TRAVIS_JOB_ID $TRAVIS_JOB_NUMBER"
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverageTest
 
 cache:
   directories:
