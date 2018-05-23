@@ -2,20 +2,22 @@ package org.hammerlab.docs
 
 import hammerlab.Suite
 import hammerlab.indent.implicits.spaces2
+import hammerlab.lines._
 import hammerlab.show._
-import org.hammerlab.docs.Code.Example
+import org.hammerlab.docs.Code.example
 
 class CodeTest
   extends Suite {
   test("lines") {
-    Code.lines.apply(
-      Example(
-        "Array(1, 2, 1, 3).sorted",
-        "Array(1, 1, 2, 3)"
-      )
+
+    /** Verify that [[org.hammerlab.docs.Code.Example]]s are converted to [[Lines]] correctly */
+    example(
+      "input",
+      "// output"
     )
     .showLines should be(
-      "Array(1, 2, 1, 3).sorted\n// Array(1, 1, 2, 3)"
+      """input
+        |// output""".stripMargin
     )
   }
 }

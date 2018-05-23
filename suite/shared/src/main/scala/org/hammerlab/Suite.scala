@@ -1,6 +1,7 @@
 package org.hammerlab
 
-import cats.Eq
+import cats.Show.ContravariantShow
+import cats.{ Eq, Show }
 import hammerlab.math.tolerance._
 import org.hammerlab.cmp.CanEq.withConversion
 import org.hammerlab.cmp.{ CanEq, double }
@@ -32,12 +33,17 @@ abstract class Suite
   implicit val int2double : CanEq[Double, Int] = withConversion[Double, Int]
   implicit val int2long   : CanEq[  Long, Int] = withConversion[  Long, Int]
 
-  def ===[T, U](t1: T, t2: U)(implicit cmp: CanEq[T, U]): Unit =
+  private def showAny[T] =
+    new Show[T] {
+      override def show(t: T): String = t.toString
+    }
+
+  def ===[T, U, E](t1: T, t2: U)(implicit cmp: CanEq.Aux[T, U, E], showError: Show[E] = showAny[E]): Unit =
     cmp(t1, t2)
       .foreach {
         e ⇒
           fail(
-            e.toString
+            showError.show(e)
           )
       }
 

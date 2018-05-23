@@ -11,14 +11,14 @@ default(
 lazy val base = project.settings(
   v"1.0.1",
   dep(
-    // this should come from the suiteJVM classpath-dep below, but test-scoped dependencies don't transit as you'd
+    // this should come from the suite.jvm classpath-dep below, but test-scoped dependencies don't transit as you'd
     // think/like
     math.tolerance tests,
     paths % "1.5.0"
   ),
   testDeps += scalatest
 ).dependsOn(
-  suiteJVM andTest
+  `suite.jvm` andTest
 )
 
 lazy val suite = crossProject.settings(
@@ -30,19 +30,19 @@ lazy val suite = crossProject.settings(
     shapeless
   )
 )
-lazy val suiteJS  = suite.js
-lazy val suiteJVM = suite.jvm
+lazy val `suite.js`  = suite.js
+lazy val `suite.jvm` = suite.jvm
 
 lazy val snippets =
   project
     .settings(
-      group("org.hammerlab.docs", "snippets"),
-      r"1.0.0",
+      group("org.hammerlab.docs"),
+      v"1.0.0",
       enableMacroParadise,
-      scalameta,
+      // macros mess up doc-generation
       skipDoc,
       dep(
-        hammerlab.io % "5.0.0".snapshot,
+        hammerlab.io % "5.0.0",
         scalatags
       )
     )
@@ -50,11 +50,11 @@ lazy val snippets =
       ScalaJSPlugin
     )
     .dependsOn(
-      suiteJS andTest
+      `suite.js` andTest
     )
 
 lazy val `test-utils` = rootProject(
   base,
   snippets,
-  suiteJS, suiteJVM
+  `suite.js`, `suite.jvm`
 )

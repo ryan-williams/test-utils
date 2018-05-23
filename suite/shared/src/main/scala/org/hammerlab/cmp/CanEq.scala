@@ -19,7 +19,7 @@ trait LowPriCanEq
   object Cmp {
     type Aux[T, E] = CanEq.Aux[T, T, E]
     def apply[T, E](fn: (T, T) ⇒ Option[E]): Cmp.Aux[T, E] = CanEq.instance[T, T, E](fn)
-    def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Cmp[U] =
+    def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Cmp.Aux[U, cmp.Error] =
       Cmp {
         (l, r) ⇒
           cmp(
@@ -37,7 +37,7 @@ trait LowPriCanEq
       override def cmp(t: T, u: U): Option[Error] = fn(t, u)
     }
 
-  implicit def fromEq[T](implicit e: Eq[T]): Cmp[T] =
+  implicit def fromEq[T](implicit e: Eq[T]): Cmp.Aux[T, (T, T)] =
     instance(
       (t1, t2) ⇒
         if (e.eqv(t1, t2))
@@ -52,7 +52,7 @@ trait LowPriCanEq
 trait MkCanEq
   extends LowPriCanEq {
 
-  def withConversion[T, U](implicit ce: CanEq[T, T], conv: U ⇒ T): CanEq[T, U] =
+  def withConversion[T, U](implicit ce: CanEq[T, T], conv: U ⇒ T): CanEq.Aux[T, U, ce.Error] =
     instance((t, u) ⇒ ce.cmp(t, u))
 }
 

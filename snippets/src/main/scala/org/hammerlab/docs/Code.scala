@@ -20,35 +20,24 @@ import scala.reflect.macros.whitebox.Context
 sealed trait Code
 object Code {
 
-  def lines: ToLines[Code] = {
-    /**
-     *  Don't import product auto-derivations that would supersede implementations' companions' [[ToLines]] instances
-     *
-     *  TODO: export these via {{{import hammerlab.lines.generic.coproduct._}}}
-     */
-    import hammerlab.lines.generic.{ ccons, cnil, traitToLines }
-    traitToLines
-  }
-
   implicit def liftComment(comment: String): Code = Comment(comment)
 
   case class Comment(lines: String*) extends Code
   object Comment {
-    implicit def lines: ToLines[Comment] = {
-      case Comment(lines @ _*) ⇒
-        Lines(
-          lines
-            .map {
-              case   "" ⇒ ""           : Lines
-              case line ⇒ "// " + line : Lines
-            }
-        )
-    }
+    implicit def lines: ToLines[Comment] =
+      ToLines {
+        _
+          .lines
+          .map {
+            case   "" ⇒ ""           : Lines
+            case line ⇒ "// " + line : Lines
+          }
+      }
   }
 
   case class Setup(lines: Lines) extends Code
   object Setup {
-    implicit val lines: ToLines[Setup] = _.lines
+    implicit val lines: ToLines[Setup] = ToLines { _.lines }
 
     def block[T](expr: T): Setup = macro blockImpl
 
@@ -68,22 +57,23 @@ object Code {
     def make(c: Context)(body: List[c.Tree]): c.Tree = {
       import c.universe._
       import hammerlab.show._
-      implicit val showTree: Show[Tree] = {
-        (t: Tree) ⇒
-          val pos = t.pos
-          val content = new String(pos.source.content)
-          val start = rewindToLineStart(content, pos.start)
-          val lines =
-            stripMargin(
-              content
-                .slice(
-                  start,
-                  pos.end
-                )
-                .split("\n")
-            )
+      implicit val showTree: Show[Tree] =
+        Show {
+          (t: Tree) ⇒
+            val pos = t.pos
+            val content = new String(pos.source.content)
+            val start = rewindToLineStart(content, pos.start)
+            val lines =
+              stripMargin(
+                content
+                  .slice(
+                    start,
+                    pos.end
+                  )
+                  .split("\n")
+              )
 
-          lines.mkString("\n")
+            lines.mkString("\n")
       }
 
       val strings =
@@ -197,8 +187,9 @@ object Code {
   }
 
   case class Example(lines: Lines) extends Code
+  def example(lines: Lines*): Example = Example(lines)
   object Example {
-    implicit val lines: ToLines[Example] = _.lines
+    implicit val lines: ToLines[Example] = ToLines { _.lines }
 
     trait make {
       def example[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Example = macro Macro.example[L, R]
@@ -275,13 +266,13 @@ object Code {
       }
 
       def example[
-          L: c.WeakTypeTag,
-          R: c.WeakTypeTag
+        L: c.WeakTypeTag,
+        R: c.WeakTypeTag
       ](
-          c: Context
+        c: Context
       )(
-          l: c.Expr[L],
-          r: c.Expr[R]
+        l: c.Expr[L],
+        r: c.Expr[R]
       )(
         cmp: c.Expr[CanEq[L, R]]
       ):
@@ -293,8 +284,10 @@ object Code {
 
         import hammerlab.show._
         implicit val showPos: Show[Position] =
-          (p: Position) ⇒
-            s"${p.start}-${p.end} (${p.line}:${p.column})"
+          Show {
+            p ⇒
+              s"${p.start}-${p.end} (${p.line}:${p.column})"
+          }
 
         if (lpos.start == lpos.end)
           exception(
@@ -305,9 +298,10 @@ object Code {
         implicit val _content = Content(content)
 
         implicit val showTree: Show[Tree] =
-          (t: Tree) ⇒
-            show"${t.pos}:\n${_content(t.pos.start, t.pos.end)}"
-
+          Show {
+            t ⇒
+              show"${t.pos}:\n${_content(t.pos.start, t.pos.end)}"
+          }
 
         val exampleStart =
           content.lastIndexOf("example(", lpos.start) +
