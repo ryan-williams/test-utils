@@ -4,7 +4,39 @@ import cats.data.Ior._
 import org.hammerlab.cmp.CanEq
 import org.hammerlab.cmp.CanEq.instance
 
+/**
+ * [[CanEq]] instances for standard collections, computing and returning the [[hammerlab.cmp.first first]] index where
+ * they differ, as well as a structured representation of that difference (see
+ * [[hammerlab.cmp.first.ElemDiff ElemDiff]]).
+ */
 trait Collections {
+
+  /**
+   * Sum-type for the first difference found between two collections
+   *
+   * @tparam L type of elements in the LHS collection; returned as a [[LeftOnly]] if e.g. the RHS is a prefix of the LHS
+   *           (so the first differing index is just beyond the length of the RHS)
+   * @tparam R type of elements in the RHS collection; returned as a [[RightOnly]] if e.g. the LHS is a prefix of the
+   *           RHS (so the first differing index is just beyond the length of the LHS)
+   * @tparam B error-type returned by a [[CanEq]] that compares an [[L]] and [[R]] and finds a difference before the end
+   *           of either collection; this gets wrapped in and returned as a [[Diff]]
+   */
+  sealed trait  ElemDiff[+L, +R, +B]       extends Product with Serializable
+  case class  LeftOnly[ L,  R,  B](l: L) extends ElemDiff[L, R, B]
+  case class RightOnly[ L,  R,  B](r: R) extends ElemDiff[L, R, B]
+  case class      Diff[ L,  R,  B](b: B) extends ElemDiff[L, R, B]
+
+
+  /**
+   * Error-type for a [[CanEq]] that returns an index/"key" [[K]] at which two collections have a different value
+   * (expressed as an [[ElemDiff]]
+   */
+  type ErrT[K, L, R, E] = (K, ElemDiff[L, R, E])
+
+  /**
+   * Collection-error-type specialized for [[Int]]-indices
+   */
+  type IdxError[L, R, E] = ErrT[Int, L, R, E]
 
   implicit def arraysCanEq[T, U](
     implicit
@@ -39,11 +71,6 @@ trait Collections {
           s2.iterator
         )
     }
-
-  sealed trait ElemDiff[+L, +R, +B] extends Product with Serializable
-  case class  LeftOnly[L, R, B](l: L) extends ElemDiff[L, R, B]
-  case class RightOnly[L, R, B](r: R) extends ElemDiff[L, R, B]
-  case class      Diff[L, R, B](b: B) extends ElemDiff[L, R, B]
 
   implicit def mapsCanEq[K, V1, V2](
     implicit
@@ -87,8 +114,6 @@ trait Collections {
           None
     }
 
-  type ErrT[K, L, R, E] = (K, ElemDiff[L, R, E])
-  type IdxError[L, R, E] = ErrT[Int, L, R, E]
   implicit def iteratorsCanEq[T, U](
     implicit
     ce: CanEq[T, U]
