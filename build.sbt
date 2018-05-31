@@ -9,7 +9,7 @@ default(
 )
 
 lazy val base = project.settings(
-  v"1.0.1",
+  r"1.0.1",
   dep(
     // this should come from the suite.jvm classpath-dep below, but test-scoped dependencies don't transit as you'd
     // think/like
@@ -22,7 +22,7 @@ lazy val base = project.settings(
 )
 
 lazy val suite = crossProject.settings(
-  v"1.0.0",
+  r"1.0.1",
   dep(
     cats,
     math.tolerance,
@@ -42,7 +42,7 @@ lazy val snippets =
       // macros mess up doc-generation
       skipDoc,
       dep(
-        hammerlab.io % "5.0.0",
+        hammerlab.io % "5.0.1" snapshot,
         scalatags
       )
     )
