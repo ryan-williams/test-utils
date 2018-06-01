@@ -4,10 +4,10 @@ import org.hammerlab.test.Cmp
 import shapeless.{ :+:, CNil, Coproduct, Generic, Inl, Inr, Lazy }
 
 trait SealedTrait {
-  object SealedTraitError {
+  object SealedTrait {
     type Err[E <: Coproduct] = Either[String, E]
   }
-  import SealedTraitError.Err
+  import SealedTrait.Err
 
   implicit val cmpCnil: Cmp.Aux[CNil, Err[CNil]] = Cmp[CNil, Err[CNil]]((_, _) ⇒ ???)
 

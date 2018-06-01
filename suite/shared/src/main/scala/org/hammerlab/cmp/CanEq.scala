@@ -13,6 +13,24 @@ trait CanEq[-L, -R] {
   def   eqv(l: L, r: R): Boolean = cmp(l, r).isEmpty
 }
 
+case class Pos(file: sourcecode.File,
+               line: sourcecode.Line,
+               name: sourcecode.Name) {
+  override def toString =
+    s"${file.value.drop(file.value.lastIndexOf('/') + 1)}:${line.value}\t(${name.value})"
+}
+
+object Pos {
+  implicit def make(
+  implicit
+    file: sourcecode.File,
+    line: sourcecode.Line,
+    name: sourcecode.Name
+  ): Pos =
+     Pos(file, line, name)
+}
+
+
 trait LowPriCanEq
   extends Serializable {
 
@@ -22,7 +40,7 @@ trait LowPriCanEq
     type Aux[T, E] = CanEq.Aux[T, T, E]
 
     /** Create a [[Cmp]] from its single method */
-    def apply[T, E](fn: (T, T) ⇒ Option[E]): Aux[T, E] = CanEq(fn)
+    def apply[T, E](fn: (T, T) ⇒ Option[E])(implicit pos: Pos): Aux[T, E] = CanEq(fn)
 
     /** Create a [[Cmp]] interms of another */
     def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Aux[U, cmp.Error] =
@@ -35,24 +53,27 @@ trait LowPriCanEq
       }
   }
 
-  type Aux[T, U, E] = CanEq[T, U] { type Error = E }
+  type Aux[-T, -U, E] = CanEq[T, U] { type Error = E }
 
   /**
    * Short-hand for creating [[CanEq]] instances from a single method.
    *
    * TODO: can probably go away in favor of SAM-syntax once Scala 2.11 support is dropped.
    */
-  def apply[T, U, E](fn: (T, U) ⇒ Option[E]): Aux[T, U, E] =
+  def apply[T, U, E](fn: (T, U) ⇒ Option[E])(implicit pos: Pos): Aux[T, U, E] =
     new CanEq[T, U] {
       type Error = E
-      override def cmp(t: T, u: U): Option[Error] = fn(t, u)
+      override def cmp(t: T, u: U): Option[Error] = {
+        println(s"$pos: compare $t $u")
+        fn(t, u)
+      }
     }
 
   /**
    * Derive a [[Cmp]] from an [[Eq]], where the returned "diff"-representation is just a [[Tuple2]] with the two
    * comparees
    */
-  implicit def fromEq[T](implicit e: Eq[T]): Cmp.Aux[T, (T, T)] =
+  implicit def fromEq[T](implicit e: Eq[T], pos: Pos): Cmp.Aux[T, (T, T)] =
     apply(
       (t1, t2) ⇒
         if (e.eqv(t1, t2))
