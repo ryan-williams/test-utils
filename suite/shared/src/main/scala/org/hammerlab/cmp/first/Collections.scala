@@ -2,7 +2,6 @@ package org.hammerlab.cmp.first
 
 import cats.data.Ior._
 import org.hammerlab.cmp.CanEq
-import org.hammerlab.cmp.CanEq.instance
 
 /**
  * [[CanEq]] instances for standard collections, computing and returning the [[hammerlab.cmp.first first]] index where
@@ -22,9 +21,9 @@ trait Collections {
    *           of either collection; this gets wrapped in and returned as a [[Diff]]
    */
   sealed trait  ElemDiff[+L, +R, +B]       extends Product with Serializable
-  case class  LeftOnly[ L,  R,  B](l: L) extends ElemDiff[L, R, B]
-  case class RightOnly[ L,  R,  B](r: R) extends ElemDiff[L, R, B]
-  case class      Diff[ L,  R,  B](b: B) extends ElemDiff[L, R, B]
+    case class  LeftOnly[ L,  R,  B](l: L) extends ElemDiff[L, R, B]
+    case class RightOnly[ L,  R,  B](r: R) extends ElemDiff[L, R, B]
+    case class      Diff[ L,  R,  B](b: B) extends ElemDiff[L, R, B]
 
 
   /**
@@ -47,7 +46,7 @@ trait Collections {
       Array[U],
       IdxError[T, U, ce.Error]
     ] =
-    instance {
+    CanEq {
       (s1, s2) ⇒
         iteratorsCanEq(ce)(
           s1.iterator,
@@ -64,7 +63,7 @@ trait Collections {
       Seq[U],
       IdxError[T, U, ce.Error]
     ] =
-    instance {
+    CanEq {
       (s1, s2) ⇒
         iteratorsCanEq(ce)(
           s1.iterator,
@@ -81,7 +80,7 @@ trait Collections {
       Map[K, V2],
       ErrT[K, V1, V2, cmp.Error]
     ] =
-    instance {
+    CanEq {
       (m1, m2) ⇒
         val it =
           for {

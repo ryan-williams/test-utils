@@ -1,7 +1,6 @@
 package org.hammerlab.cmp
 
 import hammerlab.cmp.first._
-import CanEq.cmp
 
 class CollectionsTest
   extends hammerlab.Suite {
@@ -73,7 +72,6 @@ class CollectionsTest
       )
     )
   }
-
 
   test("arrays") {
     ===(

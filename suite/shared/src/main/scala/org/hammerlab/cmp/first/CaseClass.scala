@@ -4,9 +4,12 @@ import org.hammerlab.test.Cmp
 import shapeless._
 
 trait CaseClass {
-  implicit def cclass[T, L <: HList, E <: Coproduct](implicit
-                                                     gen: Generic.Aux[T, L],
-                                                     listEq: Lazy[Cmp.Aux[L, E]]): Cmp[T] =
+  implicit def cmpCaseClass[T, L <: HList, E <: Coproduct](
+    implicit
+    gen: Generic.Aux[T, L],
+    listEq: Lazy[Cmp.Aux[L, E]]
+  ):
+    Cmp.Aux[T, E] =
     Cmp[T, E] {
       (l, r) ⇒
         listEq
@@ -17,9 +20,12 @@ trait CaseClass {
           )
     }
 
-  implicit def cons[H, T <: HList, ET <: Coproduct](implicit
-                                                    head: Lazy[Cmp[H]],
-                                                    tail: Lazy[Cmp.Aux[T, ET]]): Cmp.Aux[H :: T, head.value.Error :+: ET] =
+  implicit def cmpCons[H, T <: HList, ET <: Coproduct](
+    implicit
+    head: Lazy[Cmp[H]],
+    tail: Lazy[Cmp.Aux[T, ET]]
+  ):
+    Cmp.Aux[H :: T, head.value.Error :+: ET] =
     Cmp[H :: T, head.value.Error :+: ET](
       (l, r) ⇒
         head
@@ -34,5 +40,5 @@ trait CaseClass {
           )
     )
 
-  implicit val hnil: Cmp.Aux[HNil, CNil] = Cmp[HNil, CNil]((_, _) ⇒ None)
+  implicit val cmpHNil: Cmp.Aux[HNil, CNil] = Cmp[HNil, CNil]((_, _) ⇒ None)
 }

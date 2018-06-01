@@ -14,6 +14,8 @@ case class Complex(r: Double, i: Double)
 class CanEqTest
   extends hammerlab.Suite {
 
+  import hammerlab.cmp.first._
+
   test("seq") {
     ===(
       Seq(2.0, 3.0),
@@ -81,6 +83,9 @@ class CanEqTest
       Seq(2, 3),
       Seq(2, 3, 4)
     )
+
+    implicitly[Cmp[T[Double]]]
+    implicitly[Cmp[Seq[T[Double]]]]
 
     val lt: Seq[T[Double]] = Seq(D(2.0), D(3.0))
     val rt: Seq[T[Double]] = Seq(D(2.0), D(3.0))

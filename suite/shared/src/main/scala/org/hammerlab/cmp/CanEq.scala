@@ -8,9 +8,9 @@ import cats.Eq
  */
 trait CanEq[-L, -R] {
   type Error
-  def cmp(l: L, r: R): Option[Error]
+  def   cmp(l: L, r: R): Option[Error]
   def apply(l: L, r: R): Option[Error] = cmp(l, r)
-  def eqv(l: L, r: R): Boolean = cmp(l, r).isEmpty
+  def   eqv(l: L, r: R): Boolean = cmp(l, r).isEmpty
 }
 
 trait LowPriCanEq
@@ -22,10 +22,10 @@ trait LowPriCanEq
     type Aux[T, E] = CanEq.Aux[T, T, E]
 
     /** Create a [[Cmp]] from its single method */
-    def apply[T, E](fn: (T, T) ⇒ Option[E]): Cmp.Aux[T, E] = CanEq.instance[T, T, E](fn)
+    def apply[T, E](fn: (T, T) ⇒ Option[E]): Aux[T, E] = CanEq(fn)
 
     /** Create a [[Cmp]] interms of another */
-    def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Cmp.Aux[U, cmp.Error] =
+    def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Aux[U, cmp.Error] =
       Cmp {
         (l, r) ⇒
           cmp(
@@ -42,7 +42,7 @@ trait LowPriCanEq
    *
    * TODO: can probably go away in favor of SAM-syntax once Scala 2.11 support is dropped.
    */
-  def instance[T, U, E](fn: (T, U) ⇒ Option[E]): CanEq.Aux[T, U, E] =
+  def apply[T, U, E](fn: (T, U) ⇒ Option[E]): Aux[T, U, E] =
     new CanEq[T, U] {
       type Error = E
       override def cmp(t: T, u: U): Option[Error] = fn(t, u)
@@ -53,7 +53,7 @@ trait LowPriCanEq
    * comparees
    */
   implicit def fromEq[T](implicit e: Eq[T]): Cmp.Aux[T, (T, T)] =
-    instance(
+    apply(
       (t1, t2) ⇒
         if (e.eqv(t1, t2))
           None
@@ -78,8 +78,12 @@ object CanEq
     conv: U ⇒ T
   ):
     CanEq.Aux[T, U, cmp.Error] =
-    instance(cmp(_, _))
+    CanEq(cmp(_, _))
 
-  /** Short-hand for applying a [[CanEq]] to two objects and returning the "error", if any */
-  def cmp[L, R, E](l: L, r: R)(implicit cmp: CanEq.Aux[L, R, E]): Option[E] = cmp(l, r)
+  trait dsl {
+    /** Short-hand for applying a [[CanEq]] to two objects and returning the "error", if any */
+    def cmp[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Option[cmp.Error] = cmp(l, r)
+  }
+
+  object dsl extends dsl
 }

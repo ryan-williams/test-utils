@@ -3,7 +3,7 @@ package org.hammerlab
 import cats.{ Eq, Show }
 import hammerlab.math.tolerance._
 import org.hammerlab.cmp.CanEq.withConversion
-import org.hammerlab.cmp.{ CanEq, double }
+import org.hammerlab.cmp.{ CanEq, double, either }
 import org.hammerlab.test.{ Afters, Befores, matchers }
 import org.scalatest.{ FunSuite, Matchers }
 
@@ -28,7 +28,9 @@ abstract class Suite
      with Afters
      with matchers.lines.HasMatcher
      with matchers.seqs.all
-     with double.HasNeq {
+     with double.HasNeq
+     with CanEq.dsl
+     with either {
 
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[doubleCmp]] */
   implicit var ε: E = 1e-6
@@ -93,4 +95,15 @@ abstract class Suite
   def !==[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Unit =
     if (cmp(l, r).isEmpty)
       fail(s"Expected $l !== $r")
+
+  implicit class VerifyOps[T](t: Option[T]) {
+    def !(implicit show: Show[T] = showAny[T]): Unit =
+      t
+        .foreach {
+          e ⇒
+            fail(
+              show.show(e)
+            )
+        }
+  }
 }
