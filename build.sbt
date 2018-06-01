@@ -27,8 +27,7 @@ lazy val suite = crossProject.settings(
     cats,
     math.tolerance,
     scalatest,
-    shapeless,
-    "com.lihaoyi" ^^ "sourcecode" ^ "0.1.4"
+    shapeless
   )
 )
 lazy val `suite.js`  = suite.js
