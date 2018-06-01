@@ -1,7 +1,7 @@
 package org.hammerlab.cmp
 
 import org.hammerlab.test.Cmp
-import shapeless.{ :+:, CNil, Generic, HNil, Inl, Inr, Lazy, :: }
+import shapeless.{ :+:, ::, CNil, Generic, HNil, Inl, Inr, Lazy }
 
 object Helpers {
 //  implicit def canEqSuperclass[T, U <: T](implicit cmp: Cmp[T]): CanEq.Aux[T, U, cmp.Error] =
@@ -138,97 +138,18 @@ object Helpers {
 
     hammerlab.cmp.first.cmpSealedTrait[
       Either[L, R],
-      Left[L, R] :+:
-      Right[L, R] :+:
-      CNil,
+        Left[L, R] :+:
+       Right[L, R] :+:
+              CNil,
       (cmpL.Error :+: CNil) :+:
       (cmpR.Error :+: CNil) :+:
-      CNil
+                      CNil
     ]
-
-    //    implicit val cp: Cmp.Aux[
-//      Left[L, R] :+:
-//      Right[L, R] :+:
-//      CNil,
-//      Either[
-//        String,
-//        cmpL.Error :+:
-//        cmpR.Error :+:
-//        CNil
-//      ]
-//    ] = ???
-
-//    hammerlab.cmp.first.cmpSealedTrait[
-//      Either[L, R],
-//        Left[L, R] :+:
-//       Right[L, R] :+:
-//              CNil,
-//      cmpL.Error :+:
-//      cmpR.Error :+:
-//      CNil
-//    ]
   }
-
-
-//  def eitherCanEq[L, R](
-//    implicit
-//    cmpL: Lazy[Cmp[L]],
-//    cmpR: Lazy[Cmp[R]]
-//  ):
-//    Cmp.Aux[
-//      Either[L, R],
-//      Either[
-//        String,
-//        cmpL.value.Error :+:
-//        cmpR.value.Error :+:
-//        CNil
-//      ]
-//    ] =
-//    shapeless.the[
-//      Cmp.Aux[
-//        Either[L, R],
-//        Either[
-//          String,
-//          cmpL.value.Error :+:
-//          cmpR.value.Error :+:
-//          CNil
-//        ]
-//      ]
-//    ]
-
-//    hammerlab.cmp.first.cmpSealedTrait[
-//      Either[L, R],
-//        Left[L, R] :+:
-//       Right[L, R] :+:
-//              CNil,
-//      cmpL.value.Error :+:
-//      cmpR.value.Error :+:
-//      CNil
-//    ]
 }
 
 class EitherTest
   extends hammerlab.Suite {
-
-  //implicitly[Generic.Aux[Either[String, Int], Left[String, Int] :+: Right[String, Int] :+: CNil]]
-
-  //import Helpers.canEqSuperclass
-
-//  implicit def eitherProductSerializable[L, R](
-//    implicit
-//    cmpL: Lazy[Cmp[L]],
-//    cmpR: Lazy[Cmp[R]]
-//  ):
-//    Cmp.Aux[
-//      Either[L, R] with Product with Serializable,
-//      Either[
-//        String,
-//        cmpL.value.Error :+:
-//        cmpR.value.Error :+:
-//        CNil
-//      ]
-//    ] =
-//    Helpers.eitherCanEq[L, R](cmpL, cmpR)
 
   implicit def eitherProductSerializable[L, R](
     implicit
@@ -245,7 +166,6 @@ class EitherTest
     ]
   ] =
     Helpers.eitherCanEq[L, R](cmpL, cmpR)
-
 
   test("simple") {
     val l =  Left("abc")
@@ -321,14 +241,10 @@ class EitherTest
       Some(
         Right(
           Inl(
-            Right(
-              Inl(
-                Inl(
-                  (
-                    "abc",
-                    "cba"
-                  )
-                )
+            Inl(
+              (
+                "abc",
+                "cba"
               )
             )
           )
@@ -358,16 +274,10 @@ class EitherTest
         Right(
           Inr(
             Inl(
-              Right(
-                Inr(
-                  Inl(
-                    Inl(
-                      (
-                        123,
-                        321
-                      )
-                    )
-                  )
+              Inl(
+                (
+                  123,
+                  321
                 )
               )
             )

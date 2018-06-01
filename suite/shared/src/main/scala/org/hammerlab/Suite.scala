@@ -95,15 +95,4 @@ abstract class Suite
   def !==[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Unit =
     if (cmp(l, r).isEmpty)
       fail(s"Expected $l !== $r")
-
-  implicit class VerifyOps[T](t: Option[T]) {
-    def !(implicit show: Show[T] = showAny[T]): Unit =
-      t
-        .foreach {
-          e ⇒
-            fail(
-              show.show(e)
-            )
-        }
-  }
 }
