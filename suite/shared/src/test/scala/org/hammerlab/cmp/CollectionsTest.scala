@@ -1,7 +1,6 @@
 package org.hammerlab.cmp
 
-import hammerlab.cmp.first._
-import CanEq.cmp
+import org.hammerlab.cmp.first.Collections.{ Diff, LeftOnly, RightOnly }
 
 class CollectionsTest
   extends hammerlab.Suite {
@@ -13,12 +12,12 @@ class CollectionsTest
     }
 
   test("maps") {
-    ===(
+    ==(
       Map("a" → 2),
       Map("a" → 2)
     )
 
-    ===(
+    ==(
       Map("a" →  2),
       Map("a" → 12)
     )
@@ -74,9 +73,8 @@ class CollectionsTest
     )
   }
 
-
   test("arrays") {
-    ===(
+    ==(
       Array( 1,  6, 22, 17),
       Array(11, 66,  2, 77)
     )
@@ -90,5 +88,139 @@ class CollectionsTest
           Diff((17, 78))
       )
     )
+  }
+
+  test("iterables") {
+    ==(
+      Iterable( 1,  6, 22, 17),
+      Iterable(11, 66,  2, 77)
+    )
+
+    cmp(
+      Iterable( 1,  6, 22, 17),
+      Iterable(11, 66,  2, 78)
+    ) should be(
+      Some(
+        3 →
+          Diff((17, 78))
+      )
+    )
+
+    ==(
+      List( 1,  6, 22, 17): Iterable[Int],
+      List(11, 66,  2, 77): Iterable[Int]
+    )
+
+    cmp(
+      List( 1,  6, 22, 17): Iterable[Int],
+      List(11, 66,  2, 78): Iterable[Int]
+    ) should be(
+      Some(
+        3 →
+          Diff((17, 78))
+      )
+    )
+  }
+
+//  test("seqs") {
+//    ==(
+//      Seq( 1,  6, 22, 17),
+//      Seq(11, 66,  2, 77)
+//    )
+//
+//    cmp(
+//      Seq( 1,  6, 22, 17),
+//      Seq(11, 66,  2, 78)
+//    ) should be(
+//      Some(
+//        3 →
+//          Diff((17, 78))
+//      )
+//    )
+//
+//    ==(
+//      List( 1,  6, 22, 17): Seq[Int],
+//      List(11, 66,  2, 77): Seq[Int]
+//    )
+//
+//    cmp(
+//      List( 1,  6, 22, 17): Seq[Int],
+//      List(11, 66,  2, 78): Seq[Int]
+//    ) should be(
+//      Some(
+//        3 →
+//          Diff((17, 78))
+//      )
+//    )
+//  }
+
+//  test("lists") {
+//    ==(
+//      List( 1,  6, 22, 17),
+//      List(11, 66,  2, 77)
+//    )
+//
+//    val empty = List()
+//
+//    ==(empty, empty)
+//    ==(empty,   Nil)
+//    ==(  Nil, empty)
+//    ==(  Nil,   Nil)
+//
+//    cmp(
+//      List( 1,  6, 22, 17),
+//      List(11, 66,  2, 78)
+//    ) should be(
+//      Some(
+//        3 →
+//          Diff((17, 78))
+//      )
+//    )
+//  }
+
+  test("sets") {
+    ==(Set(): Set[Int])(Set())
+
+    ==(Set(1), Set(1))
+
+    ==(
+      Set(  1, 10, 100),
+      Set(  1, 10, 100)
+    )
+
+    ==(
+      Set(  1, 10, 100),
+      Set(100,  1,  10)
+    )
+
+    cmp(
+      Set(  1, 10, 1000, 100),
+      Set(100,  1,   10)
+    ) should be(
+      Some(
+        LeftOnly(1000)
+      )
+    )
+
+    cmp(
+      Set(100,  1,   10),
+      Set(  1, 10, 1000, 100)
+    ) should be(
+      Some(
+        RightOnly(1000)
+      )
+    )
+
+    cmp(
+      Set(1)
+    )(
+      Set( )
+    ) should be(
+      Some(
+        LeftOnly(1)
+      )
+    )
+
+    !=(Set(1))(Set())
   }
 }

@@ -28,6 +28,6 @@ trait HasNeq {
    * Consider [[Double]]s to be equal if their ratio if their ratio differs from [[1]] by less than or equal to [[ε]],
    * or if one of them equals zero and the other's absolute value is less than or equal to [[ε]]
    */
-  implicit def doubleCmp(implicit ε: E): Cmp.Aux[Double, Neq] =
+  implicit def fuzzyDoubleCmp(implicit ε: E): Cmp.Aux[Double, Neq] =
     Cmp[Double, Neq](Neq(_, _))
 }

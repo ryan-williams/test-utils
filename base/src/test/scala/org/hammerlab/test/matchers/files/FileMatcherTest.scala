@@ -14,8 +14,9 @@ class FileMatcherTest
 
   test("differing files") {
     val result = fileMatch("c/numbers")("b/numbers")
-    result.matches should be(false)
-    result.failureMessage should be(
+    ==(result.matches, false)
+    ==(
+      result.failureMessage,
       """"1
         |2
         |3
@@ -33,11 +34,11 @@ class FileMatcherTest
   test("error on directories") {
     val dir = tmpDir()
     var result = new FileMatcher(dir).apply("a/numbers")
-    result.matches should be(false)
-    result.failureMessage should be(s"'Expected' file $dir should not be a directory")
+    ==(result.matches, false)
+    ==(result.failureMessage, s"'Expected' file $dir should not be a directory")
 
     result = fileMatch("a/numbers").apply(dir)
-    result.matches should be(false)
-    result.failureMessage should be(s"'Actual' file $dir should not be a directory")
+    ==(result.matches, false)
+    ==(result.failureMessage, s"'Actual' file $dir should not be a directory")
   }
 }
