@@ -1,10 +1,7 @@
 package org.hammerlab.cmp.first
 
-import org.hammerlab.cmp.Pos
 import org.hammerlab.test.Cmp
 import shapeless.{ :+:, CNil, Coproduct, Generic, Inl, Inr, Lazy }
-
-import scala.reflect.ClassTag
 
 trait SealedTrait {
   object SealedTrait {
@@ -17,16 +14,15 @@ trait SealedTrait {
   implicit def cmpCCons[H, T <: Coproduct, ET <: Coproduct](
     implicit
     head: Lazy[Cmp[H]],
-    tail: Lazy[Cmp.Aux[T, Err[ET]]],
-    tt: ClassTag[H]
+    tail: Lazy[Cmp.Aux[T, Err[ET]]]
   ):
     Cmp.Aux[
       H :+: T,
-      Err[head.value.Error :+: ET]
+      Err[head.value.Diff :+: ET]
     ] =
     Cmp[
       H :+: T,
-      Err[head.value.Error :+: ET]
+      Err[head.value.Diff :+: ET]
     ] {
       case (Inl(l), Inl(r)) ⇒
         head
@@ -58,9 +54,7 @@ trait SealedTrait {
   implicit def cmpSealedTrait[T, C <: Coproduct, E <: Coproduct](
     implicit
     gen: Generic.Aux[T, C],
-    cmp: Lazy[Cmp.Aux[C, Err[E]]],
-    ctt: ClassTag[T],
-    ctc: ClassTag[C]
+    cmp: Lazy[Cmp.Aux[C, Err[E]]]
   ):
     Cmp.Aux[T, Err[E]] =
     Cmp[T, Err[E]] {

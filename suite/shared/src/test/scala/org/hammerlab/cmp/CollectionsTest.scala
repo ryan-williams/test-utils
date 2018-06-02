@@ -1,6 +1,6 @@
 package org.hammerlab.cmp
 
-import hammerlab.cmp.first._
+import org.hammerlab.cmp.first.Collections.{ Diff, LeftOnly, RightOnly }
 
 class CollectionsTest
   extends hammerlab.Suite {
@@ -82,6 +82,57 @@ class CollectionsTest
     cmp(
       Array( 1,  6, 22, 17),
       Array(11, 66,  2, 78)
+    ) should be(
+      Some(
+        3 →
+          Diff((17, 78))
+      )
+    )
+  }
+
+  test("iterables") {
+    ===(
+      Iterable( 1,  6, 22, 17),
+      Iterable(11, 66,  2, 77)
+    )
+
+    cmp(
+      Iterable( 1,  6, 22, 17),
+      Iterable(11, 66,  2, 78)
+    ) should be(
+      Some(
+        3 →
+          Diff((17, 78))
+      )
+    )
+  }
+
+  test("seqs") {
+    ===(
+      Seq( 1,  6, 22, 17),
+      Seq(11, 66,  2, 77)
+    )
+
+    cmp(
+      Seq( 1,  6, 22, 17),
+      Seq(11, 66,  2, 78)
+    ) should be(
+      Some(
+        3 →
+          Diff((17, 78))
+      )
+    )
+  }
+
+  test("lists") {
+    ===(
+      List( 1,  6, 22, 17),
+      List(11, 66,  2, 77)
+    )
+
+    cmp(
+      List( 1,  6, 22, 17),
+      List(11, 66,  2, 78)
     ) should be(
       Some(
         3 →

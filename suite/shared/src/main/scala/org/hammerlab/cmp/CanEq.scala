@@ -1,37 +1,22 @@
 package org.hammerlab.cmp
 
 import cats.Eq
-
-case class Pos(file: sourcecode.File,
-               line: sourcecode.Line,
-               name: sourcecode.Name) {
-  override def toString =
-    s"${file.value.drop(file.value.lastIndexOf('/') + 1)}:${line.value}\t(${name.value})"
-}
-
-object Pos {
-  implicit def make(
-  implicit
-    file: sourcecode.File,
-    line: sourcecode.Line,
-    name: sourcecode.Name
-  ): Pos =
-     Pos(file, line, name)
-}
+import org.hammerlab.cmp.first.{ CaseClass, Collections }
 
 /**
- * Type-class for comparing two types, with customizable `Error` output-type containing a possibly-structured
- * representation of the "diff", if any
+ * Type-class for comparing instances of two (possibly different )types, with a customizable "diff" output-type
+ * containing a configurable representation of the "diff", if any
  */
 trait CanEq[-L, -R] {
-  type Error
-  def   cmp(l: L, r: R): Option[Error]
-  def apply(l: L, r: R): Option[Error] = cmp(l, r)
-  def   eqv(l: L, r: R): Boolean = cmp(l, r).isEmpty
+  type Diff
+  def   cmp(l: L, r: R): Option[Diff]
+  def apply(l: L, r: R): Option[Diff] = cmp(l, r)
+  def   eqv(l: L, r: R):      Boolean = cmp(l, r).isEmpty
 }
 
 trait LowPriCanEq
-  extends Serializable {
+  extends CaseClass
+     with Serializable {
 
   /** Short-hand for a [[CanEq]] whose comparee-types are equal */
   type Cmp[-T] = CanEq[T, T]
@@ -39,10 +24,10 @@ trait LowPriCanEq
     type Aux[-T, E] = CanEq.Aux[T, T, E]
 
     /** Create a [[Cmp]] from its single method */
-    def apply[T, E](fn: (T, T) ⇒ Option[E])(implicit pos: Pos): Aux[T, E] = CanEq(fn)
+    def apply[T, E](fn: (T, T) ⇒ Option[E]): Aux[T, E] = CanEq(fn)
 
     /** Create a [[Cmp]] interms of another */
-    def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Aux[U, cmp.Error] =
+    def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Aux[U, cmp.Diff] =
       Cmp {
         (l, r) ⇒
           cmp(
@@ -52,17 +37,17 @@ trait LowPriCanEq
       }
   }
 
-  type Aux[-T, -U, E] = CanEq[T, U] { type Error = E }
+  type Aux[-T, -U, E] = CanEq[T, U] { type Diff = E }
 
   /**
    * Short-hand for creating [[CanEq]] instances from a single method.
    *
    * TODO: can probably go away in favor of SAM-syntax once Scala 2.11 support is dropped.
    */
-  def apply[T, U, E](fn: (T, U) ⇒ Option[E])(implicit pos: Pos): Aux[T, U, E] =
+  def apply[T, U, D](fn: (T, U) ⇒ Option[D]): Aux[T, U, D] =
     new CanEq[T, U] {
-      type Error = E
-      override def cmp(t: T, u: U): Option[Error] =
+      type Diff = D
+      override def cmp(t: T, u: U): Option[Diff] =
         fn(t, u)
     }
 
@@ -70,7 +55,7 @@ trait LowPriCanEq
    * Derive a [[Cmp]] from an [[Eq]], where the returned "diff"-representation is just a [[Tuple2]] with the two
    * comparees
    */
-  implicit def fromEq[T](implicit e: Eq[T], pos: Pos): Cmp.Aux[T, (T, T)] =
+  implicit def fromEq[T](implicit e: Eq[T]): Cmp.Aux[T, (T, T)] =
     apply(
       (t1, t2) ⇒
         if (e.eqv(t1, t2))
@@ -84,7 +69,7 @@ trait LowPriCanEq
 
 object CanEq
   extends LowPriCanEq
-     with first.all {
+     with Collections {
 
   /**
    * Create a [[CanEq]] for two different types given a [[Cmp]] for one and a conversion function for the other into the
@@ -93,15 +78,14 @@ object CanEq
   def withConversion[T, U](
     implicit
     cmp: Cmp[T],
-    conv: U ⇒ T,
-    pos: Pos
+    conv: U ⇒ T
   ):
-    CanEq.Aux[T, U, cmp.Error] =
+    CanEq.Aux[T, U, cmp.Diff] =
     CanEq(cmp(_, _))
 
   trait dsl {
-    /** Short-hand for applying a [[CanEq]] to two objects and returning the "error", if any */
-    def cmp[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Option[cmp.Error] =
+    /** Short-hand for applying a [[CanEq]] to two objects and returning the [[CanEq.Diff diff]], if any */
+    def cmp[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Option[cmp.Diff] =
       cmp(l, r)
   }
 

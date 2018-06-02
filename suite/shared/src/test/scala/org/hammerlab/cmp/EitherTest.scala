@@ -5,13 +5,16 @@ import shapeless.{ Inl, Inr }
 class EitherTest
   extends hammerlab.Suite {
 
-  test("simple") {
-    val l =  Left("abc")
-    val r = Right( 123 )
+  val l1 =  Left("abc")
+  val l2 =  Left("cba")
 
+  val r1 = Right( 123 )
+  val r2 = Right( 321 )
+
+  test("different types") {
     cmp(
-      l,
-      r
+      l1,
+      r1
     ) should be(
       Some(
         Left("Different types: Left(abc), Right(123)")
@@ -19,8 +22,8 @@ class EitherTest
     )
 
     cmp(
-      l: Either[String, Int],
-      r: Either[String, Int]
+      l1: Either[String, Int],
+      r1: Either[String, Int]
     ) should be(
       Some(
         Left("Different types: Left(abc), Right(123)")
@@ -28,8 +31,8 @@ class EitherTest
     )
 
     cmp(
-      r,
-      l
+      r1,
+      l1
     ) should be(
       Some(
         Left("Different types: Right(123), Left(abc)")
@@ -37,30 +40,59 @@ class EitherTest
     )
 
     cmp(
-      r: Either[String, Int],
-      l: Either[String, Int]
+      r1: Either[String, Int],
+      l1: Either[String, Int]
     ) should be(
       Some(
         Left("Different types: Right(123), Left(abc)")
       )
     )
 
-    ===(l, l)
-    ===(r, r)
-    !==(l, r)
-    !==(r, l)
-    !==(l, Left("cba"))
-    !==(r, Right(321))
+    !==(l1, r1)
+    !==(r1, l1)
+  }
 
-    ===(r: Either[ String, Int], r)
-    ===(r: Either[ String, Int], r: Right[ String, Int])
+  test("equal lefts") {
+    ===(l1, l1)
+    ===(l2, l2)
 
-    ===(r:  Right[ String, Int], r)
-    ===(r:  Right[Nothing, Int], r)
+    ===(l1: Either[String,     Int], l1: Either[String, Int])
+    ===(l2: Either[String,     Int], l2: Either[String, Int])
+
+    ===(l1: Either[String,     Int], l1                     )
+    ===(l1: Either[String,     Int], l1:   Left[String, Int])
+
+    ===(l1:   Left[String,     Int], l1                     )
+    ===(l1:   Left[String, Nothing], l1                     )
+
+    cmp(l1, l1) should be(None)
+    cmp(l2, l2) should be(None)
+  }
+
+  test("equal rights") {
+    ===(r1, r1)
+    ===(r2, r2)
+
+    ===(r1: Either[ String, Int], r1: Either[String, Int])
+    ===(r2: Either[ String, Int], r2: Either[String, Int])
+
+    ===(r1: Either[ String, Int], r1                     )
+    ===(r1: Either[ String, Int], r1:  Right[String, Int])
+
+    ===(r1:  Right[ String, Int], r1                     )
+    ===(r1:  Right[Nothing, Int], r1                     )
+
+    cmp(r1, r1) should be(None)
+    cmp(r2, r2) should be(None)
+  }
+
+  test("different lefts") {
+    !==(l1, l2)
+    !==(l2, l1)
 
     cmp(
-      Left("abc"),
-      Left("cba")
+      l1,
+      l2
     ) should be(
       Some(
         Inl(
@@ -73,8 +105,8 @@ class EitherTest
     )
 
     cmp(
-      Left("abc"): Either[String, Int],
-      Left("cba"): Either[String, Int]
+      l1: Either[String, Int],
+      l2: Either[String, Int]
     ) should be(
       Some(
         Right(
@@ -89,10 +121,15 @@ class EitherTest
         )
       )
     )
+  }
+
+  test("different rights") {
+    !==(r1, r2)
+    !==(r2, r1)
 
     cmp(
-      Right(123),
-      Right(321)
+      r1,
+      r2
     ) should be(
       Some(
         Inl(
@@ -105,8 +142,8 @@ class EitherTest
     )
 
     cmp(
-      Right(123): Either[String, Int],
-      Right(321): Either[String, Int]
+      r1: Either[String, Int],
+      r2: Either[String, Int]
     ) should be(
       Some(
         Right(
