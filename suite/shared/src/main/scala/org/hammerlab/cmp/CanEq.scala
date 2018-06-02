@@ -27,7 +27,7 @@ trait LowPriCanEq
     def apply[T, E](fn: (T, T) ⇒ Option[E]): Aux[T, E] = CanEq(fn)
 
     /** Create a [[Cmp]] interms of another */
-    def by[T, U](fn: U ⇒ T)(implicit cmp: Cmp[T]): Aux[U, cmp.Diff] =
+    def by[L, R](fn: R ⇒ L)(implicit cmp: Cmp[L]): Aux[R, cmp.Diff] =
       Cmp {
         (l, r) ⇒
           cmp(
@@ -35,6 +35,20 @@ trait LowPriCanEq
             fn(r)
           )
       }
+
+    /**
+     * Wrapper around a [[Cmp]] used to enable overloading methods that would otherwise have the same type after erasure
+     *
+     * See [[CanEq.dsl]] or [[dsl]]
+     */
+    case class Wrapper[-T, D](cmp: Cmp.Aux[T, D]) {
+      type Diff = cmp.Diff
+      def apply(l: T, r: T): Option[D] = cmp(l, r)
+    }
+    object Wrapper {
+      implicit def   wrap[T, D](implicit c: Cmp.Aux[T, D]): Wrapper[T, D] = Wrapper(c)
+      implicit def unwrap[T, D](         w: Wrapper[T, D]): Cmp.Aux[T, D] = w.cmp
+    }
   }
 
   type Aux[-L, -R, D] = CanEq[L, R] { type Diff = D }
@@ -67,20 +81,22 @@ trait LowPriCanEq
     )
 }
 
-case class Wrapper[-L, -R, D](canEq: CanEq.Aux[L, R, D]) {
-  //type Diff = canEq.Diff
-  def apply(l: L, r: R): Option[D] = canEq(l, r)
-}
-object Wrapper {
-  //type Aux[L, R, D] = Wrapper[L, R] { type Diff = D }
-  implicit def   wrap[L, R, D](implicit c: CanEq.Aux[L, R, D]): Wrapper[L, R, D] = Wrapper(c)
-  implicit def unwrap[L, R, D](implicit w: Wrapper[L, R, D]): CanEq.Aux[L, R, D] = w.canEq
-}
-
-
 object CanEq
   extends LowPriCanEq
      with Collections {
+
+  /**
+   * Wrapper around a [[CanEq]] used to enable overloading methods that would otherwise have the same type after erasure
+   *
+   * See [[dsl]] or [[org.hammerlab.cmp.dsl]]
+   */
+  case class Wrapper[-L, -R, D](cmp: CanEq.Aux[L, R, D]) {
+    type Diff = cmp.Diff
+    def apply(l: L, r: R): Option[D] = cmp(l, r)
+  }
+  object Wrapper {
+    implicit def wrap[L, R, D](implicit c: CanEq.Aux[L, R, D]): Wrapper[L, R, D] = Wrapper(c)
+  }
 
   /**
    * Create a [[CanEq]] for two different types given a [[Cmp]] for one and a conversion function for the other into the
@@ -94,8 +110,8 @@ object CanEq
     CanEq.Aux[L, R, cmp.Diff] =
     CanEq(cmp(_, _))
 
+  /** Short-hands for applying a [[CanEq]] to two objects and returning the [[CanEq.Diff diff]], if any */
   trait dsl {
-    /** Short-hand for applying a [[CanEq]] to two objects and returning the [[CanEq.Diff diff]], if any */
     def cmp[
       L,
       R
@@ -109,16 +125,33 @@ object CanEq
       Option[cmp.Diff] =
       cmp(l, r)
 
+    /**
+     * This overload allows for coercing the second argument ("expected" value) to be the type of the first ("actual"
+     * value), e.g.:
+     *
+     * {{{
+     * def ids: Set[Int]
+     *
+     * // Diff `ids` against an empty Set
+     * cmp(ids)(Set())
+     *
+     * // This won't compile, because the compiler will attempt to unify Set[Int] and Set[Nothing], and Set is invariant
+     * cmp(ids, Set())
+     * }}}
+     *
+     * @param cmp use a [[Cmp.Wrapper]] here, otherwise this method has the same type after erasure as its overload
+     *            above, and won't compile
+     */
     def cmp[T, E](
       l: T
     )(
       r: T
     )(
       implicit
-      cmp: Wrapper[T, T, E]
+      cmp: Cmp.Wrapper[T, E]
     ):
-      Option[cmp.canEq.Diff] =
-      cmp.canEq(l, r)
+      Option[cmp.Diff] =
+      cmp(l, r)
   }
 
   object dsl extends dsl

@@ -16,6 +16,6 @@ trait MatcherResultTest
       else
         matchResult.failureMessage
 
-      actualFailureMsg should be(expectedFailureMsg)
+      ==(actualFailureMsg, expectedFailureMsg)
   }
 }

@@ -1,6 +1,6 @@
 package org.hammerlab.cmp
 
-import org.hammerlab.cmp.first.Collections.{ Diff, ElemOnly, LeftOnly, RightOnly }
+import org.hammerlab.cmp.first.Collections.{ Diff, LeftOnly, RightOnly }
 
 class CollectionsTest
   extends hammerlab.Suite {
@@ -12,12 +12,12 @@ class CollectionsTest
     }
 
   test("maps") {
-    ===(
+    ==(
       Map("a" → 2),
       Map("a" → 2)
     )
 
-    ===(
+    ==(
       Map("a" →  2),
       Map("a" → 12)
     )
@@ -74,7 +74,7 @@ class CollectionsTest
   }
 
   test("arrays") {
-    ===(
+    ==(
       Array( 1,  6, 22, 17),
       Array(11, 66,  2, 77)
     )
@@ -91,7 +91,7 @@ class CollectionsTest
   }
 
   test("iterables") {
-    ===(
+    ==(
       Iterable( 1,  6, 22, 17),
       Iterable(11, 66,  2, 77)
     )
@@ -106,7 +106,7 @@ class CollectionsTest
       )
     )
 
-    ===(
+    ==(
       List( 1,  6, 22, 17): Iterable[Int],
       List(11, 66,  2, 77): Iterable[Int]
     )
@@ -123,7 +123,7 @@ class CollectionsTest
   }
 
   test("seqs") {
-    ===(
+    ==(
       Seq( 1,  6, 22, 17),
       Seq(11, 66,  2, 77)
     )
@@ -138,7 +138,7 @@ class CollectionsTest
       )
     )
 
-    ===(
+    ==(
       List( 1,  6, 22, 17): Seq[Int],
       List(11, 66,  2, 77): Seq[Int]
     )
@@ -155,7 +155,7 @@ class CollectionsTest
   }
 
   test("lists") {
-    ===(
+    ==(
       List( 1,  6, 22, 17),
       List(11, 66,  2, 77)
     )
@@ -172,19 +172,16 @@ class CollectionsTest
   }
 
   test("sets") {
-    //===[Set[Int], Set[Int], ElemOnly[Int, Int]](Set(), Set())
-    //==[Set[Int], ElemOnly[Int, Int]](Set(), Set())
-
     ==(Set(): Set[Int])(Set())
 
-    ===(Set(1), Set(1))
+    ==(Set(1), Set(1))
 
-    ===(
+    ==(
       Set(  1, 10, 100),
       Set(  1, 10, 100)
     )
 
-    ===(
+    ==(
       Set(  1, 10, 100),
       Set(100,  1,  10)
     )

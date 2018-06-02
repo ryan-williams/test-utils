@@ -48,47 +48,47 @@ class EitherTest
       )
     )
 
-    !==(l1, r1)
-    !==(r1, l1)
+    !=(l1, r1)
+    !=(r1, l1)
   }
 
   test("equal lefts") {
-    ===(l1, l1)
-    ===(l2, l2)
+    ==(l1, l1)
+    ==(l2, l2)
 
-    ===(l1: Either[String,     Int], l1: Either[String, Int])
-    ===(l2: Either[String,     Int], l2: Either[String, Int])
+    ==(l1: Either[String,     Int], l1: Either[String, Int])
+    ==(l2: Either[String,     Int], l2: Either[String, Int])
 
-    ===(l1: Either[String,     Int], l1                     )
-    ===(l1: Either[String,     Int], l1:   Left[String, Int])
+    ==(l1: Either[String,     Int], l1                     )
+    ==(l1: Either[String,     Int], l1:   Left[String, Int])
 
-    ===(l1:   Left[String,     Int], l1                     )
-    ===(l1:   Left[String, Nothing], l1                     )
+    ==(l1:   Left[String,     Int], l1                     )
+    ==(l1:   Left[String, Nothing], l1                     )
 
-    cmp(l1, l1) should be(None)
-    cmp(l2, l2) should be(None)
+    ==(cmp(l1, l1), None)
+    ==(cmp(l2, l2), None)
   }
 
   test("equal rights") {
-    ===(r1, r1)
-    ===(r2, r2)
+    ==(r1, r1)
+    ==(r2, r2)
 
-    ===(r1: Either[ String, Int], r1: Either[String, Int])
-    ===(r2: Either[ String, Int], r2: Either[String, Int])
+    ==(r1: Either[ String, Int], r1: Either[String, Int])
+    ==(r2: Either[ String, Int], r2: Either[String, Int])
 
-    ===(r1: Either[ String, Int], r1                     )
-    ===(r1: Either[ String, Int], r1:  Right[String, Int])
+    ==(r1: Either[ String, Int], r1                     )
+    ==(r1: Either[ String, Int], r1:  Right[String, Int])
 
-    ===(r1:  Right[ String, Int], r1                     )
-    ===(r1:  Right[Nothing, Int], r1                     )
+    ==(r1:  Right[ String, Int], r1                     )
+    ==(r1:  Right[Nothing, Int], r1                     )
 
-    cmp(r1, r1) should be(None)
-    cmp(r2, r2) should be(None)
+    ==(cmp(r1, r1), None)
+    ==(cmp(r2, r2), None)
   }
 
   test("different lefts") {
-    !==(l1, l2)
-    !==(l2, l1)
+    !=(l1, l2)
+    !=(l2, l1)
 
     cmp(
       l1,
@@ -124,8 +124,8 @@ class EitherTest
   }
 
   test("different rights") {
-    !==(r1, r2)
-    !==(r2, r1)
+    !=(r1, r2)
+    !=(r2, r1)
 
     cmp(
       r1,

@@ -16,17 +16,17 @@ class SuiteTest
   }
 
   test("before is cleared") {
-    b should be("")
+    ==(b, "")
     b = "b2"
   }
 
   test("check num afters") {
-    b should be("")
-    numAftersRun should be(1)
+    ==(b, "")
+    ==(numAftersRun, 1)
   }
 
   test("check num afters again") {
-    b should be("")
-    numAftersRun should be(2)
+    ==(b, "")
+    ==(numAftersRun, 2)
   }
 }

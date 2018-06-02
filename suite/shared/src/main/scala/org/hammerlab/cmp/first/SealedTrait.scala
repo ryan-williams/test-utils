@@ -58,12 +58,12 @@ trait SealedTrait {
   ):
     Cmp.Aux[T, Err[E]] =
     Cmp[T, Err[E]] {
-      (t, u) ⇒
+      (l, r) ⇒
         cmp
           .value
           .cmp(
-            gen.to(t),
-            gen.to(u)
+            gen.to(l),
+            gen.to(r)
           )
     }
 }
