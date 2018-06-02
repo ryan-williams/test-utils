@@ -3,7 +3,7 @@ package org.hammerlab
 import cats.{ Eq, Show }
 import hammerlab.math.tolerance._
 import org.hammerlab.cmp.CanEq.withConversion
-import org.hammerlab.cmp.{ CanEq, double, either }
+import org.hammerlab.cmp.{ CanEq, double }
 import org.hammerlab.test.{ Afters, Befores, matchers }
 import org.scalatest.{ FunSuite, Matchers }
 
@@ -29,8 +29,7 @@ abstract class Suite
      with matchers.lines.HasMatcher
      with matchers.seqs.all
      with double.HasNeq
-     with CanEq.dsl
-     with either {
+     with CanEq.dsl {
 
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[doubleCmp]] */
   implicit var ε: E = 1e-6

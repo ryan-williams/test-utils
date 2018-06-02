@@ -76,7 +76,7 @@ object Test {
 //      import Test.caseclass
 //      implicitly[TC[A]]
 //      implicitly[Cmp[A]]
-      implicitly[Cmp[A1]]
+      //implicitly[Cmp[A1]]
     } else {
       println("boo")
 //      implicitly[TC[A]]

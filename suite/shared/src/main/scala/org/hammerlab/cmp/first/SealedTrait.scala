@@ -1,10 +1,52 @@
 package org.hammerlab.cmp.first
 
+import org.hammerlab.cmp.Pos
 import org.hammerlab.test.Cmp
 import shapeless.{ :+:, CNil, Coproduct, Generic, Inl, Inr, Lazy }
 
 import scala.reflect.ClassTag
-//import scala.reflect.runtime.universe._
+
+object Helpers {
+
+  import cats.implicits.{ catsKernelStdOrderForInt, catsKernelStdOrderForString }
+  import hammerlab.cmp.first.SealedTrait
+
+  def eitherCanEq[L, R, EL, ER](
+    implicit
+    cmpL: Lazy[Cmp.Aux[L, EL]],
+    cmpR: Lazy[Cmp.Aux[R, ER]]
+  ):
+    Cmp.Aux[
+      Either[L, R],
+      SealedTrait.Err[
+        (EL :+: CNil) :+:
+        (ER :+: CNil) :+:
+        CNil
+      ]
+    ] = {
+      implicitly
+    }
+
+  trait implicits {
+    implicit def cmpEitherProductSerializable[L, R, EL, ER](
+      implicit
+      cmpL: Lazy[Cmp.Aux[L, EL]],
+      cmpR: Lazy[Cmp.Aux[R, ER]],
+      pos: Pos
+    ):
+      Cmp.Aux[
+        Either[L, R] with Product with Serializable,
+        SealedTrait.Err[
+          (EL :+: CNil) :+:
+          (ER :+: CNil) :+:
+          CNil
+        ]
+      ] = {
+        println(s"**** $pos: eitherProductSerializable")
+        eitherCanEq[L, R, EL, ER]
+      }
+  }
+}
 
 trait SealedTrait {
   object SealedTrait {
@@ -12,7 +54,8 @@ trait SealedTrait {
   }
   import SealedTrait.Err
 
-  implicit val cmpCnil: Cmp.Aux[CNil, Err[CNil]] = Cmp[CNil, Err[CNil]]((_, _) ⇒ ???)
+  implicit val cmpCNil: Cmp.Aux[CNil, Err[CNil]] = Cmp[CNil, Err[CNil]]((_, _) ⇒ ???)
+  println(s"cmpCNil: $cmpCNil")
 
   implicit def cmpCCons[H, T <: Coproduct, ET <: Coproduct](
     implicit
@@ -23,7 +66,9 @@ trait SealedTrait {
     Cmp.Aux[
       H :+: T,
       Err[head.value.Error :+: ET]
-    ] =
+    ] = {
+    println(s"cmpCCons called with ${head.value} ${tail.value}")
+    val cmp =
     Cmp[
       H :+: T,
       Err[head.value.Error :+: ET]
@@ -56,6 +101,9 @@ trait SealedTrait {
           )
         )
     }
+    println(s"cmpCCons returning: $cmp, built from: ${head.value} ${tail.value}")
+    cmp
+  }
 
   implicit def cmpSealedTrait[T, C <: Coproduct, E <: Coproduct](
     implicit
@@ -65,7 +113,8 @@ trait SealedTrait {
     ctc: ClassTag[C]
   ):
     Cmp.Aux[T, Err[E]] = {
-    println(s"called cmpSealedTrait, $gen, ${cmp.value} ${ctt.runtimeClass.getCanonicalName}")
+    println(s"cmpSealedTrait called: with ${cmp.value} for ${ctt.runtimeClass.getCanonicalName}")
+    val ret =
     Cmp[T, Err[E]] {
       (t, u) ⇒
         println(s"cmpSealedTrait: ${ctt.runtimeClass.getCanonicalName}")
@@ -76,5 +125,7 @@ trait SealedTrait {
             gen.to(u)
           )
     }
+    println(s"cmpSealedTrait returning: $ret from ${cmp.value} for ${ctt.runtimeClass.getCanonicalName}")
+    ret
   }
 }

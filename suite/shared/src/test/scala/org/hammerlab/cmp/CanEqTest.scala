@@ -14,8 +14,6 @@ case class Complex(r: Double, i: Double)
 class CanEqTest
   extends hammerlab.Suite {
 
-  import hammerlab.cmp.first._
-
   test("seq") {
     ===(
       Seq(2.0, 3.0),
