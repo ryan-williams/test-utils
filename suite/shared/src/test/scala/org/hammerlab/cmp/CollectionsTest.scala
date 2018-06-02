@@ -1,6 +1,6 @@
 package org.hammerlab.cmp
 
-import org.hammerlab.cmp.first.Collections.{ Diff, LeftOnly, RightOnly }
+import org.hammerlab.cmp.first.Collections.{ Diff, ElemOnly, LeftOnly, RightOnly }
 
 class CollectionsTest
   extends hammerlab.Suite {
@@ -105,6 +105,21 @@ class CollectionsTest
           Diff((17, 78))
       )
     )
+
+    ===(
+      List( 1,  6, 22, 17): Iterable[Int],
+      List(11, 66,  2, 77): Iterable[Int]
+    )
+
+    cmp(
+      List( 1,  6, 22, 17): Iterable[Int],
+      List(11, 66,  2, 78): Iterable[Int]
+    ) should be(
+      Some(
+        3 →
+          Diff((17, 78))
+      )
+    )
   }
 
   test("seqs") {
@@ -116,6 +131,21 @@ class CollectionsTest
     cmp(
       Seq( 1,  6, 22, 17),
       Seq(11, 66,  2, 78)
+    ) should be(
+      Some(
+        3 →
+          Diff((17, 78))
+      )
+    )
+
+    ===(
+      List( 1,  6, 22, 17): Seq[Int],
+      List(11, 66,  2, 77): Seq[Int]
+    )
+
+    cmp(
+      List( 1,  6, 22, 17): Seq[Int],
+      List(11, 66,  2, 78): Seq[Int]
     ) should be(
       Some(
         3 →
@@ -139,5 +169,54 @@ class CollectionsTest
           Diff((17, 78))
       )
     )
+  }
+
+  test("sets") {
+    //===[Set[Int], Set[Int], ElemOnly[Int, Int]](Set(), Set())
+    //==[Set[Int], ElemOnly[Int, Int]](Set(), Set())
+
+    ==(Set(): Set[Int])(Set())
+
+    ===(Set(1), Set(1))
+
+    ===(
+      Set(  1, 10, 100),
+      Set(  1, 10, 100)
+    )
+
+    ===(
+      Set(  1, 10, 100),
+      Set(100,  1,  10)
+    )
+
+    cmp(
+      Set(  1, 10, 1000, 100),
+      Set(100,  1,   10)
+    ) should be(
+      Some(
+        LeftOnly(1000)
+      )
+    )
+
+    cmp(
+      Set(100,  1,   10),
+      Set(  1, 10, 1000, 100)
+    ) should be(
+      Some(
+        RightOnly(1000)
+      )
+    )
+
+    cmp2(
+      Set(1)
+    )(
+      Set( )
+    ) should be(
+      Some(
+        LeftOnly(1)
+      )
+    )
+
+    !=(Set(1))(Set())
   }
 }

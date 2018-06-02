@@ -16,8 +16,8 @@ import org.scalatest.{ FunSuite, Matchers }
  * For example, tests can import implicit [[CanEq]]s to compare collections of objects in a variety of ways:
  *
  * - configurable "fuzziness" to [[Double]]-equality (see `Suite.ε` below)
- * - returning displaying a representation of collections' difference in terms of:
- *   - the index of the first elements to differ (see [[hammerlab.cmp.first]])
+ * - returning a representation of collections' difference in terms of:
+ *   - the index of the first elements to differ (see [[org.hammerlab.cmp.first.Collections]])
  *   - more complex logic to e.g. express that collections have the same elements, but in a different order (TODO:
  *     implement this, and others like it!)
  */
@@ -29,7 +29,8 @@ abstract class Suite
      with matchers.lines.HasMatcher
      with matchers.seqs.all
      with double.HasNeq
-     with CanEq.dsl {
+     with CanEq.dsl
+     with CanEq.dsl2 {
 
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[doubleCmp]] */
   implicit var ε: E = 1e-6
@@ -87,6 +88,35 @@ abstract class Suite
             showError.show(e)
           )
       }
+
+  import CanEq.Cmp
+  def ==[T, E](
+    l: T
+  )(
+    r: T
+  )(
+    implicit
+    cmp: Cmp.Aux[T, E],
+    showError: Show[E] = showAny[E]
+  ): Unit =
+    cmp(l, r)
+      .foreach {
+        e ⇒
+          fail(
+            showError.show(e)
+          )
+      }
+
+  def !=[T](
+    l: T
+  )(
+    r: T
+  )(
+    implicit
+    cmp: Cmp[T]
+  ): Unit =
+    if (cmp(l, r).isEmpty)
+      fail(s"Expected $l !== $r")
 
   /**
    * Verify that two objects are not equal, according to an implicit [[CanEq]]

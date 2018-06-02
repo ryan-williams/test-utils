@@ -37,18 +37,18 @@ trait LowPriCanEq
       }
   }
 
-  type Aux[-T, -U, E] = CanEq[T, U] { type Diff = E }
+  type Aux[-L, -R, D] = CanEq[L, R] { type Diff = D }
 
   /**
    * Short-hand for creating [[CanEq]] instances from a single method.
    *
    * TODO: can probably go away in favor of SAM-syntax once Scala 2.11 support is dropped.
    */
-  def apply[T, U, D](fn: (T, U) ⇒ Option[D]): Aux[T, U, D] =
-    new CanEq[T, U] {
+  def apply[L, R, D](fn: (L, R) ⇒ Option[D]): Aux[L, R, D] =
+    new CanEq[L, R] {
       type Diff = D
-      override def cmp(t: T, u: U): Option[Diff] =
-        fn(t, u)
+      override def cmp(l: L, r: R): Option[Diff] =
+        fn(l, r)
     }
 
   /**
@@ -75,19 +75,42 @@ object CanEq
    * Create a [[CanEq]] for two different types given a [[Cmp]] for one and a conversion function for the other into the
    * [[Cmp]]'s type
    */
-  def withConversion[T, U](
+  def withConversion[L, R](
     implicit
-    cmp: Cmp[T],
-    conv: U ⇒ T
+    cmp: Cmp[L],
+    conv: R ⇒ L
   ):
-    CanEq.Aux[T, U, cmp.Diff] =
+    CanEq.Aux[L, R, cmp.Diff] =
     CanEq(cmp(_, _))
 
   trait dsl {
     /** Short-hand for applying a [[CanEq]] to two objects and returning the [[CanEq.Diff diff]], if any */
-    def cmp[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Option[cmp.Diff] =
+    def cmp[
+      L,
+      R
+    ](
+      l: L,
+      r: R
+    )(
+      implicit
+      cmp: CanEq[L, R]
+    ):
+      Option[cmp.Diff] =
       cmp(l, r)
   }
 
-  object dsl extends dsl
+  trait dsl2 {
+    def cmp2[T](
+      l: T
+    )(
+      r: T
+    )(
+      implicit
+      cmp: Cmp[T]
+    ):
+      Option[cmp.Diff] =
+      cmp(l, r)
+  }
+
+  object dsl extends dsl with dsl2
 }

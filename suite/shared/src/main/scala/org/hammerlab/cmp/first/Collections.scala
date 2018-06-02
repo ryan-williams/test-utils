@@ -3,6 +3,7 @@ package org.hammerlab.cmp.first
 import cats.data.Ior._
 import org.hammerlab.cmp.CanEq
 import Collections._
+import org.hammerlab.test.Cmp
 
 object Collections {
   /**
@@ -16,9 +17,10 @@ object Collections {
    *           the end of either collection; this gets wrapped in and returned as a [[Diff]]
    */
   sealed trait  ElemDiff[+L, +R, +B]       extends Product with Serializable
-    case class  LeftOnly[ L,  R,  B](l: L) extends ElemDiff[L, R, B]
-    case class RightOnly[ L,  R,  B](r: R) extends ElemDiff[L, R, B]
-    case class      Diff[ L,  R,  B](b: B) extends ElemDiff[L, R, B]
+  sealed trait  ElemOnly[+L, +R    ]       extends ElemDiff[L, R, Nothing]
+    case class  LeftOnly[ L        ](l: L) extends ElemOnly[L, Nothing]
+    case class RightOnly[     R    ](r: R) extends ElemOnly[Nothing, R]
+    case class      Diff[         B](b: B) extends ElemDiff[Nothing, Nothing, B]
 
   /**
    * Diff-type for a [[CanEq]] that returns an index/"key" [[Key]] at which two collections have a different value
@@ -93,22 +95,56 @@ trait LowPriorityCollections
 trait Collections
   extends LowPriorityCollections {
 
-  implicit def arraysCanEq[T, U](
+  implicit def arraysCanEq[L, R](
     implicit
-    ce: CanEq[T, U]
+    ce: CanEq[L, R]
   ):
     CanEq.Aux[
-      Array[T],
-      Array[U],
-      IndexedDiff[T, U, ce.Diff]
+      Array[L],
+      Array[R],
+      IndexedDiff[L, R, ce.Diff]
     ] =
     CanEq {
-      (s1, s2) ⇒
+      (l, r) ⇒
         iteratorsCanEq(ce)(
-          s1.iterator,
-          s2.iterator
+          l.iterator,
+          r.iterator
         )
     }
+
+    implicit def setsCanEq[T](
+      implicit
+      cmp: Cmp[T]
+    ):
+      Cmp.Aux[
+        Set[T],
+        ElemOnly[T, T]
+      ] =
+      Cmp {
+        (l, r) ⇒
+          val it =
+            for {
+              e ← l.iterator
+              if !r(e)
+            } yield
+              e
+
+          if (it.hasNext)
+            Some(LeftOnly(it.next))
+          else {
+            val it =
+              for {
+                e ← r.iterator
+                if !l(e)
+              } yield
+                e
+
+            if (it.hasNext)
+              Some(RightOnly(it.next))
+            else
+              None
+          }
+      }
 
   /**
    * Compare two [[Map]]s; takes precedence over [[iterablesCanEq]]
