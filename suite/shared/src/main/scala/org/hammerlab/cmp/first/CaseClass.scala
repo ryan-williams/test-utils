@@ -7,12 +7,12 @@ trait CaseClass {
   implicit def cmpCaseClass[T, L <: HList, E <: Coproduct](
     implicit
     gen: Generic.Aux[T, L],
-    listEq: Lazy[Cmp.Aux[L, E]]
+    listCmp: Lazy[Cmp.Aux[L, E]]
   ):
     Cmp.Aux[T, E] =
     Cmp[T, E] {
       (l, r) ⇒
-        listEq
+        listCmp
           .value
           .cmp(
             gen.to(l),
