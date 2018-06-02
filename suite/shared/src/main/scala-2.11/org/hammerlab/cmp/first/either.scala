@@ -1,9 +1,9 @@
 package org.hammerlab.cmp.first
 
+import hammerlab.cmp.first.SealedTrait
 import org.hammerlab.cmp.Pos
 import org.hammerlab.test.Cmp
 import shapeless._
-import hammerlab.cmp.first.SealedTrait
 
 trait either {
   import either.eitherCanEq
@@ -20,10 +20,8 @@ trait either {
         (ER :+: CNil) :+:
         CNil
       ]
-    ] = {
-      println(s"**** $pos: eitherProductSerializable")
+    ] =
       eitherCanEq[L, R, EL, ER]
-    }
 }
 
 object either {

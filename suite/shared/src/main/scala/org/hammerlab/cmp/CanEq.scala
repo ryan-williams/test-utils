@@ -61,12 +61,9 @@ trait LowPriCanEq
    */
   def apply[T, U, E](fn: (T, U) ⇒ Option[E])(implicit pos: Pos): Aux[T, U, E] =
     new CanEq[T, U] {
-      println(s"$pos:\tmake CanEq")
       type Error = E
-      override def cmp(t: T, u: U): Option[Error] = {
-        println(s"$pos:\tcomparing: $t $u")
+      override def cmp(t: T, u: U): Option[Error] =
         fn(t, u)
-      }
     }
 
   /**
@@ -104,10 +101,8 @@ object CanEq
 
   trait dsl {
     /** Short-hand for applying a [[CanEq]] to two objects and returning the "error", if any */
-    def cmp[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Option[cmp.Error] = {
-      println(s"called cmp dsl: $l, $r $cmp")
+    def cmp[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Option[cmp.Error] =
       cmp(l, r)
-    }
   }
 
   object dsl extends dsl

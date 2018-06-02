@@ -10,9 +10,7 @@ trait CaseClass
     gen: Generic.Aux[T, L],
     listCmp: Lazy[Cmp.Aux[L, E]]
   ):
-    Cmp.Aux[T, E] = {
-    println(s"cmpCaseClass called: ${listCmp.value}")
-    val cmp =
+    Cmp.Aux[T, E] =
     Cmp[T, E] {
       (l, r) ⇒
         listCmp
@@ -22,18 +20,13 @@ trait CaseClass
             gen.to(r)
           )
     }
-    println(s"cmpCaseClass returning: $cmp from ${listCmp.value}")
-    cmp
-  }
 
   implicit def cmpCons[H, T <: HList, ET <: Coproduct](
     implicit
     head: Lazy[Cmp[H]],
     tail: Lazy[Cmp.Aux[T, ET]]
   ):
-    Cmp.Aux[H :: T, head.value.Error :+: ET] = {
-    println(s"cmpCons called: ${head.value} ${tail.value}")
-    val ret =
+    Cmp.Aux[H :: T, head.value.Error :+: ET] =
     Cmp[H :: T, head.value.Error :+: ET](
       (l, r) ⇒
         head
@@ -47,10 +40,6 @@ trait CaseClass
               .map(Inr[head.value.Error, ET](_))
           )
     )
-    println(s"cmpCons returning: $ret from ${head.value} ${tail.value}")
-    ret
-  }
 
   implicit val cmpHNil: Cmp.Aux[HNil, CNil] = Cmp[HNil, CNil]((_, _) ⇒ None)
-  println(s"cmpHNil: $cmpHNil")
 }
