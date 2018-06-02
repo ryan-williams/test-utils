@@ -1,9 +1,9 @@
 package org.hammerlab
 
-import cats.{ Eq, Show }
+import cats.Eq
 import hammerlab.math.tolerance._
 import org.hammerlab.cmp.CanEq.withConversion
-import org.hammerlab.cmp.{ CanEq, double }
+import org.hammerlab.cmp.{ CanEq, Wrapper, double }
 import org.hammerlab.test.{ Afters, Befores, matchers }
 import org.scalatest.{ FunSuite, Matchers }
 
@@ -30,7 +30,7 @@ abstract class Suite
      with matchers.seqs.all
      with double.HasNeq
      with CanEq.dsl
-     with CanEq.dsl2 {
+     with dsl {
 
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[doubleCmp]] */
   implicit var ε: E = 1e-6
@@ -49,11 +49,27 @@ abstract class Suite
   implicit val int2double : CanEq[Double, Int] = withConversion[Double, Int]
   implicit val int2long   : CanEq[  Long, Int] = withConversion[  Long, Int]
 
+}
+
+trait Show[T] {
+  def apply(t: T): String
+}
+trait LowPriorityShow
+  extends Serializable {
   /** Fallback [[Show]] for error-types that don't have a custom [[Show]] provided */
-  private def showAny[T] =
+  implicit def showAny[T]: Show[T] = Show { t: T ⇒ t.toString }
+}
+object Show
+  extends LowPriorityShow {
+  implicit def fromCats[T](implicit s: cats.Show[T]): Show[T] = Show { s.show }
+  def apply[T](fn: T ⇒ String): Show[T] =
     new Show[T] {
-      override def show(t: T): String = t.toString
+      def apply(t: T): String = fn(t)
     }
+}
+
+trait dsl {
+  self: FunSuite ⇒
 
   /**
    * Assert equality between two arbitrary types
@@ -79,31 +95,70 @@ abstract class Suite
   )(
     implicit
     cmp: CanEq.Aux[L, R, E],
-    showError: Show[E] = showAny[E]
+    showError: Show[E]
   ): Unit =
     cmp(l, r)
       .foreach {
         e ⇒
           fail(
-            showError.show(e)
+            showError(e)
           )
       }
 
-  import CanEq.Cmp
+  /**
+   * Verify that two objects are not equal, according to an implicit [[CanEq]]
+   */
+  def !==[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Unit =
+    if (cmp(l, r).isEmpty)
+      fail(s"Expected $l !== $r")
+
+  def ==[L, R, E](
+    l: L,
+    r: R
+  )(
+    implicit
+    cmp: CanEq.Aux[L, R, E],
+    showError: Show[E]
+  ): Unit =
+    cmp(l, r)
+      .foreach {
+        e ⇒
+          fail(
+            showError(e)
+          )
+      }
+
+  def ===[T, E](
+    l: T
+  )(
+    r: T
+  )(
+    implicit
+    cmp: Wrapper[T, T, E],
+    showError: Show[E]
+  ): Unit =
+    cmp(l, r)
+      .foreach {
+        e ⇒
+          fail(
+            showError(e)
+          )
+      }
+
   def ==[T, E](
     l: T
   )(
     r: T
   )(
     implicit
-    cmp: Cmp.Aux[T, E],
-    showError: Show[E] = showAny[E]
+    cmp: Wrapper[T, T, E],
+    showError: Show[E]
   ): Unit =
     cmp(l, r)
       .foreach {
         e ⇒
           fail(
-            showError.show(e)
+            showError(e)
           )
       }
 
@@ -113,15 +168,8 @@ abstract class Suite
     r: T
   )(
     implicit
-    cmp: Cmp[T]
+    cmp: Wrapper[T, T, _]
   ): Unit =
-    if (cmp(l, r).isEmpty)
-      fail(s"Expected $l !== $r")
-
-  /**
-   * Verify that two objects are not equal, according to an implicit [[CanEq]]
-   */
-  def !==[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Unit =
     if (cmp(l, r).isEmpty)
       fail(s"Expected $l !== $r")
 }

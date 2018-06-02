@@ -67,6 +67,17 @@ trait LowPriCanEq
     )
 }
 
+case class Wrapper[-L, -R, D](canEq: CanEq.Aux[L, R, D]) {
+  //type Diff = canEq.Diff
+  def apply(l: L, r: R): Option[D] = canEq(l, r)
+}
+object Wrapper {
+  //type Aux[L, R, D] = Wrapper[L, R] { type Diff = D }
+  implicit def   wrap[L, R, D](implicit c: CanEq.Aux[L, R, D]): Wrapper[L, R, D] = Wrapper(c)
+  implicit def unwrap[L, R, D](implicit w: Wrapper[L, R, D]): CanEq.Aux[L, R, D] = w.canEq
+}
+
+
 object CanEq
   extends LowPriCanEq
      with Collections {
@@ -97,20 +108,18 @@ object CanEq
     ):
       Option[cmp.Diff] =
       cmp(l, r)
-  }
 
-  trait dsl2 {
-    def cmp2[T](
+    def cmp[T, E](
       l: T
     )(
       r: T
     )(
       implicit
-      cmp: Cmp[T]
+      cmp: Wrapper[T, T, E]
     ):
-      Option[cmp.Diff] =
-      cmp(l, r)
+      Option[cmp.canEq.Diff] =
+      cmp.canEq(l, r)
   }
 
-  object dsl extends dsl with dsl2
+  object dsl extends dsl
 }

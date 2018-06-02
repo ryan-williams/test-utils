@@ -207,7 +207,7 @@ class CollectionsTest
       )
     )
 
-    cmp2(
+    cmp(
       Set(1)
     )(
       Set( )
