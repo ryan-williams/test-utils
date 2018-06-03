@@ -2,6 +2,7 @@ package org.hammerlab.cmp
 
 import cats.Eq
 import org.hammerlab.cmp.first.Collections
+import org.hammerlab.cmp.first.Collections.IndexedDiff
 import org.hammerlab.test.Cmp
 import shapeless._
 
@@ -16,18 +17,92 @@ trait CanEq[L, R] {
   def   eqv(l: L, r: R):      Boolean = cmp(l, r).isEmpty
 }
 
-trait LowestPriCanEq
+trait Priority4CanEq
   extends Serializable {
-  //implicit def contraCanEq[L <: UL, R <: UR, UL, UR](implicit c: Lazy[CanEq[UL, UR]]): CanEq.Aux[L, R, c.value.Diff] = ???
-  implicit def subtypeCanEq[L, R <: L](implicit cmp: Lazy[Cmp[L]], ev: L =:!= R): CanEq.Aux[L, R, cmp.value.Diff] =
+  implicit def convertActualCanEq[
+    L,
+    R
+  ](
+    implicit
+    cmp: Lazy[Cmp[R]],
+    evl: L =:!= R,
+    fn: L ⇒ R
+  ):
+    CanEq.Aux[
+      L,
+      R,
+      cmp.value.Diff
+    ] =
     CanEq {
       (l, r) ⇒
         cmp.value(l, r)
     }
 }
 
-trait LowPriCanEq
-  extends LowestPriCanEq {
+trait Priority3CanEq
+  extends Priority4CanEq {
+  implicit def convertExpectedCanEq[
+    L,
+    R
+  ](
+    implicit
+    cmp: Lazy[Cmp[L]],
+    evl: L =:!= R,
+    fn: R ⇒ L
+  ):
+    CanEq.Aux[
+      L,
+      R,
+      cmp.value.Diff
+    ] =
+    CanEq {
+      (l, r) ⇒
+        cmp.value(l, r)
+    }
+}
+
+trait Priority2CanEq
+  extends Priority3CanEq {
+
+  implicit def subtypeCanEq[
+    L,
+    R <: L
+  ](
+    implicit
+    cmp: Lazy[Cmp[L]],
+    ev: L =:!= R
+  ):
+    CanEq.Aux[
+      L,
+      R,
+      cmp.value.Diff
+    ] =
+    CanEq {
+      (l, r) ⇒
+        cmp.value(l, r)
+    }
+
+  implicit def supertypeCanEq[
+    L <: R,
+    R
+  ](
+    implicit
+    cmp: Lazy[Cmp[R]],
+    ev: L =:!= R
+  ):
+    CanEq.Aux[
+      L,
+      R,
+      cmp.value.Diff
+    ] =
+    CanEq {
+      (l, r) ⇒
+        cmp.value(l, r)
+    }
+}
+
+trait Priority1CanEq
+  extends Priority2CanEq {
 
   /** Short-hand for a [[CanEq]] whose comparee-types are equal */
   type Cmp[T] = CanEq[T, T]
@@ -93,7 +168,7 @@ trait LowPriCanEq
 }
 
 object CanEq
-  extends LowPriCanEq
+  extends Priority1CanEq
      with Collections {
 
   /**

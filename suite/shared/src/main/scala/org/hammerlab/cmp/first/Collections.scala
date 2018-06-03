@@ -1,9 +1,10 @@
 package org.hammerlab.cmp.first
 
 import cats.data.Ior._
-import org.hammerlab.cmp.{ CanEq, LowestPriCanEq }
-import Collections._
+import org.hammerlab.cmp.first.Collections._
+import org.hammerlab.cmp.{ CanEq, Priority2CanEq }
 import org.hammerlab.test.Cmp
+import shapeless.Lazy
 
 object Collections {
   /**
@@ -34,61 +35,104 @@ object Collections {
   type IndexedDiff[Left, Right, Diff] = DiffT[Int, Left, Right, Diff]
 }
 
+trait CanIterate[T[_]] {
+  def apply[A](t: T[A]): Iterator[A]
+}
+object CanIterate {
+  implicit val array: CanIterate[Array] =
+    new CanIterate[Array] {
+      def apply[A](t: Array[A]) = t.toIterator
+    }
+  implicit def option[Opt[T] <: Option[T]]: CanIterate[Opt] =
+    new CanIterate[Opt] {
+      def apply[A](t: Opt[A]) = t.toIterator
+    }
+  implicit val iterator: CanIterate[Iterator] =
+    new CanIterate[Iterator] {
+      def apply[A](t: Iterator[A]) = t
+    }
+  implicit def traversable[I[T] <: scala.collection.Traversable[T]]: CanIterate[I] =
+    new CanIterate[I] {
+      def apply[A](t: I[A]) = t.toIterator
+    }
+}
+
 trait LowPriorityCollections
   extends SealedTrait
      with CaseClass
-     with LowestPriCanEq {
+     with Priority2CanEq {
 
-  implicit def iterablesCanEq[L, R](
+  implicit def cmpRange(
     implicit
-    ce: CanEq[L, R]
+    cmp: Lazy[Cmp[Int]]
   ):
-  CanEq.Aux[
-    Iterable[L],
-    Iterable[R],
-    IndexedDiff[L, R, ce.Diff]
-  ] =
+    Cmp.Aux[
+      Range,
+      IndexedDiff[
+        Int,
+        Int,
+        cmp.value.Diff
+      ]
+    ] =
+    Cmp.by(
+      r ⇒ r: Seq[Int]
+    )
+
+  implicit def traversesCanEq[L, R, T[_]](
+    implicit
+    cmp: Lazy[CanEq[L, R]],
+    t: CanIterate[T]
+  ):
+    CanEq.Aux[
+      T[L],
+      T[R],
+      IndexedDiff[L, R, cmp.value.Diff]
+    ] =
     CanEq {
-      (s1, s2) ⇒
-        iteratorsCanEq(ce)(
-          s1.iterator,
-          s2.iterator
+      (l, r) ⇒
+        iteratorsCanEq(cmp)(
+          t(l),
+          t(r)
         )
     }
 
-  implicit def seqsCanEq[L, R](
+  /**
+   * Work-around for https://github.com/scala/bug/issues/10917
+   *
+   * Sometimes asserting things on an empty collection is easier if instances involving [[Nothing]] can be derived.
+   */
+  implicit def traverseNothingsCanEq[T[_]](
     implicit
-    ce: CanEq[L, R]
+    t: CanIterate[T]
   ):
-  CanEq.Aux[
-    Seq[L],
-    Seq[R],
-    IndexedDiff[L, R, ce.Diff]
-  ] =
+    Cmp.Aux[
+      T[Nothing],
+      IndexedDiff[Nothing, Nothing, Nothing]
+    ] =
     CanEq {
-      (s1, s2) ⇒
-        iteratorsCanEq(ce)(
-          s1.iterator,
-          s2.iterator
+      (l, r) ⇒
+        iteratorsCanEq[Nothing, Nothing].apply(
+          t(l),
+          t(r)
         )
     }
 
-  implicit def iteratorsCanEq[L, R](
+  def iteratorsCanEq[L, R](
     implicit
-    ce: CanEq[L, R]
+    ce: Lazy[CanEq[L, R]]
   ):
     CanEq.Aux[
       Iterator[L],
       Iterator[R],
-      IndexedDiff[L, R, ce.Diff]
+      IndexedDiff[L, R, ce.value.Diff]
     ] =
     new CanEq[Iterator[L], Iterator[R]] {
-      type Diff = IndexedDiff[L, R, ce.Diff]
+      type Diff = IndexedDiff[L, R, ce.value.Diff]
       def cmp(          l: Iterator[L], r: Iterator[R]): Option[Diff] = cmp(0, l, r)
       def cmp(idx: Int, l: Iterator[L], r: Iterator[R]): Option[Diff] =
         (l.hasNext, r.hasNext) match {
           case (true, true) ⇒
-            ce(
+            ce.value.apply(
               l.next,
               r.next
             )
@@ -113,23 +157,6 @@ trait LowPriorityCollections
  */
 trait Collections
   extends LowPriorityCollections {
-
-  implicit def arraysCanEq[L, R](
-    implicit
-    ce: CanEq[L, R]
-  ):
-    CanEq.Aux[
-      Array[L],
-      Array[R],
-      IndexedDiff[L, R, ce.Diff]
-    ] =
-    CanEq {
-      (l, r) ⇒
-        iteratorsCanEq(ce)(
-          l.iterator,
-          r.iterator
-        )
-    }
 
     implicit def setsCanEq[T](
       implicit
@@ -166,7 +193,7 @@ trait Collections
       }
 
   /**
-   * Compare two [[Map]]s; takes precedence over [[iterablesCanEq]]
+   * Compare two [[Map]]s; takes precedence over [[traversesCanEq]]
    */
   implicit def mapsCanEq[K, V1, V2](
     implicit
