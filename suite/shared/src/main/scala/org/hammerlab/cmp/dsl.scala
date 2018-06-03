@@ -36,7 +36,7 @@ trait dsl {
       .foreach {
         e ⇒
           fail(
-            showError(e)
+            e.toString
           )
       }
 
@@ -67,10 +67,10 @@ trait dsl {
     r: T
   )(
     implicit
-    cmp: Cmp.Wrapper[T, D],
+    cmp: CanEq.Wrapper[T, T, D],
     showError: Show[D]
   ): Unit =
-    ===[T, T, D](l, r)(cmp, showError)
+    ===(l, r)(cmp.cmp, showError)
 
   def ==[T, D](
     l: T
@@ -78,10 +78,10 @@ trait dsl {
     r: T
   )(
     implicit
-    cmp: Cmp.Wrapper[T, D],
+    cmp: CanEq.Wrapper[T, T, D],
     showError: Show[D]
   ): Unit =
-    ===[T, D](l)(r)
+    ===[T, D](l)(r)(cmp, showError)
 
   def !=[T](
     l: T

@@ -1,26 +1,38 @@
 package org.hammerlab.cmp
 
 import cats.Eq
-import org.hammerlab.cmp.first.{ CaseClass, Collections }
+import org.hammerlab.cmp.first.Collections
+import org.hammerlab.test.Cmp
+import shapeless._
 
 /**
  * Type-class for comparing instances of two (possibly different )types, with a customizable "diff" output-type
  * containing a configurable representation of the "diff", if any
  */
-trait CanEq[-L, -R] {
+trait CanEq[L, R] {
   type Diff
   def   cmp(l: L, r: R): Option[Diff]
   def apply(l: L, r: R): Option[Diff] = cmp(l, r)
   def   eqv(l: L, r: R):      Boolean = cmp(l, r).isEmpty
 }
 
-trait LowPriCanEq
+trait LowestPriCanEq
   extends Serializable {
+  //implicit def contraCanEq[L <: UL, R <: UR, UL, UR](implicit c: Lazy[CanEq[UL, UR]]): CanEq.Aux[L, R, c.value.Diff] = ???
+  implicit def subtypeCanEq[L, R <: L](implicit cmp: Lazy[Cmp[L]], ev: L =:!= R): CanEq.Aux[L, R, cmp.value.Diff] =
+    CanEq {
+      (l, r) ⇒
+        cmp.value(l, r)
+    }
+}
+
+trait LowPriCanEq
+  extends LowestPriCanEq {
 
   /** Short-hand for a [[CanEq]] whose comparee-types are equal */
-  type Cmp[-T] = CanEq[T, T]
+  type Cmp[T] = CanEq[T, T]
   object Cmp {
-    type Aux[-T, E] = CanEq.Aux[T, T, E]
+    type Aux[T, E] = CanEq.Aux[T, T, E]
 
     /** Create a [[Cmp]] from its single method */
     def apply[T, E](fn: (T, T) ⇒ Option[E]): Aux[T, E] = CanEq(fn)
@@ -40,7 +52,7 @@ trait LowPriCanEq
      *
      * See [[CanEq.dsl]] or [[dsl]]
      */
-    case class Wrapper[-T, D](cmp: Cmp.Aux[T, D]) {
+    case class Wrapper[T, D](cmp: Cmp.Aux[T, D]) {
       type Diff = cmp.Diff
       def apply(l: T, r: T): Option[D] = cmp(l, r)
     }
@@ -50,7 +62,7 @@ trait LowPriCanEq
     }
   }
 
-  type Aux[-L, -R, D] = CanEq[L, R] { type Diff = D }
+  type Aux[L, R, D] = CanEq[L, R] { type Diff = D }
 
   /**
    * Short-hand for creating [[CanEq]] instances from a single method.
@@ -89,7 +101,7 @@ object CanEq
    *
    * See [[dsl]] or [[org.hammerlab.cmp.dsl]]
    */
-  case class Wrapper[-L, -R, D](cmp: CanEq.Aux[L, R, D]) {
+  case class Wrapper[L, R, D](cmp: CanEq.Aux[L, R, D]) {
     type Diff = cmp.Diff
     def apply(l: L, r: R): Option[D] = cmp(l, r)
   }

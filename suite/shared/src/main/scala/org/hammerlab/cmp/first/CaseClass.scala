@@ -11,12 +11,8 @@ import shapeless._
  *
  * The returned [[org.hammerlab.cmp.CanEq.Diff "diff"]] type is a [[Coproduct]] ("either") of all the fields'
  * diff-types.
- *
- * [[EitherHack]] is mixed in here to ensure that it has lower priority than `cmpCaseClass`, otherwise auto-derivation
- * for e.g. [[Left]] which is both a case class and an [[Either with Product with Serializable]].
  */
-trait CaseClass
-  extends EitherHack {
+trait CaseClass {
 
   /**
    * Derive a [[Cmp]] instance for a case class.

@@ -7,7 +7,7 @@ class SuiteTest
     b = ""
   }
 
-  var b = "before"
+  var b: String = "before"
 
   var numAftersRun = 0
 

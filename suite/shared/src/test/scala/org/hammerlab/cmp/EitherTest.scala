@@ -1,6 +1,7 @@
 package org.hammerlab.cmp
 
-import shapeless.{ Inl, Inr }
+import org.hammerlab.test.Cmp
+import shapeless._
 
 class EitherTest
   extends hammerlab.Suite {
@@ -13,7 +14,7 @@ class EitherTest
 
   test("different types") {
     cmp(
-      l1,
+      l1: Either[String, Int],
       r1
     ) should be(
       Some(
@@ -31,7 +32,7 @@ class EitherTest
     )
 
     cmp(
-      r1,
+      r1: Either[String, Int],
       l1
     ) should be(
       Some(
@@ -48,8 +49,8 @@ class EitherTest
       )
     )
 
-    !=(l1, r1)
-    !=(r1, l1)
+    !=(l1: Either[String, Int], r1)
+    !=(r1: Either[String, Int], l1)
   }
 
   test("equal lefts") {

@@ -1,7 +1,7 @@
 package org.hammerlab.cmp.first
 
 import cats.data.Ior._
-import org.hammerlab.cmp.CanEq
+import org.hammerlab.cmp.{ CanEq, LowestPriCanEq }
 import Collections._
 import org.hammerlab.test.Cmp
 
@@ -36,7 +36,8 @@ object Collections {
 
 trait LowPriorityCollections
   extends SealedTrait
-     with CaseClass {
+     with CaseClass
+     with LowestPriCanEq {
 
   implicit def iterablesCanEq[L, R](
     implicit
@@ -45,6 +46,23 @@ trait LowPriorityCollections
   CanEq.Aux[
     Iterable[L],
     Iterable[R],
+    IndexedDiff[L, R, ce.Diff]
+  ] =
+    CanEq {
+      (s1, s2) ⇒
+        iteratorsCanEq(ce)(
+          s1.iterator,
+          s2.iterator
+        )
+    }
+
+  implicit def seqsCanEq[L, R](
+    implicit
+    ce: CanEq[L, R]
+  ):
+  CanEq.Aux[
+    Seq[L],
+    Seq[R],
     IndexedDiff[L, R, ce.Diff]
   ] =
     CanEq {

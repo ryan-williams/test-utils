@@ -122,61 +122,61 @@ class CollectionsTest
     )
   }
 
-  test("seqs") {
-    ==(
-      Seq( 1,  6, 22, 17),
-      Seq(11, 66,  2, 77)
-    )
+//  test("seqs") {
+//    ==(
+//      Seq( 1,  6, 22, 17),
+//      Seq(11, 66,  2, 77)
+//    )
+//
+//    cmp(
+//      Seq( 1,  6, 22, 17),
+//      Seq(11, 66,  2, 78)
+//    ) should be(
+//      Some(
+//        3 →
+//          Diff((17, 78))
+//      )
+//    )
+//
+//    ==(
+//      List( 1,  6, 22, 17): Seq[Int],
+//      List(11, 66,  2, 77): Seq[Int]
+//    )
+//
+//    cmp(
+//      List( 1,  6, 22, 17): Seq[Int],
+//      List(11, 66,  2, 78): Seq[Int]
+//    ) should be(
+//      Some(
+//        3 →
+//          Diff((17, 78))
+//      )
+//    )
+//  }
 
-    cmp(
-      Seq( 1,  6, 22, 17),
-      Seq(11, 66,  2, 78)
-    ) should be(
-      Some(
-        3 →
-          Diff((17, 78))
-      )
-    )
-
-    ==(
-      List( 1,  6, 22, 17): Seq[Int],
-      List(11, 66,  2, 77): Seq[Int]
-    )
-
-    cmp(
-      List( 1,  6, 22, 17): Seq[Int],
-      List(11, 66,  2, 78): Seq[Int]
-    ) should be(
-      Some(
-        3 →
-          Diff((17, 78))
-      )
-    )
-  }
-
-  test("lists") {
-    ==(
-      List( 1,  6, 22, 17),
-      List(11, 66,  2, 77)
-    )
-
-    val empty = List()
-
-    ==(empty, empty)
-    ==(empty,   Nil)
-    ==(  Nil, empty)
-    ==(  Nil,   Nil)
-
-    cmp(
-      List( 1,  6, 22, 17),
-      List(11, 66,  2, 78)
-    ) should be(
-      Some(
-        3 →
-          Diff((17, 78))
-      )
-    )
-  }
+//  test("lists") {
+//    ==(
+//      List( 1,  6, 22, 17),
+//      List(11, 66,  2, 77)
+//    )
+//
+//    val empty = List()
+//
+//    ==(empty, empty)
+//    ==(empty,   Nil)
+//    ==(  Nil, empty)
+//    ==(  Nil,   Nil)
+//
+//    cmp(
+//      List( 1,  6, 22, 17),
+//      List(11, 66,  2, 78)
+//    ) should be(
+//      Some(
+//        3 →
+//          Diff((17, 78))
+//      )
+//    )
+//  }
 
   test("sets") {
     ==(Set(): Set[Int])(Set())

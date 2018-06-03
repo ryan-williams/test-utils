@@ -3,7 +3,7 @@ package org.hammerlab.cmp
 import org.hammerlab.cmp.double.Neq
 import org.hammerlab.test.Cmp
 import org.scalatest.exceptions.TestFailedException
-import shapeless.{ Inl, Inr }
+import shapeless._
 
 sealed trait T[R] extends Product with Serializable
 case class D(d: Double) extends T[Double]
@@ -96,12 +96,13 @@ class CanEqTest
     ==(lt, rt)
 
     !=(
-      Seq(D(2.0), E(3.0)),
+      Seq(D(2.0), E(3.0))
+    )(
       Seq(D(2.0), D(3.0))
     )
 
     !=(
-      Seq(D(2.0), D(3.0)),
+      Seq[T[Double]](D(2.0), D(3.0)),
       Seq(D(2.0), E(3.0))
     )
 
@@ -111,7 +112,7 @@ class CanEqTest
     )
 
     !=(
-      Seq(D(2.0), D(3.0)),
+      Seq[T[Double]](D(2.0), D(3.0)),
       Seq(E(2.0), D(3.0))
     )
   }
