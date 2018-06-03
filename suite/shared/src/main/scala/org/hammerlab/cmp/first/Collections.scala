@@ -35,7 +35,8 @@ object Collections {
 }
 
 trait LowPriorityCollections
-  extends SealedTrait {
+  extends SealedTrait
+     with CaseClass {
 
   implicit def iterablesCanEq[L, R](
     implicit

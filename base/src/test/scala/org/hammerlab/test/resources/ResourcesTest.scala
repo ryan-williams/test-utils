@@ -17,7 +17,8 @@ class ResourcesTest extends Suite {
   }
 
   test("read file") {
-    File("a/numbers").read should be(
+    ==(
+      File("a/numbers").read,
       """1
         |2
         |3
@@ -27,7 +28,8 @@ class ResourcesTest extends Suite {
   }
 
   test("read file bytes") {
-    File("a/numbers").readBytes should be(
+    ==(
+      File("a/numbers").readBytes,
       """1
         |2
         |3

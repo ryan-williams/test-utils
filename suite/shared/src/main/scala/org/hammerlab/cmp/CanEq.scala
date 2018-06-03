@@ -15,8 +15,7 @@ trait CanEq[-L, -R] {
 }
 
 trait LowPriCanEq
-  extends CaseClass
-     with Serializable {
+  extends Serializable {
 
   /** Short-hand for a [[CanEq]] whose comparee-types are equal */
   type Cmp[-T] = CanEq[T, T]
@@ -97,6 +96,23 @@ object CanEq
   object Wrapper {
     implicit def wrap[L, R, D](implicit c: CanEq.Aux[L, R, D]): Wrapper[L, R, D] = Wrapper(c)
   }
+
+  implicit val nothingCanEqNothing: Cmp.Aux[Nothing, Nothing] = Cmp[Nothing, Nothing] { (_, _) ⇒ ??? }
+
+  def by[L, R](
+    fn: L ⇒ R
+  )(
+    implicit
+    cmp: Cmp[R]
+  ):
+    CanEq.Aux[L, R, cmp.Diff] =
+    CanEq {
+      (l, r) ⇒
+        cmp(
+          fn(l),
+          r
+        )
+    }
 
   /**
    * Create a [[CanEq]] for two different types given a [[Cmp]] for one and a conversion function for the other into the

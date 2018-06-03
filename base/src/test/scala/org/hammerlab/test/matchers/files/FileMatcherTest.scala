@@ -15,7 +15,8 @@ class FileMatcherTest
   test("differing files") {
     val result = fileMatch("c/numbers")("b/numbers")
     ==(result.matches, false)
-    result.failureMessage should be(
+    ==(
+      result.failureMessage,
       """"1
         |2
         |3

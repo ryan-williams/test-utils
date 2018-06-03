@@ -43,13 +43,18 @@ abstract class Suite
 
   /** Default [[Eq]] instances that [[org.hammerlab.test.Cmp]]s can be derived from */
   implicit val     intOrder: Eq[    Int] = cats.instances.    int.catsKernelStdOrderForInt
+  implicit val    byteOrder: Eq[   Byte] = cats.instances.   byte.catsKernelStdOrderForByte
+  implicit val    charOrder: Eq[   Char] = cats.instances.   char.catsKernelStdOrderForChar
   implicit val    longOrder: Eq[   Long] = cats.instances.   long.catsKernelStdOrderForLong
   implicit val  stringOrder: Eq[ String] = cats.instances. string.catsKernelStdOrderForString
   implicit val booleanOrder: Eq[Boolean] = cats.instances.boolean.catsKernelStdOrderForBoolean
 
   /** Default [[CanEq]] instances for [[Double]]s vs. [[Int]]s */
-  implicit val int2double : CanEq[Double, Int] = withConversion[Double, Int]
-  implicit val int2long   : CanEq[  Long, Int] = withConversion[  Long, Int]
+  object implicits {
+    implicit val int2double : CanEq[Double,  Int] = withConversion[Double, Int]
+    implicit val int2long   : CanEq[  Long,  Int] = withConversion[  Long, Int]
+    implicit val long2int   : CanEq[   Int, Long] = CanEq.by(_.toLong)
+  }
 }
 
 

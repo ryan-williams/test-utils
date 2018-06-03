@@ -160,6 +160,13 @@ class CollectionsTest
       List(11, 66,  2, 77)
     )
 
+    val empty = List()
+
+    ==(empty, empty)
+    ==(empty,   Nil)
+    ==(  Nil, empty)
+    ==(  Nil,   Nil)
+
     cmp(
       List( 1,  6, 22, 17),
       List(11, 66,  2, 78)
