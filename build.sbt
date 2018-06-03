@@ -32,8 +32,9 @@ lazy val suite = crossProject.settings(
 )
 lazy val `suite.js`  = suite.js
 lazy val `suite.jvm` = suite.jvm
+lazy val `suite-x`   = parent(`suite.js`, `suite.jvm`)
 
-lazy val `test-utils` = rootProject(
-  base,
-  `suite.js`, `suite.jvm`
+lazy val `test-utils` = root(
+    base,
+  `suite-x`
 )

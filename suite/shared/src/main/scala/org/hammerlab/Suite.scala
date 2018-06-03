@@ -2,7 +2,6 @@ package org.hammerlab
 
 import cats.Eq
 import hammerlab.math.tolerance._
-import org.hammerlab.cmp.CanEq.withConversion
 import org.hammerlab.cmp.{ CanEq, double, dsl }
 import org.hammerlab.test.{ Afters, Befores, matchers }
 import org.scalatest.{ FunSuite, Matchers }
@@ -48,13 +47,4 @@ abstract class Suite
   implicit val    longOrder: Eq[   Long] = cats.instances.   long.catsKernelStdOrderForLong
   implicit val  stringOrder: Eq[ String] = cats.instances. string.catsKernelStdOrderForString
   implicit val booleanOrder: Eq[Boolean] = cats.instances.boolean.catsKernelStdOrderForBoolean
-
-  /** Default [[CanEq]] instances for [[Double]]s vs. [[Int]]s */
-  object implicits {
-    implicit val int2double : CanEq[Double,  Int] = withConversion[Double, Int]
-    implicit val int2long   : CanEq[  Long,  Int] = withConversion[  Long, Int]
-    implicit val long2int   : CanEq[   Int, Long] = CanEq.by(_.toLong)
-  }
 }
-
-
