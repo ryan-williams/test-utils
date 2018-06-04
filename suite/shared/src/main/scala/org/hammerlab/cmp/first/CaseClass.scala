@@ -1,5 +1,6 @@
 package org.hammerlab.cmp.first
 
+import org.hammerlab.cmp.Priority4CanEq
 import org.hammerlab.test.Cmp
 import shapeless._
 
@@ -11,8 +12,12 @@ import shapeless._
  *
  * The returned [[org.hammerlab.cmp.CanEq.Diff "diff"]] type is a [[Coproduct]] ("either") of all the fields'
  * diff-types.
+ *
+ * Mixes-in [[Priority4CanEq]] to have generic-autoderivation take precedence over [[Ordering]]-based derivation, which
+ * is relevant for e.g. [[Tuple2]]s where an [[Ordering]] is in scope by default
  */
-trait CaseClass {
+trait CaseClass
+  extends Priority4CanEq {
 
   /**
    * Derive a [[Cmp]] instance for a case class.

@@ -11,7 +11,7 @@ class CollectionsTest
   /**
    * Test custom-equality by comparing [[Int]]s via their ones' digit
    */
-  override implicit val intOrder: cats.Eq[Int] =
+  implicit val intOrder: cats.Eq[Int] =
     new cats.Eq[Int] {
       def eqv(x: Int, y: Int): Boolean =
         x % 10 == y % 10

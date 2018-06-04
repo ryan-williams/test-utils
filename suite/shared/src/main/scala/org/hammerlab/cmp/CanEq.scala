@@ -2,7 +2,6 @@ package org.hammerlab.cmp
 
 import cats.Eq
 import org.hammerlab.cmp.first.Collections
-import org.hammerlab.cmp.first.Collections.IndexedDiff
 import org.hammerlab.test.Cmp
 import shapeless._
 
@@ -36,6 +35,18 @@ trait Priority4CanEq
     CanEq {
       (l, r) ⇒
         cmp.value(l, r)
+    }
+
+  /**
+   * Lower priority than [[cats.Eq]] by default
+   */
+  implicit def cmpFromOrdering[T](implicit ord: Ordering[T]): Cmp.Aux[T, (T, T)] =
+    Cmp {
+      (l, r) ⇒
+        if (ord.equiv(l, r))
+          None
+        else
+          Some((l, r))
     }
 }
 

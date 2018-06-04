@@ -1,6 +1,5 @@
 package org.hammerlab
 
-import cats.Eq
 import hammerlab.math.tolerance._
 import org.hammerlab.cmp.{ CanEq, double, dsl }
 import org.hammerlab.test.{ Afters, Befores, matchers }
@@ -39,12 +38,4 @@ abstract class Suite
   def tolerance(d: Double): Unit = {
     ε = d
   }
-
-  /** Default [[Eq]] instances that [[org.hammerlab.test.Cmp]]s can be derived from */
-  implicit val     intOrder: Eq[    Int] = cats.instances.    int.catsKernelStdOrderForInt
-  implicit val    byteOrder: Eq[   Byte] = cats.instances.   byte.catsKernelStdOrderForByte
-  implicit val    charOrder: Eq[   Char] = cats.instances.   char.catsKernelStdOrderForChar
-  implicit val    longOrder: Eq[   Long] = cats.instances.   long.catsKernelStdOrderForLong
-  implicit val  stringOrder: Eq[ String] = cats.instances. string.catsKernelStdOrderForString
-  implicit val booleanOrder: Eq[Boolean] = cats.instances.boolean.catsKernelStdOrderForBoolean
 }
