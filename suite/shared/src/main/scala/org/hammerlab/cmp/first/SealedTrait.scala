@@ -34,7 +34,7 @@ trait SealedTrait {
           .value
           .cmp(l, r)
           .map {
-            case  Left(e) ⇒ Left(e)
+            case  Left(e) ⇒  Left(    e )
             case Right(e) ⇒ Right(Inr(e))
           }
       case (l, r) ⇒
@@ -42,7 +42,6 @@ trait SealedTrait {
           c match {
             case Inl(v) ⇒ v.toString
             case Inr(v) ⇒ str(v)
-            case _: CNil ⇒ ???
           }
         Some(
           Left(

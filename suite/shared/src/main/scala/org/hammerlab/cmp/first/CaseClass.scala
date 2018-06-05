@@ -84,17 +84,7 @@ trait CaseClass
     tail: Lazy[Cmp.Aux[T, DT]]
   ):
     Cmp.Aux[Nothing :: T, Nothing :+: DT] =
-    Cmp[Nothing :: T, Nothing :+: DT](
-      (l, r) ⇒
-        the[Cmp[Nothing]].apply(l.head, r.head)
-          .map(Inl[Nothing, DT](_))
-          .orElse(
-            tail
-              .value
-              .cmp(l.tail, r.tail)
-              .map(Inr[Nothing, DT](_))
-          )
-    )
+    Cmp    [Nothing :: T, Nothing :+: DT] { (_, _) ⇒ ??? }
 
   implicit val cmpHNil: Cmp.Aux[HNil, CNil] = Cmp[HNil, CNil]((_, _) ⇒ None)
 }

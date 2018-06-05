@@ -140,7 +140,6 @@ trait Priority1CanEq
      */
     case class Wrapper[T, D](cmp: Cmp.Aux[T, D]) {
       type Diff = cmp.Diff
-      def apply(l: T, r: T): Option[D] = cmp(l, r)
     }
     object Wrapper {
       implicit def   wrap[T, D](implicit c: Cmp.Aux[T, D]): Wrapper[T, D] = Wrapper(c)
@@ -189,10 +188,10 @@ object CanEq
    */
   case class Wrapper[L, R, D](cmp: CanEq.Aux[L, R, D]) {
     type Diff = cmp.Diff
-    def apply(l: L, r: R): Option[D] = cmp(l, r)
   }
   object Wrapper {
-    implicit def wrap[L, R, D](implicit c: CanEq.Aux[L, R, D]): Wrapper[L, R, D] = Wrapper(c)
+    implicit def   wrap[L, R, D](implicit c: CanEq.Aux[L, R, D]): Wrapper[L, R, D] = Wrapper(c)
+    implicit def unwrap[L, R, D](         w: Wrapper[L, R, D]): CanEq.Aux[L, R, D] = w.cmp
   }
 
   implicit val nothingCanEqNothing: Cmp.Aux[Nothing, Nothing] = Cmp[Nothing, Nothing] { (_, _) ⇒ ??? }

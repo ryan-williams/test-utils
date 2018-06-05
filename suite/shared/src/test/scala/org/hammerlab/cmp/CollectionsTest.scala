@@ -171,6 +171,11 @@ class CollectionsTest
     implicitly[Cmp[(Int, Option[Int])]]
     implicitly[Cmp[(Nothing, Nothing)]]
     implicitly[Cmp[(Nothing, Option[Nothing])]]
+
+    ==(
+      Iterator[(Nothing, Option[Nothing])](),
+      Iterator()
+    )
   }
 
   test("lists") {

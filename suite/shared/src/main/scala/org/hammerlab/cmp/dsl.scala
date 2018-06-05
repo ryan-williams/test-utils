@@ -70,7 +70,7 @@ trait dsl {
     cmp: CanEq.Wrapper[T, T, D],
     showError: Show[D]
   ): Unit =
-    ===(l, r)(cmp.cmp, showError)
+    ===(l, r)(cmp, showError)
 
   def ==[T, D](
     l: T
