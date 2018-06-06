@@ -28,7 +28,9 @@ lazy val suite = crossProject.settings(
     math.tolerance,
     scalatest,
     shapeless
-  )
+  ),
+  // java.nio.file.InvalidPathException: Malformed input or input contains unmappable characters: index/index-ε.html
+  emptyDocJar
 )
 lazy val `suite.js`  = suite.js
 lazy val `suite.jvm` = suite.jvm
