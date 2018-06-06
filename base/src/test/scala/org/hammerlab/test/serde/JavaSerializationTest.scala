@@ -8,15 +8,15 @@ import JavaSerialization._
 class JavaSerializationTest
   extends Suite {
   test("round trips") {
-    javaRead[String](javaBytes("abc")) should be("abc")
+    ==(javaRead[String](javaBytes("abc")), "abc")
 
     val baos = new ByteArrayOutputStream()
     javaWrite("abc", baos)
     val bais = new ByteArrayInputStream(baos.toByteArray)
-    javaRead[String](bais) should be("abc")
+    ==(javaRead[String](bais), "abc")
 
     val path = tmpPath()
     javaWrite("abc", path)
-    javaRead[String](path) should be("abc")
+    ==(javaRead[String](path), "abc")
   }
 }

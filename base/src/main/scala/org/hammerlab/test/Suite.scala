@@ -6,17 +6,15 @@ import org.hammerlab.paths.Path
 import org.hammerlab.test.files.TmpFiles
 import org.hammerlab.test.matchers.files.{ HasDirMatchers, HasFileMatchers }
 import org.hammerlab.test.resources.Url
-import org.scalactic.ConversionCheckedTripleEquals
 
 /**
  * Simple wrapper for common test-suite boilerplate.
  */
 abstract class Suite
   extends hammerlab.Suite
-    with ConversionCheckedTripleEquals
-    with TmpFiles
-    with HasFileMatchers
-    with HasDirMatchers {
+     with TmpFiles
+     with HasFileMatchers
+     with HasDirMatchers {
 
   /**
    * Hacky helper for setting env variables
