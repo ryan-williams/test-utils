@@ -1,6 +1,5 @@
 package org.hammerlab.cmp
 
-import org.hammerlab.test.Cmp
 import shapeless._
 
 class EitherTest

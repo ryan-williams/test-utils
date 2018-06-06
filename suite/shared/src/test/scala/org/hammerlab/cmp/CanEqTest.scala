@@ -2,7 +2,7 @@ package org.hammerlab.cmp
 
 import org.hammerlab.cmp.double.Neq
 import org.hammerlab.cmp.first.Collections.Diff
-import org.hammerlab.test.Cmp
+import org.hammerlab.cmp.CanEq.Cmp
 import org.scalatest.exceptions.TestFailedException
 import shapeless._
 

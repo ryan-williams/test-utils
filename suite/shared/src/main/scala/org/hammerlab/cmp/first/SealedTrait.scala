@@ -1,9 +1,12 @@
 package org.hammerlab.cmp.first
 
-import org.hammerlab.test.Cmp
+import org.hammerlab.cmp.CanEq.Cmp
+import org.hammerlab.cmp.{ Cmp, Priority1CanEq }
 import shapeless.{ :+:, CNil, Coproduct, Generic, Inl, Inr, Lazy }
 
-trait SealedTrait {
+trait SealedTrait
+  extends Priority1CanEq {
+
   object SealedTrait {
     type Err[+E <: Coproduct] = Either[String, E]
   }

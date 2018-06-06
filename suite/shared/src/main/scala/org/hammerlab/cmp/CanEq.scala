@@ -1,8 +1,8 @@
 package org.hammerlab.cmp
 
 import cats.Eq
+import org.hammerlab.cmp.CanEq.Cmp
 import org.hammerlab.cmp.first.Collections
-import org.hammerlab.test.Cmp
 import shapeless._
 
 /**
@@ -18,6 +18,11 @@ trait CanEq[L, R] {
 
 trait Priority4CanEq
   extends Serializable {
+
+  /**
+   * Derive a [[CanEq]] for two types given a [[Cmp]] for teh second and an implicit conversion from the first to the
+   * second
+   */
   implicit def convertActualCanEq[
     L,
     R
@@ -38,7 +43,7 @@ trait Priority4CanEq
     }
 
   /**
-   * Lower priority than [[cats.Eq]] by default
+   * Derive a [[Cmp]] from an [[Ordering]]; lower priority than [[CanEq.fromEq]] (derivation from [[cats.Eq]])
    */
   implicit def cmpFromOrdering[T](implicit ord: Ordering[T]): Cmp.Aux[T, (T, T)] =
     Cmp {
@@ -52,6 +57,10 @@ trait Priority4CanEq
 
 trait Priority3CanEq
   extends Priority4CanEq {
+  /**
+   * Derive a [[CanEq]] for two types given a [[Cmp]] for the first and an implicit conversion from the second to the
+   * first
+   */
   implicit def convertExpectedCanEq[
     L,
     R
@@ -75,6 +84,9 @@ trait Priority3CanEq
 trait Priority2CanEq
   extends Priority3CanEq {
 
+  /**
+   * Derive a [[CanEq]] for two types where the second is a ([[=:!= strict!]]) subclass of the first
+   */
   implicit def subtypeCanEq[
     L,
     R <: L
@@ -93,6 +105,9 @@ trait Priority2CanEq
         cmp.value(l, r)
     }
 
+  /**
+   * Derive a [[CanEq]] for two types where the first is a ([[=:!= strict!]]) subclass of the second
+   */
   implicit def supertypeCanEq[
     L <: R,
     R
@@ -115,37 +130,57 @@ trait Priority2CanEq
 trait Priority1CanEq
   extends Priority2CanEq {
 
+  /**
+   * Derive a [[Cmp]] from an [[Eq]], where the returned "diff"-representation is just a [[Tuple2]] with the two
+   * non-equal values
+   */
+  implicit def fromEq[T](implicit e: Eq[T]): Cmp.Aux[T, (T, T)] =
+    CanEq {
+      (t1, t2) ⇒
+        if (e.eqv(t1, t2))
+          None
+        else
+          Some(
+            (t1, t2)
+          )
+    }
+}
+
+object Cmp {
+  type Aux[T, E] = CanEq.Aux[T, T, E]
+
+  /** Create a [[Cmp]] from its single method */
+  def apply[T, E](fn: (T, T) ⇒ Option[E]): Aux[T, E] = CanEq(fn)
+
+  /** Create a [[Cmp]] interms of another */
+  def by[L, R](fn: R ⇒ L)(implicit cmp: Cmp[L]): Aux[R, cmp.Diff] =
+    Cmp {
+      (l, r) ⇒
+        cmp(
+          fn(l),
+          fn(r)
+        )
+    }
+
+  /**
+   * Wrapper around a [[Cmp]] used to enable overloading methods that would otherwise have the same type after erasure
+   *
+   * See [[CanEq.dsl]] or [[dsl]]
+   */
+  case class Wrapper[T, D](cmp: Cmp.Aux[T, D]) {
+    type Diff = cmp.Diff
+  }
+  object Wrapper {
+    implicit def   wrap[T, D](implicit c: Cmp.Aux[T, D]): Wrapper[T, D] = Wrapper(c)
+    implicit def unwrap[T, D](         w: Wrapper[T, D]): Cmp.Aux[T, D] = w.cmp
+  }
+}
+
+object CanEq
+  extends Collections {
+
   /** Short-hand for a [[CanEq]] whose comparee-types are equal */
   type Cmp[T] = CanEq[T, T]
-  object Cmp {
-    type Aux[T, E] = CanEq.Aux[T, T, E]
-
-    /** Create a [[Cmp]] from its single method */
-    def apply[T, E](fn: (T, T) ⇒ Option[E]): Aux[T, E] = CanEq(fn)
-
-    /** Create a [[Cmp]] interms of another */
-    def by[L, R](fn: R ⇒ L)(implicit cmp: Cmp[L]): Aux[R, cmp.Diff] =
-      Cmp {
-        (l, r) ⇒
-          cmp(
-            fn(l),
-            fn(r)
-          )
-      }
-
-    /**
-     * Wrapper around a [[Cmp]] used to enable overloading methods that would otherwise have the same type after erasure
-     *
-     * See [[CanEq.dsl]] or [[dsl]]
-     */
-    case class Wrapper[T, D](cmp: Cmp.Aux[T, D]) {
-      type Diff = cmp.Diff
-    }
-    object Wrapper {
-      implicit def   wrap[T, D](implicit c: Cmp.Aux[T, D]): Wrapper[T, D] = Wrapper(c)
-      implicit def unwrap[T, D](         w: Wrapper[T, D]): Cmp.Aux[T, D] = w.cmp
-    }
-  }
 
   type Aux[L, R, D] = CanEq[L, R] { type Diff = D }
 
@@ -160,26 +195,6 @@ trait Priority1CanEq
       override def cmp(l: L, r: R): Option[Diff] =
         fn(l, r)
     }
-
-  /**
-   * Derive a [[Cmp]] from an [[Eq]], where the returned "diff"-representation is just a [[Tuple2]] with the two
-   * comparees
-   */
-  implicit def fromEq[T](implicit e: Eq[T]): Cmp.Aux[T, (T, T)] =
-    apply(
-      (t1, t2) ⇒
-        if (e.eqv(t1, t2))
-          None
-        else
-          Some(
-            (t1, t2)
-          )
-    )
-}
-
-object CanEq
-  extends Priority1CanEq
-     with Collections {
 
   /**
    * Wrapper around a [[CanEq]] used to enable overloading methods that would otherwise have the same type after erasure

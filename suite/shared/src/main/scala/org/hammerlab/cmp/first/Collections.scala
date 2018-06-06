@@ -1,8 +1,8 @@
 package org.hammerlab.cmp.first
 
 import cats.data.Ior._
+import org.hammerlab.cmp.CanEq
 import org.hammerlab.cmp.first.Collections._
-import org.hammerlab.cmp.{ CanEq, Priority2CanEq }
 import org.hammerlab.test.Cmp
 import shapeless.Lazy
 
@@ -58,9 +58,7 @@ object CanIterate {
 }
 
 trait LowPriorityCollections
-  extends SealedTrait
-     with CaseClass
-     with Priority2CanEq {
+  extends CaseClass {
 
   implicit def cmpRange(
     implicit
