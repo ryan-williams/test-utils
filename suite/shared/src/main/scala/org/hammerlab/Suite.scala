@@ -31,6 +31,9 @@ abstract class Suite
      with CanEq.dsl
      with dsl {
 
+  val !! = shapeless.the
+  val illTyped = shapeless.test.illTyped
+
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[fuzzyDoubleCmp]] */
   implicit var ε: E = 1e-6
 
