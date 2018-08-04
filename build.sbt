@@ -1,6 +1,7 @@
 
 default(
   subgroup("test"),
+  v"1.0.2",
   // Don't inherit default test-deps from parent plugin.
   clearTestDeps,
   versions(
@@ -9,7 +10,6 @@ default(
 )
 
 lazy val base = project.settings(
-  v"1.0.1",
   dep(
     // this should come from the suite.jvm classpath-dep below, but test-scoped dependencies don't transit as you'd
     // think/like
@@ -22,7 +22,6 @@ lazy val base = project.settings(
 )
 
 lazy val suite = crossProject.settings(
-  v"1.0.1",
   dep(
     cats,
     math.tolerance,
@@ -37,6 +36,6 @@ lazy val `suite.jvm` = suite.jvm
 lazy val `suite-x`   = parent(`suite.js`, `suite.jvm`)
 
 lazy val `test-utils` = root(
-    base,
+   base,
   `suite-x`
 )
