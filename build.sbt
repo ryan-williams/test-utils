@@ -1,7 +1,7 @@
 
 default(
   subgroup("test"),
-  v"1.0.2",
+  v"1.0.3",
   // Don't inherit default test-deps from parent plugin.
   clearTestDeps,
   versions(

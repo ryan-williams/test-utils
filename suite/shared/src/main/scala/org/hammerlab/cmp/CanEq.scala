@@ -267,8 +267,8 @@ object CanEq
      * cmp(ids, Set())
      * }}}
      *
-     * @param cmp use a [[Cmp.Wrapper]] here, otherwise this method has the same type after erasure as its overload
-     *            above, and won't compile
+     * @param cmp use a [[Wrapper]] here, otherwise this method has the same type after erasure as its overload above,
+     *            and won't compile
      */
     def cmp[T, E](
       l: T
