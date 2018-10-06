@@ -26,9 +26,8 @@ abstract class Suite
     map.put(key, value)
   }
 
-  def path(name: String): Path = Path(Url(name).toURI)
-
-  def resource(name: String): Path = File(name).path
+  def     path(name: String): Path = Path(Url(name).toURI)
+  def resource(name: String): Path = path(name)
 
   def fileCopy(path: Path, out: Path): Path = {
     val in = path.inputStream
