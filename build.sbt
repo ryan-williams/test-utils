@@ -18,10 +18,10 @@ lazy val base = project.settings(
   ),
   testDeps += scalatest
 ).dependsOn(
-  `suite.jvm` andTest
+  suite.jvm andTest
 )
 
-lazy val suite = crossProject.settings(
+lazy val suite = cross.settings(
   dep(
     cats,
     math.tolerance,
@@ -31,9 +31,7 @@ lazy val suite = crossProject.settings(
   // java.nio.file.InvalidPathException: Malformed input or input contains unmappable characters: index/index-ε.html
   emptyDocJar
 )
-lazy val `suite.js`  = suite.js
-lazy val `suite.jvm` = suite.jvm
-lazy val `suite-x`   = parent(`suite.js`, `suite.jvm`)
+lazy val `suite-x` = suite.x
 
 lazy val `test-utils` = root(
    base,
