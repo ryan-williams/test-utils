@@ -1,6 +1,5 @@
 package org.hammerlab.cmp
 
-import org.hammerlab.cmp.CanEq.Cmp
 import org.scalatest.FunSuite
 
 trait dsl {
@@ -36,7 +35,7 @@ trait dsl {
       .foreach {
         e ⇒
           fail(
-            e.toString
+            showError(e)
           )
       }
 

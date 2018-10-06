@@ -5,7 +5,7 @@ class SuiteTest
   test("fileCopy") {
     ==(
       fileCopy(
-        path("a/numbers"),
+        resource("a/numbers"),
         tmpPath("numbers")
       )
       .read,

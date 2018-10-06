@@ -5,7 +5,7 @@ import java.nio.file.Files
 import org.hammerlab.paths.Path
 import org.hammerlab.test.files.TmpFiles
 import org.hammerlab.test.matchers.files.{ HasDirMatchers, HasFileMatchers }
-import org.hammerlab.test.resources.Url
+import org.hammerlab.test.resources.{ File, Url }
 
 /**
  * Simple wrapper for common test-suite boilerplate.
@@ -26,7 +26,8 @@ abstract class Suite
     map.put(key, value)
   }
 
-  def path(name: String): Path = Path(Url(name).toURI)
+  def     path(name: String): Path = Path(Url(name).toURI)
+  def resource(name: String): Path = path(name)
 
   def fileCopy(path: Path, out: Path): Path = {
     val in = path.inputStream
