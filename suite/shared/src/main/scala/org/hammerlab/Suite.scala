@@ -34,6 +34,8 @@ abstract class Suite
   val !! = shapeless.the
   val illTyped = shapeless.test.illTyped
 
+  def hint[T](clue: Any)(fun: => T): T = withClue(clue)(fun)
+
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[fuzzyDoubleCmp]] */
   implicit var ε: E = 1e-6
 
