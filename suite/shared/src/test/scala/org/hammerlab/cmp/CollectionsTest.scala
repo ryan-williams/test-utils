@@ -1,7 +1,7 @@
 package org.hammerlab.cmp
 
 import org.hammerlab.cmp.CanEq.Cmp
-import org.hammerlab.cmp.first.Collections.{ Diff, LeftOnly, RightOnly }
+import org.hammerlab.cmp.first.collections.{ Diff, LeftOnly, RightOnly }
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -10,6 +10,9 @@ class CollectionsTest
 
   /**
    * Test custom-equality by comparing [[Int]]s via their ones' digit
+   *
+   * When this is in scope, comparisons of other nested structures containing ints inherit this custom int-comparison
+   * logic
    */
   implicit val intOrder: cats.Eq[Int] =
     new cats.Eq[Int] {

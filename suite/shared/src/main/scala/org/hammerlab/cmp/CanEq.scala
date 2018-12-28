@@ -2,8 +2,10 @@ package org.hammerlab.cmp
 
 import cats.Eq
 import org.hammerlab.cmp.CanEq.Cmp
-import org.hammerlab.cmp.first.Collections
+import org.hammerlab.cmp.first.collections.Unordered
 import shapeless._
+
+import scala.util.matching.Regex
 
 /**
  * Type-class for comparing instances of two (possibly different )types, with a customizable "diff" output-type
@@ -176,8 +178,35 @@ object Cmp {
   }
 }
 
+trait Regexs
+  extends first.collections.all {
+  implicit val stringCanEqRegex: CanEq.Aux[String, Regex, (String, Regex)] =
+    new CanEq[String, Regex] {
+      override type Diff = (String, Regex)
+      override def cmp(l: String, r: Regex): Option[Diff] =
+        r
+          .findFirstMatchIn(l)
+          .fold {
+            Option(l, r)
+          } {
+            _ ⇒ None
+          }
+    }
+
+  case class StartsWith(str: String)
+  implicit val stringCanEqStartsWith: CanEq.Aux[String, StartsWith, (String, String)] =
+    new CanEq[String, StartsWith] {
+      override type Diff = (String, String)
+      override def cmp(l: String, r: StartsWith): Option[Diff] =
+        if (l.startsWith(r.str))
+          None
+        else
+          Some((l, r.str))
+    }
+}
+
 object CanEq
-  extends Collections {
+  extends Regexs {
 
   /** Short-hand for a [[CanEq]] whose comparee-types are equal */
   type Cmp[T] = CanEq[T, T]

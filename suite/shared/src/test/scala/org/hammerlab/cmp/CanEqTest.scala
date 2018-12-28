@@ -1,7 +1,8 @@
 package org.hammerlab.cmp
 
+import hammerlab.test.cmp.StartsWith
 import org.hammerlab.cmp.double.Neq
-import org.hammerlab.cmp.first.Collections.Diff
+import org.hammerlab.cmp.first.collections.Diff
 import org.hammerlab.cmp.CanEq.Cmp
 import org.scalatest.exceptions.TestFailedException
 import shapeless._
@@ -14,7 +15,9 @@ case class F(d: Double) extends T
 case class Complex(r: Double, i: Double)
 
 class CanEqTest
-  extends hammerlab.Suite {
+  extends hammerlab.Suite
+     with hammerlab.test.cmp.tuple
+{
 
   test("seq") {
     ==(
@@ -167,6 +170,107 @@ class CanEqTest
     ==("", "")
     !=("abc", "")
     !=("", "abc")
+  }
+
+  test("regexs") {
+    ==("abc",  "abc" .r)
+    ==("abc", "^abc" .r)
+    ==("abc",  "abc$".r)
+    ==("abc", "^abc$".r)
+
+    ==("abc",  "ab".r)
+    ==("abc", "^ab".r)
+    !=("abc", "^ab$".r)
+    !=("abc",  "ab$".r)
+
+    ==("abc",  "bc".r)
+    !=("abc", "^bc".r)
+    ==("abc",  "bc$".r)
+    !=("abc", "^bc$".r)
+
+    !=("abc",  "ac".r)
+    !=("abc", "^ac".r)
+    !=("abc",  "ac$".r)
+    !=("abc", "^ac$".r)
+
+    ==("abc",  "a" .r)
+    ==("abc", "^a" .r)
+    !=("abc",  "a$".r)
+    !=("abc", "^a$".r)
+
+    ==("abc",  "b" .r)
+    !=("abc", "^b" .r)
+    !=("abc",  "b$".r)
+    !=("abc", "^b$".r)
+
+    ==("abc",  "c" .r)
+    !=("abc", "^c" .r)
+    ==("abc",  "c$".r)
+    !=("abc", "^c$".r)
+
+    !=("abc",  "d" .r)
+    !=("abc", "^d" .r)
+    !=("abc",  "d$".r)
+    !=("abc", "^d$".r)
+
+    ==("abc",  "" .r)
+    ==("abc", "^" .r)
+    ==("abc",  "$".r)
+    !=("abc", "^$".r)
+
+    ==("abc",  "[a-c]" .r)
+    ==("abc", "^[a-c]" .r)
+    ==("abc",  "[a-c]$".r)
+    !=("abc", "^[a-c]$".r)
+
+    ==("abc",  "[a-c]{3}" .r)
+    ==("abc", "^[a-c]{3}" .r)
+    ==("abc",  "[a-c]{3}$".r)
+    ==("abc", "^[a-c]{3}$".r)
+
+    ==("a",  "a" .r)
+    ==("a", "^a" .r)
+    ==("a",  "a$".r)
+    ==("a", "^a$".r)
+
+    !=("a",  "b" .r)
+    !=("a", "^b" .r)
+    !=("a",  "b$".r)
+    !=("a", "^b$".r)
+
+    ==("a",  "" .r)
+    ==("a", "^" .r)
+    ==("a",  "$".r)
+    !=("a", "^$".r)
+
+    !=("",  "b" .r)
+    !=("", "^b" .r)
+    !=("",  "b$".r)
+    !=("", "^b$".r)
+
+    ==("",  "" .r)
+    ==("", "^" .r)
+    ==("",  "$".r)
+    ==("", "^$".r)
+  }
+
+  test("starts with") {
+    ==("abc", StartsWith(""))
+    ==("abc", StartsWith("a"))
+    ==("abc", StartsWith("ab"))
+    ==("abc", StartsWith("abc"))
+    !=("abc", StartsWith("abcd"))
+    !=("abc", StartsWith("abd"))
+    !=("abc", StartsWith("b"))
+    !=("abc", StartsWith("bc"))
+    !=("abc", StartsWith("bd"))
+  }
+
+  test("tuples") {
+    ==(("abc", "def"), ("a".r, "d".r))
+    !=(("abc", "def"), ("a".r, "a".r))
+    !=(("abc", "def"), ("d".r, "d".r))
+    !=(("abc", "def"), ("d".r, "a".r))
   }
 
   test("custom cmp") {
