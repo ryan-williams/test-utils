@@ -5,7 +5,7 @@ jdk:
 
 scala:
   - 2.11.12
-  - 2.12.7
+  - 2.12.8
 
 script:
   - echo "Travis build $TRAVIS_BUILD_ID $TRAVIS_BUILD_NUMBER"
