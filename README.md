@@ -10,13 +10,13 @@
 ## Get
 
 ```scala
-libraryDependencies += "org.hammerlab.test" %%% "suite" % "1.0.1"
+libraryDependencies += "org.hammerlab.test" %%% "suite" % "1.1.0"
 ```
 
 or
 
 ```scala
-libraryDependencies += "org.hammerlab.test" %% "base" % "1.0.1"
+libraryDependencies += "org.hammerlab.test" %% "base" % "1.1.0"
 ```
 
 ## Use
