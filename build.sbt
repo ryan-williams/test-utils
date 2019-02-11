@@ -1,8 +1,8 @@
+import hammerlab._
 
 default(
   subgroup("test"),
-  v"1.1.0",
-  +`2.11`,
+  v"2.0.0",
   // Don't inherit default test-deps from parent plugin.
   clearTestDeps,
   versions(
@@ -10,17 +10,24 @@ default(
   )
 )
 
-lazy val base = project.settings(
+lazy val base = cross.settings(
   dep(
     // this should come from the suite.jvm classpath-dep below, but test-scoped dependencies don't transit as you'd
     // think/like
     math.tolerance tests,
-    paths % "1.5.0"
+    "org.lasersonlab" ^^ "uri" ^ "0.1.0".snapshot
   ),
   testDeps += scalatest
 ).dependsOn(
-  suite.jvm andTest
+  cmp,
+  suite andTest
 )
+lazy val `base-x` = base.x
+
+lazy val cmp = cross.settings(
+
+)
+lazy val `cmp-x` = cmp.x
 
 lazy val suite = cross.settings(
   dep(
@@ -32,9 +39,13 @@ lazy val suite = cross.settings(
   // java.nio.file.InvalidPathException: Malformed input or input contains unmappable characters: index/index-ε.html
   emptyDocJar
 )
+.dependsOn(
+  cmp
+)
 lazy val `suite-x` = suite.x
 
 lazy val `test-utils` = root(
-   base,
-  `suite-x`
+   `base-x`,
+    `cmp-x`,
+  `suite-x`,
 )
