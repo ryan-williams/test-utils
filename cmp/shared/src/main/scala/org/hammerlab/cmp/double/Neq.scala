@@ -4,7 +4,7 @@ import cats.Show
 import cats.Show.show
 import cats.syntax.show._
 import hammerlab.math.tolerance._
-import org.hammerlab.test.Cmp
+import org.hammerlab.cmp.Cmp
 
 case class Neq(l: Double, r: Double, ε: E)
 object Neq {

@@ -1,7 +1,7 @@
 package org.hammerlab.cmp.double
 
 import hammerlab.math.tolerance._
-import org.hammerlab.test.Cmp
+import org.hammerlab.cmp.Cmp
 
 class NeqTest
   extends hammerlab.Suite {

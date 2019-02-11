@@ -1,8 +1,7 @@
 package org.hammerlab.cmp.first
 
-import org.hammerlab.cmp.CanEq.Cmp
 import org.hammerlab.cmp.{ Cmp, Priority1CanEq }
-import shapeless.{ :+:, CNil, Coproduct, Generic, Inl, Inr, Lazy }
+import shapeless._
 
 trait SealedTrait
   extends Priority1CanEq {

@@ -1,8 +1,7 @@
 package org.hammerlab.cmp.first.collections
 
 import cats.data.Ior._
-import org.hammerlab.cmp.CanEq
-import org.hammerlab.test.Cmp
+import org.hammerlab.cmp.{ CanEq, Cmp }
 
 /**
  * [[CanEq]] instances for standard collections, computing and returning the first index where they differ, as well as

@@ -1,8 +1,6 @@
 package org.hammerlab.cmp
 
 import cats.Eq
-import org.hammerlab.cmp.CanEq.Cmp
-import org.hammerlab.cmp.first.collections.Unordered
 import shapeless._
 
 import scala.util.matching.Regex
