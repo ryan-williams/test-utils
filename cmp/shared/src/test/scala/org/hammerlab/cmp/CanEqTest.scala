@@ -1,9 +1,8 @@
 package org.hammerlab.cmp
 
-import hammerlab.test.cmp.StartsWith
+import hammerlab.cmp.StartsWith
 import org.hammerlab.cmp.double.Neq
 import org.hammerlab.cmp.first.collections.Diff
-import org.hammerlab.cmp.CanEq.Cmp
 import org.scalatest.exceptions.TestFailedException
 import shapeless._
 

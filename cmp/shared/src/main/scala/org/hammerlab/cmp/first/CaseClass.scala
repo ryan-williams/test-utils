@@ -1,7 +1,6 @@
 package org.hammerlab.cmp.first
 
-import org.hammerlab.cmp.Priority1CanEq
-import org.hammerlab.test.Cmp
+import org.hammerlab.cmp.Cmp
 import shapeless._
 
 /**

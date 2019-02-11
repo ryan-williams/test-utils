@@ -1,4 +1,4 @@
-package hammerlab.test
+package hammerlab
 
 package object cmp {
   type tuple = org.hammerlab.cmp.tuples

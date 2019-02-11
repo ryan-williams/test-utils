@@ -4,7 +4,7 @@ default(
   subgroup("test"),
   v"2.0.0",
   // Don't inherit default test-deps from parent plugin.
-  clearTestDeps,
+  addTestLib := false,
   versions(
     math.tolerance → "1.0.0"
   )
@@ -26,7 +26,11 @@ lazy val base =
     )
 
 lazy val cmp = cross.settings(
-
+  dep(
+    cats,
+    math.tolerance,
+    shapeless
+  )
 )
 lazy val `cmp-x` = cmp.x
 

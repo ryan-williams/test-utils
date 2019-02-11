@@ -1,8 +1,7 @@
 package org.hammerlab.cmp.first.collections
 
-import org.hammerlab.cmp.CanEq
+import org.hammerlab.cmp.{ CanEq, Cmp }
 import org.hammerlab.cmp.first.CaseClass
-import org.hammerlab.test.Cmp
 import shapeless.Lazy
 
 trait Defaults

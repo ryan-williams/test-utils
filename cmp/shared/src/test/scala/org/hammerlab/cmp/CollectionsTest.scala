@@ -1,6 +1,5 @@
 package org.hammerlab.cmp
 
-import org.hammerlab.cmp.CanEq.Cmp
 import org.hammerlab.cmp.first.collections.{ Diff, LeftOnly, RightOnly }
 
 import scala.collection.mutable.ArrayBuffer
