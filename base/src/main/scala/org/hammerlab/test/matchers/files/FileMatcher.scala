@@ -11,7 +11,7 @@ class FileMatcher(expected: Path, binaryMatch: Boolean = false)
 
   /**
    * @param actual Fully-qualified path to the "actual" file whose contents should be compared to the "expected"
-   *                   test-resource file.
+   *               test-resource file.
    */
   override def apply(actual: Path): MatchResult =
     if (expected.isDirectory)
