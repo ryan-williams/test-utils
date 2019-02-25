@@ -4,7 +4,7 @@ import org.hammerlab.cmp.{ CanEq, Cmp }
 import org.hammerlab.cmp.first.CaseClass
 import shapeless.Lazy
 
-trait Defaults
+trait Iterables
   extends CaseClass {
 
   implicit def cmpRange(
@@ -62,6 +62,11 @@ trait Defaults
         )
     }
 
+  /**
+   * This powers comparison for any [[CanIterate]] types.
+   *
+   * It isn't implicit; the actual implicit [[Iterator]] instance goes via [[CanIterate]].
+   */
   def iteratorsCanEq[L, R](
     implicit
     ce: Lazy[CanEq[L, R]]
