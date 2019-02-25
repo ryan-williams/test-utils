@@ -8,41 +8,41 @@ import org.hammerlab.cmp.{ CanEq, Cmp }
  * [[ElemDiff a structured representation of that difference]].
  */
 trait Unordered
-  extends Defaults {
+  extends Iterables {
 
-    implicit def setsCanEq[T](
-      implicit
-      cmp: Cmp[T]
-    ):
-      Cmp.Aux[
-        Set[T],
-        ElemOnly[T, T]
-      ] =
-      Cmp {
-        (l, r) ⇒
+  implicit def setsCanEq[T](
+    implicit
+    cmp: Cmp[T]
+  ):
+    Cmp.Aux[
+      Set[T],
+      ElemOnly[T, T]
+    ] =
+    Cmp {
+      (l, r) ⇒
+        val it =
+          for {
+            e ← l.iterator
+            if !r(e)
+          } yield
+            e
+
+        if (it.hasNext)
+          Some(LeftOnly(it.next))
+        else {
           val it =
             for {
-              e ← l.iterator
-              if !r(e)
+              e ← r.iterator
+              if !l(e)
             } yield
               e
 
           if (it.hasNext)
-            Some(LeftOnly(it.next))
-          else {
-            val it =
-              for {
-                e ← r.iterator
-                if !l(e)
-              } yield
-                e
-
-            if (it.hasNext)
-              Some(RightOnly(it.next))
-            else
-              None
-          }
-      }
+            Some(RightOnly(it.next))
+          else
+            None
+        }
+    }
 
   /**
    * Compare two [[Map]]s; takes precedence over [[traversesCanEq]]

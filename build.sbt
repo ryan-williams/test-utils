@@ -6,7 +6,8 @@ default(
   // Don't inherit default test-deps from parent plugin.
   addTestLib := false,
   versions(
-    math.tolerance → "1.0.0"
+    math.tolerance → "1.0.0",
+    types → "1.5.0",
   )
 )
 
@@ -29,7 +30,8 @@ lazy val cmp = cross.settings(
   dep(
     cats,
     math.tolerance,
-    shapeless
+    shapeless,
+    types
   )
 )
 lazy val `cmp-x` = cmp.x
