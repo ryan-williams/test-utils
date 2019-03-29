@@ -7,7 +7,7 @@ object Cmp {
   def apply[T, E](fn: (T, T) ⇒ Option[E]): Aux[T, E] = CanEq(fn)
 
   /** Create a [[Cmp]] interms of another */
-  def by[L, R](fn: R ⇒ L)(implicit cmp: Cmp[L]): Aux[R, cmp.Diff] =
+  def by[L, R](fn: L ⇒ R)(implicit cmp: Cmp[R]): Aux[L, cmp.Diff] =
     Cmp {
       (l, r) ⇒
         cmp(

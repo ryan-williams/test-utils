@@ -3,7 +3,8 @@ package org.hammerlab.cmp
 import shapeless.{ =:!=, Lazy }
 
 trait ConvertLHS
-  extends Serializable {
+  extends Serializable
+{
 
   /**
    * Derive a [[CanEq]] for two types given a [[Cmp]] for the second and an implicit conversion from the first to the

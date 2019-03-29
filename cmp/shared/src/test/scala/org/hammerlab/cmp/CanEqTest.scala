@@ -153,7 +153,6 @@ class CanEqTest
     ==(2L, 2L)
     !=(3L, 2L)
   }
-
   test("strings") {
     ==("abc", "abc")
     !=("abc", "abcd")
@@ -172,85 +171,85 @@ class CanEqTest
   }
 
   test("regexs") {
-    ==("abc",  "abc" .r)
-    ==("abc", "^abc" .r)
-    ==("abc",  "abc$".r)
-    ==("abc", "^abc$".r)
+    ==("abc",  "abc"  r)
+    ==("abc", "^abc"  r)
+    ==("abc",  "abc$" r)
+    ==("abc", "^abc$" r)
 
-    ==("abc",  "ab".r)
-    ==("abc", "^ab".r)
-    !=("abc", "^ab$".r)
-    !=("abc",  "ab$".r)
+    ==("abc",  "ab"  r)
+    ==("abc", "^ab"  r)
+    !=("abc", "^ab$" r)
+    !=("abc",  "ab$" r)
 
-    ==("abc",  "bc".r)
-    !=("abc", "^bc".r)
-    ==("abc",  "bc$".r)
-    !=("abc", "^bc$".r)
+    ==("abc",  "bc"  r)
+    !=("abc", "^bc"  r)
+    ==("abc",  "bc$" r)
+    !=("abc", "^bc$" r)
 
-    !=("abc",  "ac".r)
-    !=("abc", "^ac".r)
-    !=("abc",  "ac$".r)
-    !=("abc", "^ac$".r)
+    !=("abc",  "ac"  r)
+    !=("abc", "^ac"  r)
+    !=("abc",  "ac$" r)
+    !=("abc", "^ac$" r)
 
-    ==("abc",  "a" .r)
-    ==("abc", "^a" .r)
-    !=("abc",  "a$".r)
-    !=("abc", "^a$".r)
+    ==("abc",  "a"  r)
+    ==("abc", "^a"  r)
+    !=("abc",  "a$" r)
+    !=("abc", "^a$" r)
 
-    ==("abc",  "b" .r)
-    !=("abc", "^b" .r)
-    !=("abc",  "b$".r)
-    !=("abc", "^b$".r)
+    ==("abc",  "b"  r)
+    !=("abc", "^b"  r)
+    !=("abc",  "b$" r)
+    !=("abc", "^b$" r)
 
-    ==("abc",  "c" .r)
-    !=("abc", "^c" .r)
-    ==("abc",  "c$".r)
-    !=("abc", "^c$".r)
+    ==("abc",  "c"  r)
+    !=("abc", "^c"  r)
+    ==("abc",  "c$" r)
+    !=("abc", "^c$" r)
 
-    !=("abc",  "d" .r)
-    !=("abc", "^d" .r)
-    !=("abc",  "d$".r)
-    !=("abc", "^d$".r)
+    !=("abc",  "d"  r)
+    !=("abc", "^d"  r)
+    !=("abc",  "d$" r)
+    !=("abc", "^d$" r)
 
-    ==("abc",  "" .r)
-    ==("abc", "^" .r)
-    ==("abc",  "$".r)
-    !=("abc", "^$".r)
+    ==("abc",  ""  r)
+    ==("abc", "^"  r)
+    ==("abc",  "$" r)
+    !=("abc", "^$" r)
 
-    ==("abc",  "[a-c]" .r)
-    ==("abc", "^[a-c]" .r)
-    ==("abc",  "[a-c]$".r)
-    !=("abc", "^[a-c]$".r)
+    ==("abc",  "[a-c]"  r)
+    ==("abc", "^[a-c]"  r)
+    ==("abc",  "[a-c]$" r)
+    !=("abc", "^[a-c]$" r)
 
-    ==("abc",  "[a-c]{3}" .r)
-    ==("abc", "^[a-c]{3}" .r)
-    ==("abc",  "[a-c]{3}$".r)
-    ==("abc", "^[a-c]{3}$".r)
+    ==("abc",  "[a-c]{3}"  r)
+    ==("abc", "^[a-c]{3}"  r)
+    ==("abc",  "[a-c]{3}$" r)
+    ==("abc", "^[a-c]{3}$" r)
 
-    ==("a",  "a" .r)
-    ==("a", "^a" .r)
-    ==("a",  "a$".r)
-    ==("a", "^a$".r)
+    ==("a",  "a"  r)
+    ==("a", "^a"  r)
+    ==("a",  "a$" r)
+    ==("a", "^a$" r)
 
-    !=("a",  "b" .r)
-    !=("a", "^b" .r)
-    !=("a",  "b$".r)
-    !=("a", "^b$".r)
+    !=("a",  "b"  r)
+    !=("a", "^b"  r)
+    !=("a",  "b$" r)
+    !=("a", "^b$" r)
 
-    ==("a",  "" .r)
-    ==("a", "^" .r)
-    ==("a",  "$".r)
-    !=("a", "^$".r)
+    ==("a",  ""  r)
+    ==("a", "^"  r)
+    ==("a",  "$" r)
+    !=("a", "^$" r)
 
     !=("",  "b" .r)
     !=("", "^b" .r)
     !=("",  "b$".r)
     !=("", "^b$".r)
 
-    ==("",  "" .r)
-    ==("", "^" .r)
-    ==("",  "$".r)
-    ==("", "^$".r)
+    ==("",  ""  r)
+    ==("", "^"  r)
+    ==("",  "$" r)
+    ==("", "^$" r)
   }
 
   test("starts with") {
@@ -273,14 +272,18 @@ class CanEqTest
   }
 
   test("custom cmp") {
-    implicit val cmp = Cmp.by[Int, String](_.toInt)
-    ==("2", "2")
-    ==("02", "2")
-    !=("-02", "2")
-    !=("03", "2")
-    !=("3", "2")
+    {
+      // Compare strings by parsing to integers
+      implicit val cmp = Cmp.by[String, Int](_.toInt)
+      ==("2", "2")
+      ==("02", "2")
+      !=("-02", "2")
+      !=("03", "2")
+      !=("3", "2")
+    }
 
     {
+      // Compare strings to their (integer) lengths
       implicit val cmp = CanEq.by[String, Int](_.length)
       ==( "", 0)
       !=( "", 1)
@@ -330,4 +333,34 @@ class CanEqTest
       )
     )
   }
+
+  test("subtypes") {
+    import Types.{A, A1, B}
+
+    {
+      implicit val cmpA: Cmp.Aux[A, String] = ???
+      !![CanEq[ A1, A  ]]
+      !![CanEq[ A,  A1 ]]
+    }
+
+    {
+      implicit val AcaneqB: CanEq.Aux[A, B, String] = ???
+      !![CanEq[A, B]]
+      // TODO: scalac StackOverflows in the presence of a CanEq.Aux[L1 >: L, R] ⟹ CanEq.Aux[L, R] conversion. Why?
+      //!![CanEq[A1, B]]
+    }
+  }
+
+  test("maps") {
+    val map = Map.empty[Int, String]
+
+    ==(map, Map())
+    !=(Map(1 → "a"), Map())
+  }
+}
+
+object Types {
+  trait A
+  case class A1(n: Int) extends A
+  case class B(s: String)
 }

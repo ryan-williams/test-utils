@@ -3,12 +3,19 @@ package org.hammerlab.cmp.first.collections
 import cats.data.Ior._
 import org.hammerlab.cmp.{ CanEq, Cmp }
 
+trait NothingMap extends Iterables {
+  implicit def nothingMapKeys[K, V](implicit cmp: Cmp[Map[K, V]]): CanEq.Aux[Map[K, V], Map[Nothing, Nothing], cmp.Diff] =
+    CanEq {
+      (l, r) ⇒ cmp(l, r.asInstanceOf[Map[K, V]])
+    }
+}
+
 /**
  * [[CanEq]] instances for standard collections, computing and returning the first index where they differ, as well as
  * [[ElemDiff a structured representation of that difference]].
  */
 trait Unordered
-  extends Iterables {
+  extends NothingMap {
 
   implicit def setsCanEq[T](
     implicit

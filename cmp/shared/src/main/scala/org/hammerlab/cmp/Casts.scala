@@ -10,11 +10,12 @@ trait Casts
    */
   implicit def widenRight[
     L,
-    R <: L
+    R
   ](
     implicit
     cmp: Lazy[Cmp[L]],
-    ev: L =:!= R
+    ev: L =:!= R,
+    ev2: R <:< L,
   ):
     CanEq.Aux[
       L,
@@ -30,12 +31,13 @@ trait Casts
    * Derive a [[CanEq]] for two types where the first is a ([[=:!= strict!]]) subclass of the second
    */
   implicit def widenLeft[
-    L <: R,
+    L,
     R
   ](
     implicit
     cmp: Lazy[Cmp[R]],
-    ev: L =:!= R
+    ev: L =:!= R,
+    ev2: L <:< R
   ):
     CanEq.Aux[
       L,
