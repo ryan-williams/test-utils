@@ -2,6 +2,7 @@ package org.hammerlab.cmp.first.collections
 
 import org.hammerlab.cmp.{ CanEq, Cmp }
 import org.hammerlab.cmp.first.CaseClass
+import org.hammerlab.collection.Iter
 import shapeless.Lazy
 
 trait Iterables
@@ -23,21 +24,22 @@ trait Iterables
       r ⇒ r: Seq[Int]
     )
 
-  implicit def traversesCanEq[L, R, T[_]](
+  implicit def traversesCanEq[L, R, LI[_], RI[_]](
     implicit
     cmp: Lazy[CanEq[L, R]],
-    t: CanIterate[T]
+    li: Iter[LI],
+    ri: Iter[RI],
   ):
     CanEq.Aux[
-      T[L],
-      T[R],
+      LI[L],
+      RI[R],
       IndexedDiff[L, R, cmp.value.Diff]
     ] =
     CanEq {
       (l, r) ⇒
         iteratorsCanEq(cmp)(
-          t(l),
-          t(r)
+          li.iter(l),
+          ri.iter(r)
         )
     }
 
@@ -48,7 +50,7 @@ trait Iterables
    */
   implicit def traverseNothingsCanEq[T[_]](
     implicit
-    t: CanIterate[T]
+    t: Iter[T]
   ):
     Cmp.Aux[
       T[Nothing],
@@ -57,15 +59,15 @@ trait Iterables
     CanEq {
       (l, r) ⇒
         iteratorsCanEq[Nothing, Nothing].apply(
-          t(l),
-          t(r)
+          t.iter(l),
+          t.iter(r)
         )
     }
 
   /**
-   * This powers comparison for any [[CanIterate]] types.
+   * This powers comparison for any [[Iter]] types.
    *
-   * It isn't implicit; the actual implicit [[Iterator]] instance goes via [[CanIterate]].
+   * It isn't implicit; the actual implicit [[Iterator]] instance goes via [[Iter]].
    */
   def iteratorsCanEq[L, R](
     implicit

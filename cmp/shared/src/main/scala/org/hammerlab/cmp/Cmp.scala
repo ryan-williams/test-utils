@@ -6,6 +6,8 @@ object Cmp {
   /** Create a [[Cmp]] from its single method */
   def apply[T, E](fn: (T, T) ⇒ Option[E]): Aux[T, E] = CanEq(fn)
 
+  def ???[T, D] = Cmp[T, D] { (_, _) ⇒ Predef.??? }
+
   /** Create a [[Cmp]] interms of another */
   def by[L, R](fn: L ⇒ R)(implicit cmp: Cmp[R]): Aux[L, cmp.Diff] =
     Cmp {

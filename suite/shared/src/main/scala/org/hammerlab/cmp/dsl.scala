@@ -1,9 +1,15 @@
 package org.hammerlab.cmp
 
 import org.scalatest.FunSuite
+import org.scalatest.exceptions.TestFailedException
 
 trait dsl {
   self: FunSuite ⇒
+
+  @inline def `☠️`[Δ](Δ: Δ)(implicit show: Show[Δ]) = {
+    throw new TestFailedException(Some(show(Δ)), Some(new Exception), 4)
+    //fail(show(Δ), new Exception)
+  }
 
   /**
    * Assert equality between two arbitrary types
@@ -33,9 +39,11 @@ trait dsl {
   ): Unit =
     cmp(l, r)
       .foreach {
-        e ⇒
-          fail(
-            showError(e)
+        Δ ⇒
+          `☠️`(
+          //throw new Exception(
+            showError(Δ),
+            new Exception
           )
       }
 
@@ -44,11 +52,11 @@ trait dsl {
    */
   def !==[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Unit =
     if (cmp(l, r).isEmpty)
-      fail(s"Expected $l !== $r")
+      `☠️`(s"Expected $l !== $r")
 
   def !=[L, R](l: L, r: R)(implicit cmp: CanEq[L, R]): Unit =
     if (cmp(l, r).isEmpty)
-      fail(s"Expected $l !== $r")
+      `☠️`(s"Expected $l !== $r")
 
   def ==[L, R, D](
     l: L,
@@ -91,5 +99,5 @@ trait dsl {
     cmp: Cmp.Wrapper[T, _]
   ): Unit =
     if (cmp(l, r).isEmpty)
-      fail(s"Expected $l !== $r")
+      `☠️`(s"Expected $l !== $r")
 }

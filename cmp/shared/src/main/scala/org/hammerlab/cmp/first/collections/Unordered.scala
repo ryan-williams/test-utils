@@ -8,6 +8,8 @@ trait NothingMap extends Iterables {
     CanEq {
       (l, r) ⇒ cmp(l, r.asInstanceOf[Map[K, V]])
     }
+
+  implicit def nothingNothingMap[Diff]: Cmp.Aux[Map[Nothing, Nothing], Diff] = Cmp { (l, r) ⇒ ??? }
 }
 
 /**

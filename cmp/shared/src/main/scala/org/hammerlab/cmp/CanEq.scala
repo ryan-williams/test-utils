@@ -31,6 +31,8 @@ object CanEq
         fn(l, r)
     }
 
+  def ???[L, R, D] = CanEq[L, R, D] { (_, _) ⇒ Predef.??? }
+
   /**
    * Wrapper around a [[CanEq]] used to enable overloading methods that would otherwise have the same type after erasure
    */
@@ -42,7 +44,7 @@ object CanEq
     implicit def unwrap[L, R, D](         w: Wrapper[L, R, D]): CanEq.Aux[L, R, D] = w.cmp
   }
 
-  implicit val nothingCanEqNothing: Cmp.Aux[Nothing, Nothing] = Cmp[Nothing, Nothing] { (_, _) ⇒ ??? }
+  implicit val nothingCanEqNothing: Cmp.Aux[Nothing, Nothing] = ???
 
   def by[L, R](
     fn: L ⇒ R

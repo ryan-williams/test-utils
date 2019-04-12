@@ -1,6 +1,7 @@
 package org.hammerlab.cmp
 
 import org.hammerlab.cmp.first.collections.{ Diff, LeftOnly, RightOnly }
+import org.hammerlab.collection.Iter
 
 import scala.collection.mutable.ArrayBuffer
 

@@ -26,8 +26,6 @@ abstract class Suite
      with Matchers
      with Befores
      with Afters
-     with matchers.lines.HasMatcher
-     with matchers.seqs.all
      with double.HasNeq
      with CanEq.dsl
      with dsl {
@@ -35,7 +33,7 @@ abstract class Suite
   val !! = shapeless.the
   val illTyped = shapeless.test.illTyped
 
-  def hint[T](clue: Any)(fun: => T): T = withClue(clue)(fun)
+  def hint[T](clue: Any)(fun: ⇒ T): T = withClue(clue)(fun)
 
   /** Fuzziness for [[Double]] assertions / equality-comparisons; see [[fuzzyDoubleCmp]] */
   implicit var ε: E = 1e-6

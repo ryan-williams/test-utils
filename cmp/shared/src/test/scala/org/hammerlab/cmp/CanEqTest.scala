@@ -338,13 +338,13 @@ class CanEqTest
     import Types.{A, A1, B}
 
     {
-      implicit val cmpA: Cmp.Aux[A, String] = ???
+      implicit val cmpA: Cmp.Aux[A, String] = Cmp.???
       !![CanEq[ A1, A  ]]
       !![CanEq[ A,  A1 ]]
     }
 
     {
-      implicit val AcaneqB: CanEq.Aux[A, B, String] = ???
+      implicit val AcaneqB: CanEq.Aux[A, B, String] = CanEq.???
       !![CanEq[A, B]]
       // TODO: scalac StackOverflows in the presence of a CanEq.Aux[L1 >: L, R] ⟹ CanEq.Aux[L, R] conversion. Why?
       //!![CanEq[A1, B]]
@@ -356,6 +356,8 @@ class CanEqTest
 
     ==(map, Map())
     !=(Map(1 → "a"), Map())
+
+    !![Cmp[Map[Nothing, Nothing]]]
   }
 }
 
