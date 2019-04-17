@@ -1,13 +1,15 @@
 package org.hammerlab.cmp
 
+import hammerlab.option._
+
 import scala.util.matching.Regex
 
 trait Regexs
   extends first.collections.all {
   implicit val stringCanEqRegex: CanEq.Aux[String, Regex, (String, Regex)] =
     new CanEq[String, Regex] {
-      override type Diff = (String, Regex)
-      override def cmp(l: String, r: Regex): Option[Diff] =
+      type Δ = (String, Regex)
+      def cmp(l: String, r: Regex): ?[Δ] =
         r
           .findFirstMatchIn(l)
           .fold {
@@ -20,8 +22,8 @@ trait Regexs
   case class StartsWith(str: String)
   implicit val stringCanEqStartsWith: CanEq.Aux[String, StartsWith, (String, String)] =
     new CanEq[String, StartsWith] {
-      override type Diff = (String, String)
-      override def cmp(l: String, r: StartsWith): Option[Diff] =
+      type Δ = (String, String)
+      def cmp(l: String, r: StartsWith): ?[Δ] =
         if (l.startsWith(r.str))
           None
         else

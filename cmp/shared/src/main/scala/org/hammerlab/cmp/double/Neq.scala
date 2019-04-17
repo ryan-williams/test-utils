@@ -4,11 +4,12 @@ import cats.Show
 import cats.Show.show
 import cats.syntax.show._
 import hammerlab.math.tolerance._
+import hammerlab.option._
 import org.hammerlab.cmp.Cmp
 
 case class Neq(l: Double, r: Double, ε: E)
 object Neq {
-  def apply(l: Double, r: Double)(implicit ε: E): Option[Neq] =
+  def apply(l: Double, r: Double)(implicit ε: E): ?[Neq] =
     if (l === r)
       None
     else

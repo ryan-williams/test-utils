@@ -18,25 +18,25 @@ trait dsl {
    * Supports implicit configuration of:
    *
    * - equality-test logic ([[CanEq]])
-   * - error / "diff" type ([[D]])
+   * - error / "diff" type ([[Δ]])
    * - display of error/diff (via [[cats.Show]] instances)
    *
    * @param l left-hand comparee
    * @param r right-hand comparee
-   * @param cmp comparator; returns arbitrary error-type [[D]]
-   * @param showError customizable pretty-printer for error-type [[D]]
+   * @param cmp comparator; returns arbitrary error-type [[Δ]]
+   * @param showError customizable pretty-printer for error-type [[Δ]]
    * @tparam L left-hand comparee type
    * @tparam R right-hand comparee type
-   * @tparam D error / "diff" type; a given [[CanEq]] can expose different expressions of the computed difference
+   * @tparam Δ error / "diff" type; a given [[CanEq]] can expose different expressions of the computed difference
    *           between its compared instances
    */
-  def ===[L, R, D](
+  def ===[L, R, Δ](
     l: L,
     r: R
   )(
     implicit
-    cmp: CanEq.Aux[L, R, D],
-    showError: Show[D]
+    cmp: CanEq.Aux[L, R, Δ],
+    showError: Show[Δ]
   ): Unit =
     cmp(l, r)
       .foreach {
@@ -59,37 +59,37 @@ trait dsl {
     if (cmp(l, r).isEmpty)
       `☠️`(s"Expected $l !== $r")
 
-  def ==[L, R, D](
+  def ==[L, R, Δ](
     l: L,
     r: R
   )(
     implicit
-    cmp: CanEq.Aux[L, R, D],
-    showError: Show[D]
+    cmp: CanEq.Aux[L, R, Δ],
+    showError: Show[Δ]
   ): Unit =
     ===(l, r)
 
-  def ===[T, D](
+  def ===[T, Δ](
     l: T
   )(
     r: T
   )(
     implicit
-    cmp: CanEq.Wrapper[T, T, D],
-    showError: Show[D]
+    cmp: CanEq.Wrapper[T, T, Δ],
+    showError: Show[Δ]
   ): Unit =
     ===(l, r)(cmp, showError)
 
-  def ==[T, D](
+  def ==[T, Δ](
     l: T
   )(
     r: T
   )(
     implicit
-    cmp: CanEq.Wrapper[T, T, D],
-    showError: Show[D]
+    cmp: CanEq.Wrapper[T, T, Δ],
+    showError: Show[Δ]
   ): Unit =
-    ===[T, D](l)(r)(cmp, showError)
+    ===[T, Δ](l)(r)(cmp, showError)
 
   def !=[T](
     l: T

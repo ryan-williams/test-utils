@@ -9,7 +9,7 @@ import shapeless._
  * Instances are compared field by field with [[Cmp]] instances corresponding to each field's type, and the first
  * field-difference found is returned.
  *
- * The returned [[org.hammerlab.cmp.CanEq.Diff "diff"]] type is a [[Coproduct]] ("either") of all the fields'
+ * The returned [[org.hammerlab.cmp.CanEq.Δ "diff"]] type is a [[Coproduct]] ("either") of all the fields'
  * diff-types.
  */
 trait CaseClass
@@ -54,18 +54,18 @@ trait CaseClass
     head: Lazy[Cmp[H]],
     tail: Lazy[Cmp.Aux[T, DT]]
   ):
-    Cmp.Aux[H :: T, head.value.Diff :+: DT] =
-    Cmp[H :: T, head.value.Diff :+: DT](
+    Cmp.Aux[H :: T, head.value.Δ :+: DT] =
+    Cmp[H :: T, head.value.Δ :+: DT](
       (l, r) ⇒
         head
           .value
           .cmp(l.head, r.head)
-          .map(Inl[head.value.Diff, DT](_))
+          .map(Inl[head.value.Δ, DT](_))
           .orElse(
             tail
               .value
               .cmp(l.tail, r.tail)
-              .map(Inr[head.value.Diff, DT](_))
+              .map(Inr[head.value.Δ, DT](_))
           )
     )
 

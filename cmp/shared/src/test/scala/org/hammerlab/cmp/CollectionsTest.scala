@@ -1,7 +1,7 @@
 package org.hammerlab.cmp
 
+import hammerlab.option._
 import org.hammerlab.cmp.first.collections.{ Diff, LeftOnly, RightOnly }
-import org.hammerlab.collection.Iter
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -168,15 +168,15 @@ class CollectionsTest
     implicitly[Cmp[Iterator[Nothing]]]
     implicitly[Cmp[None.type]]
     implicitly[Cmp[Some[Nothing]]]
-    implicitly[Cmp[Option[Nothing]]]
+    implicitly[Cmp[?[Nothing]]]
 
     implicitly[Cmp[(Int, Int)]]
-    implicitly[Cmp[(Int, Option[Int])]]
+    implicitly[Cmp[(Int, ?[Int])]]
     implicitly[Cmp[(Nothing, Nothing)]]
-    implicitly[Cmp[(Nothing, Option[Nothing])]]
+    implicitly[Cmp[(Nothing, ?[Nothing])]]
 
     ==(
-      Iterator[(Nothing, Option[Nothing])](),
+      Iterator[(Nothing, ?[Nothing])](),
       Iterator()
     )
   }

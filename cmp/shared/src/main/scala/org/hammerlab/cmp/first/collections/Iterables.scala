@@ -1,5 +1,6 @@
 package org.hammerlab.cmp.first.collections
 
+import hammerlab.option._
 import org.hammerlab.cmp.{ CanEq, Cmp }
 import org.hammerlab.cmp.first.CaseClass
 import org.hammerlab.collection.Iter
@@ -17,7 +18,7 @@ trait Iterables
       IndexedDiff[
         Int,
         Int,
-        cmp.value.Diff
+        cmp.value.Δ
       ]
     ] =
     Cmp.by(
@@ -33,7 +34,7 @@ trait Iterables
     CanEq.Aux[
       LI[L],
       RI[R],
-      IndexedDiff[L, R, cmp.value.Diff]
+      IndexedDiff[L, R, cmp.value.Δ]
     ] =
     CanEq {
       (l, r) ⇒
@@ -76,12 +77,12 @@ trait Iterables
     CanEq.Aux[
       Iterator[L],
       Iterator[R],
-      IndexedDiff[L, R, ce.value.Diff]
+      IndexedDiff[L, R, ce.value.Δ]
     ] =
     new CanEq[Iterator[L], Iterator[R]] {
-      type Diff = IndexedDiff[L, R, ce.value.Diff]
-      def cmp(          l: Iterator[L], r: Iterator[R]): Option[Diff] = cmp(0, l, r)
-      def cmp(idx: Int, l: Iterator[L], r: Iterator[R]): Option[Diff] =
+      type Δ = IndexedDiff[L, R, ce.value.Δ]
+      def cmp(          l: Iterator[L], r: Iterator[R]): ?[Δ] = cmp(0, l, r)
+      def cmp(idx: Int, l: Iterator[L], r: Iterator[R]): ?[Δ] =
         (l.hasNext, r.hasNext) match {
           case (true, true) ⇒
             ce.value.apply(

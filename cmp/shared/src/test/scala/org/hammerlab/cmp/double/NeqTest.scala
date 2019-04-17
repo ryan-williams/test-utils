@@ -1,6 +1,7 @@
 package org.hammerlab.cmp.double
 
 import hammerlab.math.tolerance._
+import hammerlab.option._
 import org.hammerlab.cmp.Cmp
 
 class NeqTest
@@ -10,12 +11,12 @@ class NeqTest
   implicit val cmpEpsilon: Cmp[E] = Cmp.by(_.ε)
 
   // TODO: replace [[Option]] with `Opt` that auto-lifts
-  implicit def liftOpt[T](t: T): Option[T] = Some(t)
+  implicit def liftOpt[T](t: T): ?[T] = Some(t)
 
   test("doubles") {
     implicit val ε: E = 1e-6
 
-    def check(l: Double, r: Double, expected: Option[Neq] = None): Unit =
+    def check(l: Double, r: Double, expected: ?[Neq] = None): Unit =
       ==(
         cmp(l, r),
         expected

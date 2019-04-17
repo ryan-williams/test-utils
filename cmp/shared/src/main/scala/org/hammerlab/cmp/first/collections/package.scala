@@ -20,13 +20,13 @@ package object collections {
     case class      Diff[         B](b: B) extends ElemDiff[Nothing, Nothing, B]
 
   /**
-   * Diff-type for a [[CanEq]] that returns an index/"key" [[Key]] at which two collections have a different value
+   * Diff-type for a [[CanEq]] that returns an index/"key" [[K]] at which two collections have a different value
    * (expressed as an [[ElemDiff]]
    */
-  type DiffT[Key, Left, Right, Diff] = (Key, ElemDiff[Left, Right, Diff])
+  type DiffT[K, L, R, Δ] = (K, ElemDiff[L, R, Δ])
 
   /**
    * Collection-diff-type specialized for [[Int]]-indices
    */
-  type IndexedDiff[Left, Right, Diff] = DiffT[Int, Left, Right, Diff]
+  type IndexedDiff[L, R, Δ] = DiffT[Int, L, R, Δ]
 }

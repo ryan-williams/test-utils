@@ -20,7 +20,7 @@ trait Casts
     CanEq.Aux[
       L,
       R,
-      cmp.value.Diff
+      cmp.value.Δ
     ] =
     CanEq {
       (l, r) ⇒
@@ -42,7 +42,7 @@ trait Casts
     CanEq.Aux[
       L,
       R,
-      cmp.value.Diff
+      cmp.value.Δ
     ] =
     CanEq {
       (l, r) ⇒

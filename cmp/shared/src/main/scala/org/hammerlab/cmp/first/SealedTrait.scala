@@ -20,11 +20,11 @@ trait SealedTrait
   ):
     Cmp.Aux[
       H :+: T,
-      Err[head.value.Diff :+: ET]
+      Err[head.value.Δ :+: ET]
     ] =
     Cmp[
       H :+: T,
-      Err[head.value.Diff :+: ET]
+      Err[head.value.Δ :+: ET]
     ] {
       case (Inl(l), Inl(r)) ⇒
         head

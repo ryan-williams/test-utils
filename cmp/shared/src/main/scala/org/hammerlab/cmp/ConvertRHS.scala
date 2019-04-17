@@ -20,7 +20,7 @@ trait ConvertRHS
     CanEq.Aux[
       L,
       R,
-      cmp.value.Diff
+      cmp.value.Δ
     ] =
     CanEq {
       (l, r) ⇒

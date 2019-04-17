@@ -4,12 +4,12 @@ import cats.data.Ior._
 import org.hammerlab.cmp.{ CanEq, Cmp }
 
 trait NothingMap extends Iterables {
-  implicit def nothingMapKeys[K, V](implicit cmp: Cmp[Map[K, V]]): CanEq.Aux[Map[K, V], Map[Nothing, Nothing], cmp.Diff] =
+  implicit def nothingMapKeys[K, V](implicit cmp: Cmp[Map[K, V]]): CanEq.Aux[Map[K, V], Map[Nothing, Nothing], cmp.Δ] =
     CanEq {
       (l, r) ⇒ cmp(l, r.asInstanceOf[Map[K, V]])
     }
 
-  implicit def nothingNothingMap[Diff]: Cmp.Aux[Map[Nothing, Nothing], Diff] = Cmp { (l, r) ⇒ ??? }
+  implicit def nothingNothingMap[Δ]: Cmp.Aux[Map[Nothing, Nothing], Δ] = Cmp { (l, r) ⇒ ??? }
 }
 
 /**
@@ -63,7 +63,7 @@ trait Unordered
     CanEq.Aux[
       Map[K, V1],
       Map[K, V2],
-      DiffT[K, V1, V2, cmp.Diff]
+      DiffT[K, V1, V2, cmp.Δ]
     ] =
     CanEq {
       (m1, m2) ⇒

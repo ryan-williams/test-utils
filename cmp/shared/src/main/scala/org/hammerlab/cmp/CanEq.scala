@@ -1,14 +1,16 @@
 package org.hammerlab.cmp
 
+import hammerlab.option._
+
 /**
  * Type-class for comparing instances of two (possibly different )types, with a customizable "diff" output-type
  * containing a configurable representation of the "diff", if any
  */
 trait CanEq[L, R] {
-  type Diff
-  def   cmp(l: L, r: R): Option[Diff]
-  def apply(l: L, r: R): Option[Diff] = cmp(l, r)
-  def   eqv(l: L, r: R):      Boolean = cmp(l, r).isEmpty
+  type Δ
+  def   cmp(l: L, r: R): ?[Δ]
+  def apply(l: L, r: R): ?[Δ]    = cmp(l, r)
+  def   eqv(l: L, r: R): Boolean = cmp(l, r).isEmpty
 }
 
 object CanEq
@@ -17,31 +19,30 @@ object CanEq
   /** Short-hand for a [[CanEq]] whose comparee-types are equal */
   type Cmp[T] = CanEq[T, T]
 
-  type Aux[L, R, D] = CanEq[L, R] { type Diff = D }
+  type Aux[L, R, D] = CanEq[L, R] { type Δ = D }
 
   /**
    * Short-hand for creating [[CanEq]] instances from a single method.
    *
    * TODO: can probably go away in favor of SAM-syntax once Scala 2.11 support is dropped.
    */
-  def apply[L, R, D](fn: (L, R) ⇒ Option[D]): Aux[L, R, D] =
+  def apply[L, R, D](fn: (L, R) ⇒ ?[D]): Aux[L, R, D] =
     new CanEq[L, R] {
-      type Diff = D
-      override def cmp(l: L, r: R): Option[Diff] =
-        fn(l, r)
+      type Δ = D
+      override def cmp(l: L, r: R): ?[Δ] = fn(l, r)
     }
 
-  def ???[L, R, D] = CanEq[L, R, D] { (_, _) ⇒ Predef.??? }
+  def ???[L, R, Δ] = CanEq[L, R, Δ] { (_, _) ⇒ Predef.??? }
 
   /**
    * Wrapper around a [[CanEq]] used to enable overloading methods that would otherwise have the same type after erasure
    */
   case class Wrapper[L, R, D](cmp: CanEq.Aux[L, R, D]) {
-    type Diff = cmp.Diff
+    type Δ = cmp.Δ
   }
   object Wrapper {
-    implicit def   wrap[L, R, D](implicit c: CanEq.Aux[L, R, D]): Wrapper[L, R, D] = Wrapper(c)
-    implicit def unwrap[L, R, D](         w: Wrapper[L, R, D]): CanEq.Aux[L, R, D] = w.cmp
+    implicit def   wrap[L, R, Δ](implicit c: CanEq.Aux[L, R, Δ]): Wrapper[L, R, Δ] = Wrapper(c)
+    implicit def unwrap[L, R, Δ](         w: Wrapper[L, R, Δ]): CanEq.Aux[L, R, Δ] = w.cmp
   }
 
   implicit val nothingCanEqNothing: Cmp.Aux[Nothing, Nothing] = ???
@@ -52,7 +53,7 @@ object CanEq
     implicit
     cmp: Cmp[R]
   ):
-    CanEq.Aux[L, R, cmp.Diff] =
+    CanEq.Aux[L, R, cmp.Δ] =
     CanEq {
       (l, r) ⇒
         cmp(
@@ -70,22 +71,19 @@ object CanEq
     cmp: Cmp[L],
     conv: R ⇒ L
   ):
-    CanEq.Aux[L, R, cmp.Diff] =
+    CanEq.Aux[L, R, cmp.Δ] =
     CanEq(cmp(_, _))
 
-  /** Short-hands for applying a [[CanEq]] to two objects and returning the [[CanEq.Diff diff]], if any */
+  /** Short-hands for applying a [[CanEq]] to two objects and returning the [[CanEq.Δ diff]], if any */
   trait dsl {
-    def cmp[
-      L,
-      R
-    ](
-      l: L,
-      r: R
-    )(
+    def cmp
+    [    L,    R ]
+    ( l: L, r: R )
+    (
       implicit
       cmp: CanEq[L, R]
     ):
-      Option[cmp.Diff] =
+      ?[cmp.Δ] =
       cmp(l, r)
 
     /**
@@ -105,15 +103,14 @@ object CanEq
      * @param cmp use a [[Wrapper]] here, otherwise this method has the same type after erasure as its overload above,
      *            and won't compile
      */
-    def cmp[T, E](
-      l: T
-    )(
-      r: T
-    )(
+    def cmp[T, Δ]
+    ( l: T )
+    ( r: T )
+    (
       implicit
-      cmp: Cmp.Wrapper[T, E]
+      cmp: Cmp.Wrapper[T, Δ]
     ):
-      Option[cmp.Diff] =
+      ?[cmp.Δ] =
       cmp(l, r)
   }
 
