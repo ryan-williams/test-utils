@@ -5,13 +5,13 @@ import java.nio.file.Files
 import org.hammerlab.paths.Path
 import org.hammerlab.test.files.TmpFiles
 import org.hammerlab.test.matchers.files.{ HasDirMatchers, HasFileMatchers }
-import org.hammerlab.test.resources.{ File, Url }
+import org.hammerlab.test.resources.Url
 
 /**
  * Simple wrapper for common test-suite boilerplate.
  */
 abstract class Suite
-  extends hammerlab.Suite
+  extends hammerlab.scalatest.Suite
      with TmpFiles
      with HasFileMatchers
      with HasDirMatchers {

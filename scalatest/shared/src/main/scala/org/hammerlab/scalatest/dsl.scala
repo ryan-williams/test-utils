@@ -1,5 +1,6 @@
-package org.hammerlab.cmp
+package org.hammerlab.scalatest
 
+import org.hammerlab.cmp.{ CanEq, Cmp, Show }
 import org.scalatest.FunSuite
 import org.scalatest.exceptions.TestFailedException
 
@@ -7,8 +8,8 @@ trait dsl {
   self: FunSuite ⇒
 
   @inline def `☠️`[Δ](Δ: Δ)(implicit show: Show[Δ]) = {
-    throw new TestFailedException(Some(show(Δ)), Some(new Exception), 4)
-    //fail(show(Δ), new Exception)
+    //throw new TestFailedException(Some(show(Δ)), Some(new Exception), 4)
+    fail(show(Δ), new Exception)
   }
 
   /**

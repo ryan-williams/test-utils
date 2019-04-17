@@ -1,9 +1,9 @@
-package org.hammerlab
+package hammerlab.scalatest
 
 import hammerlab.math.tolerance._
 import org.hammerlab.cmp.first.collections.Unordered
-import org.hammerlab.cmp.{ CanEq, double, dsl }
-import org.hammerlab.test.{ Afters, Befores, matchers }
+import org.hammerlab.cmp.{ CanEq, double }
+import org.hammerlab.scalatest.{ Afters, Befores, dsl }
 import org.scalatest.{ FunSuite, Matchers }
 
 /**

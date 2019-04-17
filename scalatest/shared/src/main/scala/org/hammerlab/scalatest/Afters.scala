@@ -1,6 +1,6 @@
-package org.hammerlab.test
+package org.hammerlab.scalatest
 
-import org.hammerlab.Suite
+import hammerlab.scalatest.Suite
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach }
 
 import scala.collection.mutable.ArrayBuffer

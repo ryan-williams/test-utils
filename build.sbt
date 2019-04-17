@@ -25,7 +25,7 @@ lazy val base =
       ),
     ).dependsOn(
       cmp jvm,
-      suite.jvm andTest
+      scalatest.jvm andTest
     )
 
 lazy val cmp = cross.settings(
@@ -40,7 +40,7 @@ lazy val `cmp-x` = cmp.x
 
 lazy val scalatest = cross.settings(
   dep(
-    tests.scalatest
+    tests.scalatest compile
   )
 )
 .dependsOn(cmp)
@@ -48,31 +48,15 @@ lazy val `scalatest-x` = scalatest.x
 
 lazy val utest = cross.settings(
   dep(
-    tests.utest
+    tests.utest compile
   )
 )
 .dependsOn(cmp)
 lazy val `utest-x` = utest.x
 
-lazy val suite = cross.settings(
-  dep(
-    cats,
-    math.tolerance,
-    tests.scalatest compile,
-    shapeless
-  ),
-  // java.nio.file.InvalidPathException: Malformed input or input contains unmappable characters: index/index-ε.html
-  emptyDocJar
-)
-.dependsOn(
-  cmp
-)
-lazy val `suite-x` = suite.x
-
 lazy val `test-utils` = root(
         base   ,
         `cmp-x`,
   `scalatest-x`,
-      `suite-x`,
       `utest-x`,
 )

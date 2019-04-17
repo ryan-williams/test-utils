@@ -1,7 +1,5 @@
 package org.hammerlab
 
-import org.hammerlab.cmp.Cmp
-
 class SuiteTest
   extends Suite {
 
