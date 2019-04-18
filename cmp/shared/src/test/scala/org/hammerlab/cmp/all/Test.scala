@@ -162,6 +162,38 @@ class Test
     ==(cmp(A("aaa", 111), A("bbb", 111)))(Some(NeoHList(("aaa", "bbb"), OHList.empty[(Int, Int) :: HNil])))
     ==(cmp(A("aaa", 111), A("bbb", 222)))(Some(Cons(("aaa", "bbb"), Cons((111, 222)))))
 
+    ==(cmp(B( true), B( true)), None)
+    ==(cmp(B( true), B(false)), Some(Cons(( true, false))))
+    ==(cmp(B(false), B( true)), Some(Cons((false,  true))))
+    ==(cmp(B(false), B(false)), None)
+
+    ==(cmp(C(   ""), C(   "")), None)
+    ==(cmp(C(  "a"), C(  "a")), None)
+    ==(cmp(C("abc"), C("abc")), None)
+
+    ==(cmp(C( ""), C( "a")), Some(Cons(( "",  "a"))))
+    ==(cmp(C("a"), C(  "")), Some(Cons(("a",   ""))))
+    ==(cmp(C("a"), C("aa")), Some(Cons(("a", "aa"))))
+
+    val d1 = D(A("aaa", 111), B(true), C("XXX"))
+    val d2 = D(A("aaa", 111), B(true), C("YYY"))
+    ==(cmp(d1, d1), None)
+    ==(cmp(d1, d2))(Some(Extend(Extend(Cons(Cons(("XXX", "YYY")))))))
+
+    //==(cmp(E(d1), E(d1)), None)
+
+    ==(cmp(F(111), F(111)), None)
+    ==(cmp(F(111), F(222)), Some(Cons((111, 222))))
+
+    ==(cmp(G(F(111)), G(F(111))), None)
+    ==(cmp(H(G(F(111))), H(G(F(111)))), None)
+
+    ==(cmp(I(A("aaa", 111)), I(A("aaa", 111))), None)
+
+    //    ==(cmp(C(""), C("")), None)
+//    ==(cmp(C(""), C("")), None)
+//    ==(cmp(C(""), C("")), None)
+
     //    ==(
 //      cmp(A("aaa", 111), A("aaa", 111)),
 //      None
@@ -189,4 +221,10 @@ object Test {
   case class B(v: Boolean)
   case class C(s: String)
   case class D(a: A, b: B, c: C)
+  case class E(d: D)
+  case class F(n: Int)
+  case class G(f: F)
+  case class H(g: G)
+
+  case class I(a: A)
 }
