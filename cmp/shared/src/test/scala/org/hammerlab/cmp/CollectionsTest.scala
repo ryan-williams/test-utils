@@ -1,5 +1,6 @@
 package org.hammerlab.cmp
 
+import hammerlab.cmp.{ \, ≈ }
 import hammerlab.option._
 import org.hammerlab.cmp.first.collections.{ Diff, LeftOnly, RightOnly }
 
@@ -14,11 +15,7 @@ class CollectionsTest
    * When this is in scope, comparisons of other nested structures containing ints inherit this custom int-comparison
    * logic
    */
-  implicit val intOrder: cats.Eq[Int] =
-    new cats.Eq[Int] {
-      def eqv(x: Int, y: Int): Boolean =
-        x % 10 == y % 10
-    }
+  implicit val intOrder: cats.Eq[Int] = (x, y) ⇒ x % 10 == y % 10
 
   test("maps") {
     ==(
@@ -226,15 +223,15 @@ class CollectionsTest
 
     implicit def l2ab[T](l: Seq[T]): ArrayBuffer[T] = ArrayBuffer(l: _*)
 
-    implicitly[CanEq[ArrayBuffer[Int], List[Int]]]
-    implicitly[CanEq[ArrayBuffer[Int], List[Nothing]]]
-    implicitly[CanEq[ArrayBuffer[Int], Nil.type]]
+    implicitly[ArrayBuffer[Int] \ List[Int]]
+    implicitly[ArrayBuffer[Int] \ List[Nothing]]
+    implicitly[ArrayBuffer[Int] \ Nil.type]
 
     ==(ArrayBuffer[Int](), Nil)
     ==(ArrayBuffer(4), List(4))
 
-    implicitly[Cmp[List[Range]]]
-    implicitly[CanEq[List[Range], Nil.type]]
+    implicitly[≈[List[Range]]]
+    implicitly[List[Range] \ Nil.type]
 
     cmp(
       ArrayBuffer(4, 5), List(4, 6)
@@ -247,9 +244,9 @@ class CollectionsTest
       )
     )
 
-    implicitly[CanEq[Int, Byte]]
-    implicitly[CanEq[Long, Int]]
-    implicitly[CanEq[Double, Int]]
+    implicitly[Int \ Byte]
+    implicitly[Long \ Int]
+    implicitly[Double \ Int]
   }
 
   test("sets") {

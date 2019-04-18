@@ -1,5 +1,6 @@
 package org.hammerlab.cmp
 
+import hammerlab.cmp.\
 import hammerlab.option._
 
 /**
@@ -13,8 +14,21 @@ trait CanEq[L, R] {
   def   eqv(l: L, r: R): Boolean = cmp(l, r).isEmpty
 }
 
+trait aliases {
+  type ∖ [L, R   ] = CanEq    [L, R   ]
+  type \ [L, R   ] = CanEq    [L, R   ]
+  type \→[L, R, Δ] = CanEq.Aux[L, R, Δ]
+  type ∖→[L, R, Δ] = CanEq.Aux[L, R, Δ]
+
+  type ≈→[T, Δ] = Cmp.Aux[T, Δ]
+
+  type ≈[T] = Cmp[T]
+}
+object aliases extends aliases
+
 object CanEq
-  extends Regexs {
+  extends Regexs
+     with aliases {
 
   /** Short-hand for a [[CanEq]] whose comparee-types are equal */
   type Cmp[T] = CanEq[T, T]
@@ -81,7 +95,7 @@ object CanEq
     ( l: L, r: R )
     (
       implicit
-      cmp: CanEq[L, R]
+      cmp: L \ R
     ):
       ?[cmp.Δ] =
       cmp(l, r)

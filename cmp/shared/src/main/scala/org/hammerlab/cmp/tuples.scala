@@ -1,5 +1,6 @@
 package org.hammerlab.cmp
 
+import hammerlab.cmp.\
 import hammerlab.option._
 import hammerlab.or._
 
@@ -9,8 +10,8 @@ trait tuples {
     L2, R2
   ](
     implicit
-    leq: CanEq[L1, L2],
-    req: CanEq[R1, R2]
+    leq: L1 \ L2,
+    req: R1 \ R2
   ):
   CanEq.Aux[
     (L1, R1),

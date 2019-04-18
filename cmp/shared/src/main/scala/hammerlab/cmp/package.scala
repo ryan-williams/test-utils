@@ -1,6 +1,9 @@
 package hammerlab
 
-package object cmp {
+import org.hammerlab.cmp.CanEq
+
+package object cmp
+  extends org.hammerlab.cmp.aliases {
   type tuple = org.hammerlab.cmp.tuples
   object tuple extends tuple
   type StartsWith = org.hammerlab.cmp.CanEq.StartsWith

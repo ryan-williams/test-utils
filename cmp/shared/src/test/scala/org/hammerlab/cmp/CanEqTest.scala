@@ -1,6 +1,6 @@
 package org.hammerlab.cmp
 
-import hammerlab.cmp.StartsWith
+import hammerlab.cmp.{ StartsWith, \ }
 import org.hammerlab.cmp.double.Neq
 import org.hammerlab.cmp.first.collections.Diff
 import org.scalatest.exceptions.TestFailedException
@@ -339,15 +339,15 @@ class CanEqTest
 
     {
       implicit val cmpA: Cmp.Aux[A, String] = Cmp.???
-      !![CanEq[ A1, A  ]]
-      !![CanEq[ A,  A1 ]]
+      !![ A1 \ A  ]
+      !![ A  \ A1 ]
     }
 
     {
       implicit val AcaneqB: CanEq.Aux[A, B, String] = CanEq.???
-      !![CanEq[A, B]]
+      !![A \ B]
       // TODO: scalac StackOverflows in the presence of a CanEq.Aux[L1 >: L, R] ⟹ CanEq.Aux[L, R] conversion. Why?
-      //!![CanEq[A1, B]]
+      //!![A1 \ B]
     }
   }
 

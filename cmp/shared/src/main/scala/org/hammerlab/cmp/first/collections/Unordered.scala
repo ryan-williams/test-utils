@@ -1,7 +1,10 @@
 package org.hammerlab.cmp.first.collections
 
 import cats.data.Ior._
+import hammerlab.cmp.{ ≈, \ }
+import hammerlab.option._
 import org.hammerlab.cmp.{ CanEq, Cmp }
+import org.hammerlab.collection.Iter
 
 trait NothingMap extends Iterables {
   implicit def nothingMapKeys[K, V](implicit cmp: Cmp[Map[K, V]]): CanEq.Aux[Map[K, V], Map[Nothing, Nothing], cmp.Δ] =
@@ -19,37 +22,57 @@ trait NothingMap extends Iterables {
 trait Unordered
   extends NothingMap {
 
+  def unorderedCmp[T](l: List[T], r: List[T])(implicit ≈ : Cmp[T]): ?[ElemOnly[T, T]] =
+    (l, r) match {
+      case (Nil, Nil) ⇒ None
+      case (Nil, r :: _) ⇒ Some(RightOnly(r))
+      case (l :: left, right) ⇒
+        {
+          for {
+            (r, idx) ← right.zipWithIndex
+            if ≈(l, r).isEmpty
+            rest = right.slice(0, idx) ++ right.drop(idx + 1)
+            if unorderedCmp(left, rest).isEmpty
+          } yield
+            ()
+        }
+        .headOption
+        .fold {
+          Option(LeftOnly(l): ElemOnly[T, T])
+        } {
+          _ ⇒ None
+        }
+    }
+
   implicit def setsCanEq[T](
     implicit
-    cmp: Cmp[T]
+    ≈ : ≈[T],
+    ord: Ordering[T] = null
   ):
     Cmp.Aux[
       Set[T],
-      ElemOnly[T, T]
+      ElemDiff[T, T, ≈.Δ]
     ] =
-    Cmp {
-      (l, r) ⇒
-        val it =
-          for {
-            e ← l.iterator
-            if !r(e)
-          } yield
-            e
-
-        if (it.hasNext)
-          Some(LeftOnly(it.next))
-        else {
-          val it =
-            for {
-              e ← r.iterator
-              if !l(e)
-            } yield
-              e
-
-          if (it.hasNext)
-            Some(RightOnly(it.next))
-          else
-            None
+    Option(ord) match {
+      case Some(_) ⇒
+        val ≈* = traversesCanEq(≈, Iter.vector, Iter.vector)
+        CanEq {
+          (l, r) ⇒
+            ≈*(
+              l.toVector.sorted,
+              r.toVector.sorted,
+            )
+            .map { _._2 }
+        }
+      case None ⇒
+        CanEq {
+          (l, r) ⇒
+            unorderedCmp(
+              l.toList,
+              r.toList
+            )(
+              ≈
+            )
         }
     }
 
@@ -58,7 +81,7 @@ trait Unordered
    */
   implicit def mapsCanEq[K, V1, V2](
     implicit
-    cmp: CanEq[V1, V2]
+    cmp: V1 \ V2
   ):
     CanEq.Aux[
       Map[K, V1],

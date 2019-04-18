@@ -1,5 +1,6 @@
 package org.hammerlab.cmp.first.collections
 
+import hammerlab.cmp.\
 import hammerlab.option._
 import org.hammerlab.cmp.{ CanEq, Cmp }
 import org.hammerlab.cmp.first.CaseClass
@@ -25,16 +26,16 @@ trait Iterables
       r ⇒ r: Seq[Int]
     )
 
-  implicit def traversesCanEq[L, R, LI[_], RI[_]](
+  def traversesCanEq[L, R, LI[_], RI[_]](
     implicit
-    cmp: Lazy[CanEq[L, R]],
+    cmp: L \ R,
     li: Iter[LI],
     ri: Iter[RI],
   ):
     CanEq.Aux[
       LI[L],
       RI[R],
-      IndexedDiff[L, R, cmp.value.Δ]
+      IndexedDiff[L, R, cmp.Δ]
     ] =
     CanEq {
       (l, r) ⇒
@@ -43,6 +44,18 @@ trait Iterables
           ri.iter(r)
         )
     }
+
+  implicit def traversesCanEqLazy[L, R, LI[_], RI[_]](
+    implicit
+    cmp: Lazy[L \ R],
+    li: Iter[LI],
+    ri: Iter[RI],
+  ):
+    CanEq.Aux[
+      LI[L],
+      RI[R],
+      IndexedDiff[L, R, cmp.value.Δ]
+    ] = traversesCanEq(cmp.value, li, ri)
 
   /**
    * Work-around for https://github.com/scala/bug/issues/10917
@@ -72,20 +85,20 @@ trait Iterables
    */
   def iteratorsCanEq[L, R](
     implicit
-    ce: Lazy[CanEq[L, R]]
+    ce: L \ R
   ):
     CanEq.Aux[
       Iterator[L],
       Iterator[R],
-      IndexedDiff[L, R, ce.value.Δ]
+      IndexedDiff[L, R, ce.Δ]
     ] =
     new CanEq[Iterator[L], Iterator[R]] {
-      type Δ = IndexedDiff[L, R, ce.value.Δ]
+      type Δ = IndexedDiff[L, R, ce.Δ]
       def cmp(          l: Iterator[L], r: Iterator[R]): ?[Δ] = cmp(0, l, r)
       def cmp(idx: Int, l: Iterator[L], r: Iterator[R]): ?[Δ] =
         (l.hasNext, r.hasNext) match {
           case (true, true) ⇒
-            ce.value.apply(
+            ce(
               l.next,
               r.next
             )
