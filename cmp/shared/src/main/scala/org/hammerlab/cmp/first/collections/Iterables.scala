@@ -5,7 +5,7 @@ import hammerlab.option._
 import org.hammerlab.cmp.{ CanEq, Cmp }
 import org.hammerlab.cmp.all.CaseClass
 import org.hammerlab.collection.Iter
-import shapeless.Lazy
+import shapeless.{ CNil, Lazy }
 
 trait Iterables
   extends CaseClass {
@@ -68,7 +68,7 @@ trait Iterables
   ):
     Cmp.Aux[
       T[Nothing],
-      IndexedDiff[Nothing, Nothing, Nothing]
+      IndexedDiff[Nothing, Nothing, CNil]
     ] =
     CanEq {
       (l, r) ⇒

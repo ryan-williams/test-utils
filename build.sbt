@@ -35,6 +35,7 @@ lazy val cmp = cross.settings(
     math.tolerance,
     shapeless,
     shapeless_utils,
+    sourcecode,
     types
   )
 )

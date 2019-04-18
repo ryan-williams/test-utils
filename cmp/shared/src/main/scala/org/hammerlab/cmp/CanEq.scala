@@ -40,10 +40,11 @@ object CanEq
    *
    * TODO: can probably go away in favor of SAM-syntax once Scala 2.11 support is dropped.
    */
-  def apply[L, R, D](fn: (L, R) ⇒ ?[D]): Aux[L, R, D] =
+  def apply[L, R, D](fn: (L, R) ⇒ ?[D])(implicit pos: sourcecode.FullName): Aux[L, R, D] =
     new CanEq[L, R] {
       type Δ = D
-      override def cmp(l: L, r: R): ?[Δ] = fn(l, r)
+      def cmp(l: L, r: R): ?[Δ] = fn(l, r)
+      override def toString: String = s"CanEq(${pos.value})"
     }
 
   def ???[L, R, Δ] = CanEq[L, R, Δ] { (_, _) ⇒ Predef.??? }

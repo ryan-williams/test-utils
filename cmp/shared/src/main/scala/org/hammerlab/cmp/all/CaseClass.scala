@@ -1,7 +1,8 @@
 package org.hammerlab.cmp.all
 
-import org.hammerlab.cmp.Cmp
+import org.hammerlab.cmp.{ CanEq, Cmp }
 import org.hammerlab.cmp.first.SealedTrait
+import org.hammerlab.shapeless.neohlist.NeoHList.Cons
 import org.hammerlab.shapeless.neohlist.{ NeoHList, OHList }
 import shapeless._
 
@@ -19,24 +20,23 @@ trait CaseClass2
 
   /**
    * Derive a [[Cmp]] instance for a case class.
-   * @tparam Δ the [[Coproduct]] "diff"-type returned by [[cmpCons]], which is a disjunction of fields' respective
-   *           diff-types
    */
   implicit def cmpCaseClassAll[T, L <: HList](
     implicit
     gen: Generic.Aux[T, L],
-    cmp: Lazy[Cmp[L]]
+    cmp: Cmp[L]
   ):
-    Cmp.Aux[T, cmp.value.Δ] =
-    Cmp[T, cmp.value.Δ] {
+    Cmp.Aux[T, cmp.Δ] =
+    Cmp[T, cmp.Δ] {
       (l, r) ⇒
         cmp
-          .value
           .cmp(
             gen.to(l),
             gen.to(r)
           )
     }
+
+  import OHList.Empty
 
   /**
    * Derive a [[Cmp]] instance for an [[HList]] based on [[Cmp]]s for all its fields/elements.
@@ -50,22 +50,22 @@ trait CaseClass2
    * @tparam T tail-type of the returned [[HList]] [[H :: T]]
    * @return
    */
-  implicit def cmpConsAll[H, T <: HList, Δs <: HList](
+  implicit def cmpConsAll[H, T <: HList, Δs <: HList, Δ](
     implicit
     head: Lazy[Cmp[H]],
-    tail: Lazy[Cmp.Aux[T, NeoHList[Δs]]],
-    empty: OHList.Empty[Δs],
+    tail: Lazy[Cmp.Aux[T, NeoHList[Δ, Δs]]],
+    empty: Empty[Δ :: Δs],
   ):
-    Cmp.Aux[H :: T, NeoHList[head.value.Δ :: Δs]] =
-    Cmp[H :: T, NeoHList[head.value.Δ :: Δs]] (
+    Cmp.Aux[H :: T, NeoHList[head.value.Δ, Δ :: Δs]] =
+    Cmp[H :: T, NeoHList[head.value.Δ, Δ :: Δs]] (
       (l, r) ⇒
         (
           head.value.cmp(l.head, r.head),
           tail.value.cmp(l.tail, r.tail),
         ) match {
-          case (Some(d), Some(ds)) ⇒ Some(NeoHList.Cons.cons[head.value.Δ, Δs](d, ds))
-          case (Some(d), None    ) ⇒ Some(NeoHList.Cons.cons[head.value.Δ, Δs](d, empty()))
-          case (None   , Some(ds)) ⇒ Some(NeoHList.Extend[head.value.Δ, Δs, NeoHList[Δs]](ds))
+          case (Some(d), Some(ds)) ⇒ Some(NeoHList(d, ds))
+          case (Some(d), None    ) ⇒ Some(NeoHList(d, empty()))
+          case (None   , Some(ds)) ⇒ Some(NeoHList(ds))
           case (None   , None    ) ⇒ None
         }
     )
@@ -83,15 +83,15 @@ trait CaseClass2
 //    Cmp.Aux[Nothing :: T, Nothing :+: DT] =
 //    Cmp    [Nothing :: T, Nothing :+: DT] { (_, _) ⇒ ??? }
 
-  //implicit val cmpHNil: Cmp.Aux[HNil, CNil] = Cmp[HNil, CNil]((_, _) ⇒ None)
+  implicit def cmpHNil[L <: HNil]: Cmp.Aux[L, CNil] = Cmp[L, CNil]((_, _) ⇒ None)
 }
 
 trait CaseClass extends CaseClass2 {
-  implicit def caseClassBase[T](implicit cmp: Lazy[Cmp[T]]): Cmp.Aux[T :: HNil, NeoHList[cmp.value.Δ :: HNil]] =
-    Cmp[T :: HNil, NeoHList[cmp.value.Δ :: HNil]] {
+  implicit def caseClassBase[T](implicit cmp: Cmp[T]): Cmp.Aux[T :: HNil, NeoHList[cmp.Δ, HNil]] =
+    Cmp[T :: HNil, NeoHList[cmp.Δ, HNil]] {
       case (l :: HNil, r :: HNil) ⇒
-        cmp.value.apply(l, r).map {
-          NeoHList.Cons.base
+        cmp(l, r).map {
+          NeoHList(_)
         }
     }
 }
