@@ -7,6 +7,7 @@ default(
   addTestLib := false,
   versions(
     math.tolerance → "1.0.0",
+    shapeless_utils → "1.6.0".snapshot,
     types → "1.6.0".snapshot,
   )
 )
@@ -33,6 +34,7 @@ lazy val cmp = cross.settings(
     cats,
     math.tolerance,
     shapeless,
+    shapeless_utils,
     types
   )
 )

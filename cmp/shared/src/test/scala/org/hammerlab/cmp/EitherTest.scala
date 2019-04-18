@@ -2,6 +2,7 @@ package org.hammerlab.cmp
 
 import shapeless._
 
+/*
 class EitherTest
   extends hammerlab.Suite {
 
@@ -162,3 +163,4 @@ class EitherTest
     )
   }
 }
+*/

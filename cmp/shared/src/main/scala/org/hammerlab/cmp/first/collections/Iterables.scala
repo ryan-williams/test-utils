@@ -3,7 +3,7 @@ package org.hammerlab.cmp.first.collections
 import hammerlab.cmp.\
 import hammerlab.option._
 import org.hammerlab.cmp.{ CanEq, Cmp }
-import org.hammerlab.cmp.first.CaseClass
+import org.hammerlab.cmp.all.CaseClass
 import org.hammerlab.collection.Iter
 import shapeless.Lazy
 

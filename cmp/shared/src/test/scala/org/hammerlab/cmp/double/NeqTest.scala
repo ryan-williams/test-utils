@@ -4,6 +4,7 @@ import hammerlab.math.tolerance._
 import hammerlab.option._
 import org.hammerlab.cmp.Cmp
 
+/*
 class NeqTest
   extends hammerlab.Suite {
 
@@ -48,3 +49,4 @@ class NeqTest
     !=(2.0, 2.02000001)
   }
 }
+*/

@@ -6,6 +6,7 @@ import org.hammerlab.cmp.first.collections.{ Diff, LeftOnly, RightOnly }
 
 import scala.collection.mutable.ArrayBuffer
 
+/*
 class CollectionsTest
   extends hammerlab.Suite {
 
@@ -296,3 +297,4 @@ class CollectionsTest
     !=(Set(1))(Set())
   }
 }
+*/

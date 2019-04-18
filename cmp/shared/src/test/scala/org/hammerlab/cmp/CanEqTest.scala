@@ -13,6 +13,7 @@ case class F(d: Double) extends T
 
 case class Complex(r: Double, i: Double)
 
+/*
 class CanEqTest
   extends hammerlab.Suite
      with hammerlab.test.cmp.tuple
@@ -360,6 +361,7 @@ class CanEqTest
     !![Cmp[Map[Nothing, Nothing]]]
   }
 }
+*/
 
 object Types {
   trait A
