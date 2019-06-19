@@ -68,7 +68,9 @@ class Test
 
     !![Cmp    [OHList[HNil]]]
     CanEq.cmpCaseClassAll[OHList[HNil], HNil]: Cmp.Aux[OHList[HNil], CNil]
-    !![Cmp.Aux[OHList[HNil], CNil]]
+
+
+    !![Cmp.Aux[OHList[HNil], CNil]] /* 🚫 */
 
     !![Generic    [Cons[Int, HNil]]]
     !![Generic.Aux[Cons[Int, HNil], Int :: OHList[HNil] :: HNil]]
@@ -139,7 +141,7 @@ class Test
 
     !![Cmp    [Int :: HNil]]
     //!![Cmp.Aux[Int :: HNil, Cons[(Int, Int), HNil]]]
-    !![Cmp.Aux[Int :: HNil, NeoHList[(Int, Int), HNil]]]
+    // !![Cmp.Aux[Int :: HNil, NeoHList[(Int, Int), HNil]]]  /* 🚫 */
 
     !![Cmp[Cons[(Int, Int), HNil]]]
 
@@ -149,70 +151,46 @@ class Test
     //CanEq.cmpCaseClassAll[]
     !![Cmp[NeoHList[(Int, Int), HNil]]]
 
-    ==(cmp(111 :: HNil, 111 :: HNil), None)
-    ==(cmp(111 :: HNil, 222 :: HNil), Some(Cons((111, 222))))
-
-    ==(cmp("aaa" :: 111 :: HNil, "aaa" :: 111 :: HNil), None)
-    ==(cmp("aaa" :: 111 :: HNil, "aaa" :: 222 :: HNil))(Some(Extend(Cons((111, 222)))))
-    ==(cmp("aaa" :: 111 :: HNil, "bbb" :: 111 :: HNil))(Some(NeoHList(("aaa", "bbb"), OHList.empty[(Int, Int) :: HNil])))
-    ==(cmp("aaa" :: 111 :: HNil, "bbb" :: 222 :: HNil))(Some(Cons(("aaa", "bbb"), Cons((111, 222)))))
-
-    ==(cmp(A("aaa", 111), A("aaa", 111)), None)
-    ==(cmp(A("aaa", 111), A("aaa", 222)))(Some(Extend(Cons((111, 222)))))
-    ==(cmp(A("aaa", 111), A("bbb", 111)))(Some(NeoHList(("aaa", "bbb"), OHList.empty[(Int, Int) :: HNil])))
-    ==(cmp(A("aaa", 111), A("bbb", 222)))(Some(Cons(("aaa", "bbb"), Cons((111, 222)))))
-
-    ==(cmp(B( true), B( true)), None)
-    ==(cmp(B( true), B(false)), Some(Cons(( true, false))))
-    ==(cmp(B(false), B( true)), Some(Cons((false,  true))))
-    ==(cmp(B(false), B(false)), None)
-
-    ==(cmp(C(   ""), C(   "")), None)
-    ==(cmp(C(  "a"), C(  "a")), None)
-    ==(cmp(C("abc"), C("abc")), None)
-
-    ==(cmp(C( ""), C( "a")), Some(Cons(( "",  "a"))))
-    ==(cmp(C("a"), C(  "")), Some(Cons(("a",   ""))))
-    ==(cmp(C("a"), C("aa")), Some(Cons(("a", "aa"))))
-
-    val d1 = D(A("aaa", 111), B(true), C("XXX"))
-    val d2 = D(A("aaa", 111), B(true), C("YYY"))
-    ==(cmp(d1, d1), None)
-    ==(cmp(d1, d2))(Some(Extend(Extend(Cons(Cons(("XXX", "YYY")))))))
-
-    //==(cmp(E(d1), E(d1)), None)
-
-    ==(cmp(F(111), F(111)), None)
-    ==(cmp(F(111), F(222)), Some(Cons((111, 222))))
-
-    ==(cmp(G(F(111)), G(F(111))), None)
-    ==(cmp(H(G(F(111))), H(G(F(111)))), None)
-
-    ==(cmp(I(A("aaa", 111)), I(A("aaa", 111))), None)
-
-    //    ==(cmp(C(""), C("")), None)
-//    ==(cmp(C(""), C("")), None)
-//    ==(cmp(C(""), C("")), None)
-
-    //    ==(
-//      cmp(A("aaa", 111), A("aaa", 111)),
-//      None
-//    )
-
-//    ==(
-//      cmp(A("aaa", 111), A("aaa", 222)),
-//      Some(Extend[(String, String), (Int, Int), HNil](Cons((111, 222))))
-//    )
-
-    //    ==(
-//      Δ.get,
-//      Cons(("aaa", "bbb"), Cons((111, 222), OHList.nil))
-//    )
-
-//    ==(
-//      Δ,
-//      None
-//    )
+//    ==(cmp(111 :: HNil, 111 :: HNil), None)
+//    ==(cmp(111 :: HNil, 222 :: HNil), Some(Cons((111, 222))))
+//
+//    ==(cmp("aaa" :: 111 :: HNil, "aaa" :: 111 :: HNil), None)
+//    ==(cmp("aaa" :: 111 :: HNil, "aaa" :: 222 :: HNil))(Some(Extend(Cons((111, 222)))))
+//    ==(cmp("aaa" :: 111 :: HNil, "bbb" :: 111 :: HNil))(Some(NeoHList(("aaa", "bbb"), OHList.empty[(Int, Int) :: HNil])))
+//    ==(cmp("aaa" :: 111 :: HNil, "bbb" :: 222 :: HNil))(Some(Cons(("aaa", "bbb"), Cons((111, 222)))))
+//
+//    ==(cmp(A("aaa", 111), A("aaa", 111)), None)
+//    ==(cmp(A("aaa", 111), A("aaa", 222)))(Some(Extend(Cons((111, 222)))))
+//    ==(cmp(A("aaa", 111), A("bbb", 111)))(Some(NeoHList(("aaa", "bbb"), OHList.empty[(Int, Int) :: HNil])))
+//    ==(cmp(A("aaa", 111), A("bbb", 222)))(Some(Cons(("aaa", "bbb"), Cons((111, 222)))))
+//
+//    ==(cmp(B( true), B( true)), None)
+//    ==(cmp(B( true), B(false)), Some(Cons(( true, false))))
+//    ==(cmp(B(false), B( true)), Some(Cons((false,  true))))
+//    ==(cmp(B(false), B(false)), None)
+//
+//    ==(cmp(C(   ""), C(   "")), None)
+//    ==(cmp(C(  "a"), C(  "a")), None)
+//    ==(cmp(C("abc"), C("abc")), None)
+//
+//    ==(cmp(C( ""), C( "a")), Some(Cons(( "",  "a"))))
+//    ==(cmp(C("a"), C(  "")), Some(Cons(("a",   ""))))
+//    ==(cmp(C("a"), C("aa")), Some(Cons(("a", "aa"))))
+//
+//    val d1 = D(A("aaa", 111), B(true), C("XXX"))
+//    val d2 = D(A("aaa", 111), B(true), C("YYY"))
+//    ==(cmp(d1, d1), None)
+//    ==(cmp(d1, d2))(Some(Extend(Extend(Cons(Cons(("XXX", "YYY")))))))
+//
+//    //==(cmp(E(d1), E(d1)), None)
+//
+//    ==(cmp(F(111), F(111)), None)
+//    ==(cmp(F(111), F(222)), Some(Cons((111, 222))))
+//
+//    ==(cmp(G(F(111)), G(F(111))), None)
+//    ==(cmp(H(G(F(111))), H(G(F(111)))), None)
+//
+//    ==(cmp(I(A("aaa", 111)), I(A("aaa", 111))), None)
   }
 }
 

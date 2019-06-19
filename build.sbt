@@ -7,6 +7,7 @@ default(
   addTestLib := false,
   versions(
     math.tolerance → "1.0.0",
+    shapeless → "2.4.0".snapshot,
     shapeless_utils → "1.6.0".snapshot,
     types → "1.6.0".snapshot,
   )

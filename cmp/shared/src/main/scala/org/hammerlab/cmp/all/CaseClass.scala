@@ -30,6 +30,7 @@ trait CaseClass2
     Cmp[T, cmp.Δ] {
       (l, r) ⇒
         cmp
+          //.value
           .cmp(
             gen.to(l),
             gen.to(r)
@@ -87,10 +88,10 @@ trait CaseClass2
 }
 
 trait CaseClass extends CaseClass2 {
-  implicit def caseClassBase[T](implicit cmp: Cmp[T]): Cmp.Aux[T :: HNil, NeoHList[cmp.Δ, HNil]] =
-    Cmp[T :: HNil, NeoHList[cmp.Δ, HNil]] {
+  implicit def caseClassBase[T](implicit cmp: Lazy[Cmp[T]]): Cmp.Aux[T :: HNil, NeoHList[cmp.value.Δ, HNil]] =
+    Cmp[T :: HNil, NeoHList[cmp.value.Δ, HNil]] {
       case (l :: HNil, r :: HNil) ⇒
-        cmp(l, r).map {
+        cmp.value.apply(l, r).map {
           NeoHList(_)
         }
     }
